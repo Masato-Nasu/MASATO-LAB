@@ -540,6 +540,8 @@
     let state = structuredClone(defaultData);
     let currentType = 'portfolio';
     let selectedIndex = null;
+    let autoSaveTimer = null;
+    let isAutoSaving = false;
 
     const $ = (id) => document.getElementById(id);
     const itemList = $('itemList');
@@ -928,21 +930,41 @@
       }
     }
 
-    async function saveToCloud() {
+    async function saveToCloud(options = {}) {
+      const { silent = false, successMessage = 'サイトに保存しました。', failureMessage = '保存に失敗しました。/editor が Access で保護されているかと、KV バインディングを確認してください。' } = options;
       try {
         syncCurrentEditorState({ allowCreate: true, updateStatus: false });
-        setStatus('保存しています...');
+        if (!silent) setStatus('保存しています...');
         const res = await fetch('./save', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(state)
         });
         if (!res.ok) throw new Error('save failed');
-        setStatus('サイトに保存しました。公開ページを再読み込みすると反映が見えます。');
+        setStatus(successMessage);
+        return true;
       } catch (error) {
         console.error(error);
-        setStatus('保存に失敗しました。/editor が Access で保護されているかと、KV バインディングを確認してください。');
+        setStatus(failureMessage);
+        return false;
       }
+    }
+
+    function queueAutoSave(message = '変更を自動保存しました。') {
+      clearTimeout(autoSaveTimer);
+      autoSaveTimer = setTimeout(async () => {
+        if (isAutoSaving) return;
+        isAutoSaving = true;
+        try {
+          await saveToCloud({
+            silent: true,
+            successMessage: message,
+            failureMessage: '自動保存に失敗しました。もう一度「サイトに保存」を押してください。'
+          });
+        } finally {
+          isAutoSaving = false;
+        }
+      }, 250);
     }
 
     function importJsonFile(file) {
@@ -1144,13 +1166,18 @@
       $('helper_ratio').value = e.target.value;
       imageState.ratio = e.target.value;
       syncCanvasSize();
+      if (currentType === 'portfolio') {
+        syncCurrentEditorState({ allowCreate: true, updateStatus: false });
+        queueAutoSave('画像比率を自動保存しました。公開ページも数秒で更新されます。');
+      }
     });
 
     $('helper_ratio').addEventListener('change', (e) => {
       imageState.ratio = e.target.value;
       if (currentType === 'portfolio') {
         $('p_ratio').value = e.target.value;
-        syncCurrentEditorState({ allowCreate: false, updateStatus: false });
+        syncCurrentEditorState({ allowCreate: true, updateStatus: false });
+        queueAutoSave('画像比率を自動保存しました。公開ページも数秒で更新されます。');
       }
       syncCanvasSize();
     });

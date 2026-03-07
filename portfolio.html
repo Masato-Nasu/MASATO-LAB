@@ -3,18 +3,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Portfolio | Personal Lab</title>
+  <title>Portfolio</title>
   <style>
     :root {
-      --bg: #f6f6f3;
+      --bg: #f5f5f2;
       --panel: #ffffff;
       --text: #111111;
       --muted: #666666;
       --line: #d8d8d2;
-      --soft: #efefe9;
-      --accent: #161616;
-      --shadow: 0 10px 30px rgba(0,0,0,.06);
-      --radius: 22px;
+      --shadow: 0 10px 28px rgba(0,0,0,.06);
+      --radius: 24px;
       --max: 1180px;
       font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
     }
@@ -43,7 +41,20 @@
     .wrap {
       max-width: var(--max);
       margin: 0 auto;
-      padding: 28px 20px 48px;
+      padding: 22px 20px 56px;
+    }
+
+    .site-header {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .site-title {
+      margin: 0;
+      font-size: clamp(32px, 5vw, 54px);
+      line-height: 0.98;
+      letter-spacing: -0.03em;
+      font-weight: 700;
     }
 
     .nav {
@@ -51,44 +62,27 @@
       gap: 18px;
       flex-wrap: wrap;
       align-items: center;
-      padding: 8px 0 18px;
-      font-size: 14px;
-    }
-    .nav a {
-      color: var(--muted);
+      font-size: 15px;
+      padding-bottom: 10px;
     }
     .nav a[aria-current="page"] {
-      color: var(--text);
       font-weight: 700;
     }
 
-    .hero {
-      margin: 6px 0 28px;
+    .page-head {
+      margin: 20px 0 24px;
     }
-    .eyebrow {
-      font-size: 12px;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 10px;
-    }
-    h1 {
+    .page-title {
       margin: 0;
-      font-size: clamp(34px, 6vw, 64px);
-      line-height: .98;
-      letter-spacing: -.03em;
+      font-size: clamp(34px, 6vw, 68px);
+      line-height: 0.98;
+      letter-spacing: -0.04em;
       font-weight: 700;
-    }
-    .lede {
-      margin: 14px 0 0;
-      max-width: 760px;
-      color: var(--muted);
-      font-size: clamp(15px, 2vw, 18px);
     }
 
     .works {
       display: grid;
-      gap: 26px;
+      gap: 28px;
     }
 
     .work-card {
@@ -108,14 +102,11 @@
     }
     .work-media.ratio-43 { aspect-ratio: 4 / 3; }
     .work-media.ratio-11 { aspect-ratio: 1 / 1; }
-    .work-media.ratio-34 { aspect-ratio: 3 / 4; }
-    .work-media.ratio-23 { aspect-ratio: 2 / 3; }
     .work-media img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       object-position: center center;
-      transform: scale(1.001);
     }
     .work-media.empty {
       display: grid;
@@ -130,25 +121,6 @@
       padding: 20px 22px 22px;
       display: grid;
       gap: 12px;
-    }
-
-    .work-card.portrait {
-      display: grid;
-      grid-template-columns: minmax(280px, 36%) minmax(0, 1fr);
-    }
-    .work-card.portrait .work-media {
-      border-bottom: 0;
-      border-right: 1px solid var(--line);
-      height: 100%;
-    }
-    .work-card.portrait .work-media.ratio-34,
-    .work-card.portrait .work-media.ratio-23 {
-      aspect-ratio: auto;
-      min-height: 420px;
-    }
-    .work-card.portrait .work-body {
-      padding: 24px;
-      align-content: start;
     }
 
     .work-head {
@@ -213,16 +185,9 @@
       padding: 0 16px;
       border-radius: 999px;
       border: 1px solid var(--line);
-      background: #fff;
-      font-size: 14px;
-      transition: transform .05s ease, background .15s ease;
-    }
-    .btn:hover { background: #fafaf7; }
-    .btn:active { transform: translateY(1px); }
-    .btn.primary {
-      background: var(--accent);
+      background: #111;
       color: #fff;
-      border-color: var(--accent);
+      font-size: 14px;
     }
 
     .empty-state,
@@ -235,37 +200,15 @@
       box-shadow: var(--shadow);
     }
 
-    footer {
-      margin-top: 32px;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    @media (max-width: 900px) {
-      .work-card.portrait {
-        display: block;
-      }
-      .work-card.portrait .work-media {
-        border-right: 0;
-        border-bottom: 1px solid var(--line);
-      }
-      .work-card.portrait .work-media.ratio-34 { aspect-ratio: 3 / 4; min-height: 0; }
-      .work-card.portrait .work-media.ratio-23 { aspect-ratio: 2 / 3; min-height: 0; }
-      .work-card.portrait .work-body { padding: 20px 22px 22px; }
-    }
-
     @media (max-width: 720px) {
       .wrap {
-        padding: 20px 14px 36px;
+        padding: 18px 14px 36px;
       }
       .work-body {
         padding: 16px;
       }
       .work-media.empty {
         min-height: 240px;
-      }
-      .work-head {
-        gap: 8px;
       }
       .work-meta {
         white-space: normal;
@@ -275,28 +218,28 @@
 </head>
 <body>
   <div class="wrap">
-    <nav class="nav" aria-label="Main navigation">
-      <a href="./index.html">Home</a>
-      <a href="./portfolio.html" aria-current="page">Portfolio</a>
-      <a href="./memory.html">Peripheral Memory</a>
-      <a href="./tools.html">Tools</a>
-      <a href="./about.html">About</a>
-    </nav>
-
-    <header class="hero">
-      <div class="eyebrow">Personal Lab</div>
-      <h1>Portfolio</h1>
+    <header class="site-header">
+      <h1 class="site-title" id="site-title">MASATO NASU</h1>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="./index.html">Home</a>
+        <a href="./portfolio.html" aria-current="page">Portfolio</a>
+        <a href="./memory.html">Peripheral Memory</a>
+        <a href="./tools.html">Tools</a>
+        <a href="./about.html">About</a>
+      </nav>
     </header>
 
-    <main id="portfolio-root" class="works" aria-live="polite"></main>
-
-    <footer>
-      Personal Lab / Portfolio
-    </footer>
+    <main>
+      <section class="page-head">
+        <h2 class="page-title">Portfolio</h2>
+      </section>
+      <section id="portfolio-root" class="works" aria-live="polite"></section>
+    </main>
   </div>
 
   <script>
     const root = document.getElementById('portfolio-root');
+    const siteTitle = document.getElementById('site-title');
 
     function escapeHtml(value = '') {
       return String(value)
@@ -309,9 +252,7 @@
 
     function normalizeTags(tags) {
       if (Array.isArray(tags)) return tags.filter(Boolean);
-      if (typeof tags === 'string') {
-        return tags.split(',').map(s => s.trim()).filter(Boolean);
-      }
+      if (typeof tags === 'string') return tags.split(',').map(s => s.trim()).filter(Boolean);
       return [];
     }
 
@@ -323,23 +264,8 @@
       return './images/' + path.replace(/^\.\//, '');
     }
 
-    function normalizeRatio(value) {
-      const ratio = String(value || '').trim();
-      if (['1:1', '3:4', '2:3', '4:3'].includes(ratio)) return ratio;
-      return '4:3';
-    }
-
     function ratioClass(value) {
-      const ratio = normalizeRatio(value);
-      if (ratio === '1:1') return 'ratio-11';
-      if (ratio === '3:4') return 'ratio-34';
-      if (ratio === '2:3') return 'ratio-23';
-      return 'ratio-43';
-    }
-
-    function isPortraitRatio(value) {
-      const ratio = normalizeRatio(value);
-      return ratio === '3:4' || ratio === '2:3';
+      return String(value || '').trim() === '1:1' ? 'ratio-11' : 'ratio-43';
     }
 
     function workCard(item) {
@@ -357,17 +283,16 @@
         ? `<div class="tags">${tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}</div>`
         : '';
       const actionHtml = link
-        ? `<div class="actions"><a class="btn primary" href="${escapeHtml(link)}" target="_blank" rel="noreferrer">Open Link</a></div>`
+        ? `<div class="actions"><a class="btn" href="${escapeHtml(link)}" target="_blank" rel="noreferrer">Open Link</a></div>`
         : '';
 
-      const portraitClass = isPortraitRatio(item.imageRatio) ? ' portrait' : '';
       return `
-        <article class="work-card${portraitClass}">
+        <article class="work-card">
           ${media}
           <div class="work-body">
             <div class="work-head">
               <div>
-                <h2 class="work-title">${title}</h2>
+                <h3 class="work-title">${title}</h3>
                 ${role ? `<div class="work-role">${role}</div>` : ''}
               </div>
               ${year ? `<div class="work-meta">${year}</div>` : ''}
@@ -380,32 +305,26 @@
       `;
     }
 
-    async function loadSiteData() {
-      try {
-        const apiResponse = await fetch('/api/data', { cache: 'no-store' });
-        if (apiResponse.ok) return await apiResponse.json();
-      } catch (error) {
-        console.warn('API data unavailable, trying local fallback.', error);
-      }
-      const fallbackResponse = await fetch('./data.json', { cache: 'no-store' });
-      if (!fallbackResponse.ok) throw new Error('Failed to load fallback data.json');
-      return await fallbackResponse.json();
-    }
-
     async function boot() {
       try {
-        const data = await loadSiteData();
+        const response = await fetch('./data.json', { cache: 'no-store' });
+        if (!response.ok) throw new Error('Failed to load data.json');
+        const data = await response.json();
         const works = Array.isArray(data.portfolio) ? data.portfolio : [];
+        if (data?.site?.name) {
+          siteTitle.textContent = data.site.name;
+          document.title = `${data.site.name} | Portfolio`;
+        }
 
         if (!works.length) {
-          root.innerHTML = '<section class="empty-state">まだポートフォリオ項目がありません。Editor で追加してから保存してください。</section>';
+          root.innerHTML = '<section class="empty-state">まだポートフォリオ項目がありません。</section>';
           return;
         }
 
         root.innerHTML = works.map(workCard).join('');
       } catch (error) {
         console.error(error);
-        root.innerHTML = '<section class="error-state">ポートフォリオの読み込みに失敗しました。データの保存状態を確認してください。</section>';
+        root.innerHTML = '<section class="error-state">ポートフォリオの読み込みに失敗しました。data.json の場所と内容を確認してください。</section>';
       }
     }
 
