@@ -12,7 +12,7 @@
       --muted: #666666;
       --line: #d8d8d2;
       --shadow: 0 10px 28px rgba(0,0,0,.06);
-      --radius: 24px;
+      --radius: 28px;
       --max: 1180px;
       font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
     }
@@ -88,26 +88,24 @@
     .work-card {
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 28px;
+      border-radius: var(--radius);
       overflow: hidden;
       box-shadow: var(--shadow);
     }
 
     .work-media {
       width: 100%;
-      background: #ecece6;
-      border-bottom: 1px solid var(--line);
-      overflow: hidden;
       position: relative;
+      overflow: hidden;
+      border-bottom: 1px solid var(--line);
+      background: #ecece6;
+      isolation: isolate;
     }
     .work-media.ratio-43 { aspect-ratio: 4 / 3; }
     .work-media.ratio-11 { aspect-ratio: 1 / 1; }
-    .work-media img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center center;
-    }
+    .work-media.ratio-34 { aspect-ratio: 3 / 4; }
+    .work-media.ratio-23 { aspect-ratio: 2 / 3; }
+
     .work-media.empty {
       display: grid;
       place-items: center;
@@ -115,6 +113,47 @@
       font-size: 14px;
       letter-spacing: .04em;
       min-height: 320px;
+    }
+
+    .work-media .main-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .work-media.portrait {
+      display: grid;
+      place-items: center;
+    }
+    .work-media.portrait .color-fill {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      transform: scale(1.16);
+      filter: blur(22px) saturate(1.1);
+      opacity: 0.96;
+      z-index: 0;
+    }
+    .work-media.portrait::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.12));
+      z-index: 1;
+      pointer-events: none;
+    }
+    .work-media.portrait .main-image {
+      width: auto;
+      height: 100%;
+      max-width: 100%;
+      object-fit: contain;
+      box-shadow: 0 10px 26px rgba(0,0,0,.12);
     }
 
     .work-body {
@@ -213,6 +252,10 @@
       .work-meta {
         white-space: normal;
       }
+      .work-media.portrait .color-fill {
+        transform: scale(1.22);
+        filter: blur(18px) saturate(1.08);
+      }
     }
   </style>
 </head>
@@ -239,7 +282,7 @@
 
   <script>
     const root = document.getElementById('portfolio-root');
-    const siteTitle = document.getElementById('site-title');
+    const dataEndpoints = ['./api/data', '/api/data', './data.json'];
 
     function escapeHtml(value = '') {
       return String(value)
@@ -264,8 +307,38 @@
       return './images/' + path.replace(/^\.\//, '');
     }
 
-    function ratioClass(value) {
-      return String(value || '').trim() === '1:1' ? 'ratio-11' : 'ratio-43';
+    function ratioInfo(value) {
+      const normalized = String(value || '4:3').trim();
+      switch (normalized) {
+        case '1:1': return { cls: 'ratio-11', portrait: false };
+        case '3:4': return { cls: 'ratio-34', portrait: true };
+        case '2:3': return { cls: 'ratio-23', portrait: true };
+        default: return { cls: 'ratio-43', portrait: false };
+      }
+    }
+
+    function mediaMarkup(item, title) {
+      const image = resolveImagePath(item.image || '');
+      const ratio = ratioInfo(item.imageRatio);
+
+      if (!image) {
+        return `<div class="work-media ${ratio.cls} empty">IMAGE</div>`;
+      }
+
+      if (ratio.portrait) {
+        return `
+          <div class="work-media ${ratio.cls} portrait">
+            <img class="color-fill" src="${escapeHtml(image)}" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            <img class="main-image" src="${escapeHtml(image)}" alt="${title}" loading="lazy" decoding="async">
+          </div>
+        `;
+      }
+
+      return `
+        <div class="work-media ${ratio.cls}">
+          <img class="main-image" src="${escapeHtml(image)}" alt="${title}" loading="lazy" decoding="async">
+        </div>
+      `;
     }
 
     function workCard(item) {
@@ -275,10 +348,7 @@
       const description = escapeHtml(item.description || '');
       const link = item.link ? String(item.link) : '';
       const tags = normalizeTags(item.tags);
-      const image = resolveImagePath(item.image || '');
-      const media = image
-        ? `<div class="work-media ${ratioClass(item.imageRatio)}"><img src="${escapeHtml(image)}" alt="${title}" loading="lazy" decoding="async"></div>`
-        : `<div class="work-media ${ratioClass(item.imageRatio)} empty">IMAGE</div>`;
+      const media = mediaMarkup(item, title);
       const tagHtml = tags.length
         ? `<div class="tags">${tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}</div>`
         : '';
@@ -292,7 +362,7 @@
           <div class="work-body">
             <div class="work-head">
               <div>
-                <h3 class="work-title">${title}</h3>
+                <h2 class="work-title">${title}</h2>
                 ${role ? `<div class="work-role">${role}</div>` : ''}
               </div>
               ${year ? `<div class="work-meta">${year}</div>` : ''}
@@ -305,16 +375,25 @@
       `;
     }
 
+    async function fetchData() {
+      let lastError = null;
+      for (const url of dataEndpoints) {
+        try {
+          const response = await fetch(url, { cache: 'no-store' });
+          if (!response.ok) throw new Error(`Failed to load ${url}`);
+          return await response.json();
+        } catch (error) {
+          lastError = error;
+        }
+      }
+      throw lastError || new Error('Failed to load site data');
+    }
+
     async function boot() {
       try {
-        const response = await fetch('./data.json', { cache: 'no-store' });
-        if (!response.ok) throw new Error('Failed to load data.json');
-        const data = await response.json();
+        const data = await fetchData();
+        if (data?.site?.name) document.getElementById('site-title').textContent = data.site.name;
         const works = Array.isArray(data.portfolio) ? data.portfolio : [];
-        if (data?.site?.name) {
-          siteTitle.textContent = data.site.name;
-          document.title = `${data.site.name} | Portfolio`;
-        }
 
         if (!works.length) {
           root.innerHTML = '<section class="empty-state">まだポートフォリオ項目がありません。</section>';
@@ -324,7 +403,7 @@
         root.innerHTML = works.map(workCard).join('');
       } catch (error) {
         console.error(error);
-        root.innerHTML = '<section class="error-state">ポートフォリオの読み込みに失敗しました。data.json の場所と内容を確認してください。</section>';
+        root.innerHTML = '<section class="error-state">ポートフォリオの読み込みに失敗しました。KV または data.json の内容を確認してください。</section>';
       }
     }
 
