@@ -214,6 +214,16 @@
       color: var(--muted);
       min-height: 1.4em;
     }
+
+    .hintbox {
+      margin-top: 10px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fbfbf8;
+      color: var(--muted);
+      font-size: 13px;
+    }
     .pill {
       display: inline-flex;
       align-items: center;
@@ -771,6 +781,59 @@
       };
     }
 
+    function payloadHasContent(type, payload) {
+      if (!payload) return false;
+      if (type === 'portfolio') return !!(payload.title || payload.year || payload.role || payload.description || payload.image || payload.link || (payload.tags && payload.tags.length));
+      if (type === 'memory') return !!(payload.title || payload.url || payload.comment || (payload.tags && payload.tags.length));
+      if (type === 'tools') return !!(payload.title || payload.description || payload.image || payload.appUrl || payload.repoUrl || (payload.tags && payload.tags.length));
+      return false;
+    }
+
+    function getPayloadForType(type = currentType) {
+      if (type === 'portfolio') return getPortfolioFormData();
+      if (type === 'memory') return getMemoryFormData();
+      if (type === 'tools') return getToolFormData();
+      return null;
+    }
+
+    function syncCurrentEditorState(options = {}) {
+      const { allowCreate = false, updateStatus = false } = options;
+
+      if (currentType === 'site') {
+        state.site = {
+          name: $('site_name').value.trim(),
+          tagline: $('site_tagline').value.trim(),
+          about: $('site_about').value.trim()
+        };
+        updatePreview();
+        if (updateStatus) setStatus('About の変更を反映しました。');
+        return true;
+      }
+
+      const arr = getCurrentArray();
+      const payload = getPayloadForType(currentType);
+      if (!payload) return false;
+
+      if (selectedIndex === null) {
+        if (!allowCreate || !payloadHasContent(currentType, payload)) return false;
+        arr.unshift(payload);
+        selectedIndex = 0;
+        renderList();
+        selectionText.textContent = `既存項目を編集中 #${selectedIndex + 1}`;
+        updatePreview();
+        if (updateStatus) setStatus('新規項目を追加しました。');
+        return true;
+      }
+
+      if (!arr[selectedIndex]) return false;
+      arr[selectedIndex] = payload;
+      renderList();
+      updatePreview();
+      selectionText.textContent = `既存項目を編集中 #${selectedIndex + 1}`;
+      if (updateStatus) setStatus('編集中の変更を反映しました。');
+      return true;
+    }
+
     function saveCurrentItem() {
       if (currentType === 'site') return;
       const arr = getCurrentArray();
@@ -823,14 +886,7 @@
     }
 
     function saveSite() {
-      state.site = {
-        name: $('site_name').value.trim(),
-        tagline: $('site_tagline').value.trim(),
-        about: $('site_about').value.trim()
-      };
-      updatePreview();
-      renderList();
-      setStatus('About を保存しました。');
+      syncCurrentEditorState({ allowCreate: false, updateStatus: true });
     }
 
     function downloadJson() {
@@ -874,6 +930,7 @@
 
     async function saveToCloud() {
       try {
+        syncCurrentEditorState({ allowCreate: true, updateStatus: false });
         setStatus('保存しています...');
         const res = await fetch('./save', {
           method: 'POST',
@@ -992,11 +1049,6 @@
       };
       fr.readAsDataURL(file);
     });
-
-    $('helper_ratio').addEventListener('change', (e) => {
-      imageState.ratio = e.target.value;
-      syncCanvasSize();
-    });
     $('zoomRange').addEventListener('input', (e) => {
       imageState.zoom = Number(e.target.value);
       drawCrop();
@@ -1070,6 +1122,37 @@
       const file = e.target.files?.[0];
       if (file) importJsonFile(file);
       e.target.value = '';
+    });
+
+    function bindAutoSync(formId) {
+      const form = $(formId);
+      form.querySelectorAll('input, textarea, select').forEach(el => {
+        const evt = el.tagName === 'SELECT' ? 'change' : 'input';
+        el.addEventListener(evt, () => {
+          if (form.hidden) return;
+          syncCurrentEditorState({ allowCreate: false, updateStatus: false });
+        });
+      });
+    }
+
+    bindAutoSync('siteForm');
+    bindAutoSync('portfolioForm');
+    bindAutoSync('memoryForm');
+    bindAutoSync('toolsForm');
+
+    $('p_ratio').addEventListener('change', (e) => {
+      $('helper_ratio').value = e.target.value;
+      imageState.ratio = e.target.value;
+      syncCanvasSize();
+    });
+
+    $('helper_ratio').addEventListener('change', (e) => {
+      imageState.ratio = e.target.value;
+      if (currentType === 'portfolio') {
+        $('p_ratio').value = e.target.value;
+        syncCurrentEditorState({ allowCreate: false, updateStatus: false });
+      }
+      syncCanvasSize();
     });
 
     // init
