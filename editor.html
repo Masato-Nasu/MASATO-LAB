@@ -1,0 +1,1177 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Personal Lab Editor</title>
+  <style>
+    :root {
+      --bg: #f6f6f3;
+      --panel: #ffffff;
+      --text: #111111;
+      --muted: #666666;
+      --line: #d8d8d2;
+      --soft: #efefe9;
+      --accent: #161616;
+      --danger: #922;
+      --ok: #0f6a3b;
+      --radius: 16px;
+      --shadow: 0 6px 24px rgba(0,0,0,.06);
+      --max: 1280px;
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); }
+    body { line-height: 1.5; }
+    a { color: inherit; text-decoration: none; }
+    button, input, textarea, select {
+      font: inherit;
+    }
+    button {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform .05s ease, background .15s ease, border-color .15s ease;
+    }
+    button:hover { background: #fafaf7; }
+    button:active { transform: translateY(1px); }
+    button.primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    button.primary:hover { background: #000; }
+    button.ghost { background: transparent; }
+    button.danger {
+      color: #fff;
+      background: var(--danger);
+      border-color: var(--danger);
+    }
+    button.success {
+      color: #fff;
+      background: var(--ok);
+      border-color: var(--ok);
+    }
+    .wrap {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .nav {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+      padding: 16px 0 6px;
+      font-size: 14px;
+    }
+    .nav a { color: var(--muted); }
+    .nav a[aria-current="page"] { color: var(--text); font-weight: 600; }
+    h1 {
+      font-size: clamp(28px, 3.6vw, 42px);
+      line-height: 1.05;
+      margin: 10px 0 8px;
+      letter-spacing: -.02em;
+    }
+    .lede {
+      color: var(--muted);
+      margin: 0 0 20px;
+      max-width: 820px;
+    }
+    .notice {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+      margin-bottom: 18px;
+    }
+    .toolbar, .toolbar2 {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 340px minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+    }
+    .panel-head {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .panel-body { padding: 16px 18px 18px; }
+    .muted { color: var(--muted); }
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .tabs button.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    .list {
+      display: grid;
+      gap: 10px;
+      max-height: 72vh;
+      overflow: auto;
+      padding-right: 4px;
+    }
+    .item {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: #fff;
+    }
+    .item.active {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+    .item-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .item-meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      word-break: break-word;
+    }
+    .item-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    form {
+      display: grid;
+      gap: 12px;
+    }
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+    .field label {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .field input,
+    .field textarea,
+    .field select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 12px;
+      padding: 11px 12px;
+      min-height: 44px;
+    }
+    .field textarea {
+      min-height: 130px;
+      resize: vertical;
+    }
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding-top: 4px;
+    }
+    .preview {
+      background: #0f1115;
+      color: #f4f4f4;
+      border-radius: 16px;
+      padding: 16px;
+      overflow: auto;
+      font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      max-height: 420px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .status {
+      font-size: 13px;
+      color: var(--muted);
+      min-height: 1.4em;
+    }
+
+    .hintbox {
+      margin-top: 10px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fbfbf8;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: var(--muted);
+      background: #fff;
+    }
+    .helper {
+      display: grid;
+      gap: 12px;
+    }
+    .helper .canvas-wrap {
+      background: var(--soft);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      min-height: 220px;
+      display: grid;
+      place-items: center;
+    }
+    canvas { max-width: 100%; height: auto; display: block; }
+    .range-label { font-size: 12px; color: var(--muted); }
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 18px;
+    }
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: 1fr; }
+      .split { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .wrap { padding: 16px; }
+      .grid2 { grid-template-columns: 1fr; }
+      .panel-head { align-items: flex-start; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html">Home</a>
+      <a href="../portfolio.html">Portfolio</a>
+      <a href="../memory.html">Peripheral Memory</a>
+      <a href="../tools.html">Tools</a>
+      <a href="../about.html">About</a>
+      <a href="./" aria-current="page">Editor</a>
+    </nav>
+
+    <h1>Personal Lab Editor</h1>
+    <p class="lede">この画面は <strong>/editor</strong> 配下で使う管理画面です。Cloudflare Access でここだけ保護し、保存すると Workers KV に反映されます。必要に応じて <code>data.json</code> の import / download も使えます。</p>
+
+    <div class="notice">
+      <div class="toolbar">
+        <button id="loadLiveBtn" class="ghost">現在の data.json を読み込む</button>
+        <label>
+          <input id="importInput" type="file" accept="application/json,.json" hidden>
+          <button id="importBtn" type="button">Import data.json</button>
+        </label>
+        <button id="saveCloudBtn" type="button" class="success">サイトに保存</button>
+        <button id="downloadBtn" type="button" class="primary">Download data.json</button>
+        <button id="copyJsonBtn" type="button">JSONをコピー</button>
+      </div>
+      <div class="status" id="status">現在の公開データを読み込むか、data.json を import してください。</div>
+    </div>
+
+    <div class="layout">
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="pill">項目一覧</div>
+          </div>
+          <div class="toolbar2">
+            <button class="tabbtn active" data-type="portfolio" type="button">Portfolio</button>
+            <button class="tabbtn" data-type="memory" type="button">Peripheral Memory</button>
+            <button class="tabbtn" data-type="tools" type="button">Tools</button>
+            <button class="tabbtn" data-type="site" type="button">About</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="toolbar">
+            <button id="newItemBtn" type="button" class="success">新規作成</button>
+          </div>
+          <div class="list" id="itemList"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="pill" id="editorPill">編集中: Portfolio</div>
+          </div>
+          <div class="muted" id="selectionText">新規作成モード</div>
+        </div>
+        <div class="panel-body">
+          <div class="tabs" id="subTabs"></div>
+
+          <form id="siteForm" hidden>
+            <div class="field">
+              <label for="site_name">Name</label>
+              <input id="site_name" />
+            </div>
+            <div class="field">
+              <label for="site_tagline">Tagline</label>
+              <input id="site_tagline" />
+            </div>
+            <div class="field">
+              <label for="site_about">About</label>
+              <textarea id="site_about"></textarea>
+            </div>
+            <div class="actions">
+              <button id="saveSiteBtn" type="button" class="primary">Aboutを保存</button>
+            </div>
+          </form>
+
+          <form id="portfolioForm">
+            <div class="grid2">
+              <div class="field">
+                <label for="p_title">Title</label>
+                <input id="p_title" />
+              </div>
+              <div class="field">
+                <label for="p_year">Year</label>
+                <input id="p_year" />
+              </div>
+            </div>
+            <div class="field">
+              <label for="p_role">Role</label>
+              <input id="p_role" />
+            </div>
+            <div class="field">
+              <label for="p_description">Description</label>
+              <textarea id="p_description"></textarea>
+            </div>
+            <div class="grid2">
+              <div class="field">
+                <label for="p_image">Image URL</label>
+                <input id="p_image" />
+              </div>
+              <div class="field">
+                <label for="p_link">Link URL</label>
+                <input id="p_link" />
+              </div>
+            </div>
+            <div class="grid2">
+              <div class="field">
+                <label for="p_tags">Tags (comma separated)</label>
+                <input id="p_tags" />
+              </div>
+              <div class="field">
+                <label for="p_ratio">Image ratio</label>
+                <select id="p_ratio">
+                  <option value="4:3">4:3（横）</option>
+                  <option value="1:1">1:1（正方形）</option>
+                  <option value="3:4">3:4（縦）</option>
+                  <option value="2:3">2:3（縦長）</option>
+                </select>
+              </div>
+            </div>
+            <div class="actions">
+              <button id="savePortfolioBtn" type="button" class="primary">保存 / 更新</button>
+              <button id="duplicatePortfolioBtn" type="button">複製</button>
+              <button id="deletePortfolioBtn" type="button" class="danger">削除</button>
+              <button id="resetPortfolioBtn" type="button">フォームをクリア</button>
+            </div>
+          </form>
+
+          <form id="memoryForm" hidden>
+            <div class="grid2">
+              <div class="field">
+                <label for="m_title">Title</label>
+                <input id="m_title" />
+              </div>
+              <div class="field">
+                <label for="m_date">Date</label>
+                <input id="m_date" placeholder="YYYY-MM-DD" />
+              </div>
+            </div>
+            <div class="field">
+              <label for="m_url">URL</label>
+              <input id="m_url" />
+            </div>
+            <div class="field">
+              <label for="m_comment">Comment</label>
+              <textarea id="m_comment"></textarea>
+            </div>
+            <div class="field">
+              <label for="m_tags">Tags (comma separated)</label>
+              <input id="m_tags" />
+            </div>
+            <div class="actions">
+              <button id="saveMemoryBtn" type="button" class="primary">保存 / 更新</button>
+              <button id="duplicateMemoryBtn" type="button">複製</button>
+              <button id="deleteMemoryBtn" type="button" class="danger">削除</button>
+              <button id="resetMemoryBtn" type="button">フォームをクリア</button>
+            </div>
+          </form>
+
+          <form id="toolsForm" hidden>
+            <div class="field">
+              <label for="t_title">Title</label>
+              <input id="t_title" />
+            </div>
+            <div class="field">
+              <label for="t_description">Description</label>
+              <textarea id="t_description"></textarea>
+            </div>
+            <div class="grid2">
+              <div class="field">
+                <label for="t_image">Image URL</label>
+                <input id="t_image" />
+              </div>
+              <div class="field">
+                <label for="t_tags">Tags (comma separated)</label>
+                <input id="t_tags" />
+              </div>
+            </div>
+            <div class="grid2">
+              <div class="field">
+                <label for="t_app">App URL</label>
+                <input id="t_app" />
+              </div>
+              <div class="field">
+                <label for="t_repo">GitHub URL</label>
+                <input id="t_repo" />
+              </div>
+            </div>
+            <div class="actions">
+              <button id="saveToolBtn" type="button" class="primary">保存 / 更新</button>
+              <button id="duplicateToolBtn" type="button">複製</button>
+              <button id="deleteToolBtn" type="button" class="danger">削除</button>
+              <button id="resetToolBtn" type="button">フォームをクリア</button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </div>
+
+    <div class="split">
+      <section class="panel">
+        <div class="panel-head">
+          <div class="pill">Portfolio image helper</div>
+          <div class="muted">1:1 / 4:3 / 3:4 / 2:3</div>
+        </div>
+        <div class="panel-body helper">
+          <div class="toolbar">
+            <input id="imageInput" type="file" accept="image/*" />
+          </div>
+          <div class="canvas-wrap">
+            <canvas id="cropCanvas" width="800" height="600"></canvas>
+          </div>
+          <div class="field">
+            <label for="helper_name">Downloaded file name</label>
+            <input id="helper_name" placeholder="portfolio-image.jpg" />
+          </div>
+          <div class="muted">Image ratio is linked to the Portfolio form above.</div>
+          <div class="field">
+            <label class="range-label" for="zoomRange">Zoom</label>
+            <input id="zoomRange" type="range" min="1" max="3" step="0.01" value="1" />
+          </div>
+          <div class="field">
+            <label class="range-label" for="moveXRange">Move X</label>
+            <input id="moveXRange" type="range" min="-1" max="1" step="0.001" value="0" />
+          </div>
+          <div class="field">
+            <label class="range-label" for="moveYRange">Move Y</label>
+            <input id="moveYRange" type="range" min="-1" max="1" step="0.001" value="0" />
+          </div>
+          <div class="toolbar">
+            <button id="downloadCropBtn" type="button">Download Cropped Image</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div class="pill">Current data.json preview</div>
+          <div class="muted">GitHub Pages–ready</div>
+        </div>
+        <div class="panel-body">
+          <div class="preview" id="jsonPreview"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const defaultData = {
+      site: {
+        name: "MASATO NASU",
+        tagline: "Portfolio · Peripheral Memory · Tools",
+        about: "Product designer / computational experiments."
+      },
+      portfolio: [],
+      memory: [],
+      tools: []
+    };
+
+    let state = structuredClone(defaultData);
+    let currentType = 'portfolio';
+    let selectedIndex = null;
+    let autoSaveTimer = null;
+    let isAutoSaving = false;
+
+    const $ = (id) => document.getElementById(id);
+    const itemList = $('itemList');
+    const statusEl = $('status');
+    const jsonPreview = $('jsonPreview');
+    const editorPill = $('editorPill');
+    const selectionText = $('selectionText');
+    const forms = {
+      site: $('siteForm'),
+      portfolio: $('portfolioForm'),
+      memory: $('memoryForm'),
+      tools: $('toolsForm')
+    };
+
+    function setStatus(message) {
+      statusEl.textContent = message;
+    }
+
+    function parseTags(value) {
+      return String(value || '')
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean);
+    }
+
+    function formatTags(tags) {
+      return Array.isArray(tags) ? tags.join(', ') : '';
+    }
+
+    function todayLocalISO() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    function ensureShape(data) {
+      return {
+        site: {
+          name: data?.site?.name ?? defaultData.site.name,
+          tagline: data?.site?.tagline ?? defaultData.site.tagline,
+          about: data?.site?.about ?? defaultData.site.about,
+        },
+        portfolio: Array.isArray(data?.portfolio) ? data.portfolio : [],
+        memory: Array.isArray(data?.memory) ? data.memory : [],
+        tools: Array.isArray(data?.tools) ? data.tools : [],
+      };
+    }
+
+    function updatePreview() {
+      jsonPreview.textContent = JSON.stringify(state, null, 2);
+    }
+
+    function titleForItem(type, item, i) {
+      if (type === 'portfolio') return item.title || `Untitled Portfolio ${i + 1}`;
+      if (type === 'memory') return item.title || item.url || `Untitled Memory ${i + 1}`;
+      if (type === 'tools') return item.title || `Untitled Tool ${i + 1}`;
+      return 'About';
+    }
+
+    function metaForItem(type, item) {
+      if (type === 'portfolio') return [item.year, item.role, item.link].filter(Boolean).join(' · ');
+      if (type === 'memory') return [item.date, item.url].filter(Boolean).join(' · ');
+      if (type === 'tools') return [item.appUrl, item.repoUrl].filter(Boolean).join(' · ');
+      return 'Site information';
+    }
+
+    function getCurrentArray() {
+      return currentType === 'site' ? null : state[currentType];
+    }
+
+    function switchType(type) {
+      currentType = type;
+      selectedIndex = null;
+
+      document.querySelectorAll('.tabbtn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.type === type);
+      });
+
+      Object.entries(forms).forEach(([key, form]) => {
+        form.hidden = key !== type;
+      });
+
+      editorPill.textContent = `編集中: ${type === 'site' ? 'About' : type}`;
+      selectionText.textContent = type === 'site' ? 'サイト情報を編集' : '新規作成モード';
+
+      if (type === 'site') {
+        loadSiteForm();
+      } else {
+        clearCurrentForm();
+      }
+      renderList();
+      updatePreview();
+    }
+
+    function renderList() {
+      itemList.innerHTML = '';
+
+      if (currentType === 'site') {
+        const card = document.createElement('div');
+        card.className = 'item active';
+        card.innerHTML = `
+          <div class="item-title">${escapeHtml(state.site.name || 'Site')}</div>
+          <div class="item-meta">${escapeHtml(state.site.tagline || '')}</div>
+          <div class="item-actions"><button type="button" data-action="edit-site">編集</button></div>
+        `;
+        card.querySelector('button').addEventListener('click', () => loadSiteForm());
+        itemList.appendChild(card);
+        return;
+      }
+
+      const items = getCurrentArray();
+      if (!items.length) {
+        const empty = document.createElement('div');
+        empty.className = 'muted';
+        empty.textContent = 'まだ項目がありません。新規作成してください。';
+        itemList.appendChild(empty);
+        return;
+      }
+
+      items.forEach((item, i) => {
+        const card = document.createElement('div');
+        card.className = 'item' + (selectedIndex === i ? ' active' : '');
+        card.innerHTML = `
+          <div class="item-title">${escapeHtml(titleForItem(currentType, item, i))}</div>
+          <div class="item-meta">${escapeHtml(metaForItem(currentType, item))}</div>
+          <div class="item-actions">
+            <button type="button" data-edit="${i}">編集</button>
+            <button type="button" data-duplicate="${i}">複製</button>
+            <button type="button" data-delete="${i}" class="danger">削除</button>
+          </div>
+        `;
+        card.querySelector('[data-edit]').addEventListener('click', () => loadItem(i));
+        card.querySelector('[data-duplicate]').addEventListener('click', () => duplicateItem(i));
+        card.querySelector('[data-delete]').addEventListener('click', () => deleteItem(i));
+        itemList.appendChild(card);
+      });
+    }
+
+    function loadSiteForm() {
+      $('site_name').value = state.site.name || '';
+      $('site_tagline').value = state.site.tagline || '';
+      $('site_about').value = state.site.about || '';
+      selectionText.textContent = 'About を編集中';
+    }
+
+    function clearCurrentForm() {
+      if (currentType === 'portfolio') {
+        $('p_title').value = '';
+        $('p_year').value = '';
+        $('p_role').value = '';
+        $('p_description').value = '';
+        $('p_image').value = '';
+        $('p_link').value = '';
+        $('p_tags').value = '';
+        $('p_ratio').value = '4:3';
+        imageState.ratio = '4:3';
+        syncCanvasSize();
+      } else if (currentType === 'memory') {
+        $('m_title').value = '';
+        $('m_date').value = todayLocalISO();
+        $('m_url').value = '';
+        $('m_comment').value = '';
+        $('m_tags').value = '';
+      } else if (currentType === 'tools') {
+        $('t_title').value = '';
+        $('t_description').value = '';
+        $('t_image').value = '';
+        $('t_app').value = '';
+        $('t_repo').value = '';
+        $('t_tags').value = '';
+      }
+      selectionText.textContent = '新規作成モード';
+    }
+
+    function loadItem(index) {
+      const item = getCurrentArray()?.[index];
+      if (!item) return;
+      selectedIndex = index;
+
+      if (currentType === 'portfolio') {
+        $('p_title').value = item.title || '';
+        $('p_year').value = item.year || '';
+        $('p_role').value = item.role || '';
+        $('p_description').value = item.description || '';
+        $('p_image').value = item.image || '';
+        $('p_link').value = item.link || '';
+        $('p_tags').value = formatTags(item.tags);
+        $('p_ratio').value = item.imageRatio || '4:3';
+        imageState.ratio = $('p_ratio').value;
+        syncCanvasSize();
+      } else if (currentType === 'memory') {
+        $('m_title').value = item.title || '';
+        $('m_date').value = item.date || todayLocalISO();
+        $('m_url').value = item.url || '';
+        $('m_comment').value = item.comment || '';
+        $('m_tags').value = formatTags(item.tags);
+      } else if (currentType === 'tools') {
+        $('t_title').value = item.title || '';
+        $('t_description').value = item.description || '';
+        $('t_image').value = item.image || '';
+        $('t_app').value = item.appUrl || '';
+        $('t_repo').value = item.repoUrl || '';
+        $('t_tags').value = formatTags(item.tags);
+      }
+
+      selectionText.textContent = `既存項目を編集中 #${index + 1}`;
+      renderList();
+    }
+
+    function getPortfolioFormData() {
+      return {
+        title: $('p_title').value.trim(),
+        year: $('p_year').value.trim(),
+        role: $('p_role').value.trim(),
+        description: $('p_description').value.trim(),
+        image: $('p_image').value.trim(),
+        imageRatio: $('p_ratio').value || '4:3',
+        link: $('p_link').value.trim(),
+        tags: parseTags($('p_tags').value)
+      };
+    }
+
+    function getMemoryFormData() {
+      return {
+        title: $('m_title').value.trim(),
+        url: $('m_url').value.trim(),
+        comment: $('m_comment').value.trim(),
+        tags: parseTags($('m_tags').value),
+        date: $('m_date').value.trim() || todayLocalISO()
+      };
+    }
+
+    function getToolFormData() {
+      return {
+        title: $('t_title').value.trim(),
+        description: $('t_description').value.trim(),
+        image: $('t_image').value.trim(),
+        appUrl: $('t_app').value.trim(),
+        repoUrl: $('t_repo').value.trim(),
+        tags: parseTags($('t_tags').value)
+      };
+    }
+
+    function payloadHasContent(type, payload) {
+      if (!payload) return false;
+      if (type === 'portfolio') return !!(payload.title || payload.year || payload.role || payload.description || payload.image || payload.link || (payload.tags && payload.tags.length));
+      if (type === 'memory') return !!(payload.title || payload.url || payload.comment || (payload.tags && payload.tags.length));
+      if (type === 'tools') return !!(payload.title || payload.description || payload.image || payload.appUrl || payload.repoUrl || (payload.tags && payload.tags.length));
+      return false;
+    }
+
+    function getPayloadForType(type = currentType) {
+      if (type === 'portfolio') return getPortfolioFormData();
+      if (type === 'memory') return getMemoryFormData();
+      if (type === 'tools') return getToolFormData();
+      return null;
+    }
+
+    function syncCurrentEditorState(options = {}) {
+      const { allowCreate = false, updateStatus = false } = options;
+
+      if (currentType === 'site') {
+        state.site = {
+          name: $('site_name').value.trim(),
+          tagline: $('site_tagline').value.trim(),
+          about: $('site_about').value.trim()
+        };
+        updatePreview();
+        if (updateStatus) setStatus('About の変更を反映しました。');
+        return true;
+      }
+
+      const arr = getCurrentArray();
+      const payload = getPayloadForType(currentType);
+      if (!payload) return false;
+
+      if (selectedIndex === null) {
+        if (!allowCreate || !payloadHasContent(currentType, payload)) return false;
+        arr.unshift(payload);
+        selectedIndex = 0;
+        renderList();
+        selectionText.textContent = `既存項目を編集中 #${selectedIndex + 1}`;
+        updatePreview();
+        if (updateStatus) setStatus('新規項目を追加しました。');
+        return true;
+      }
+
+      if (!arr[selectedIndex]) return false;
+      arr[selectedIndex] = payload;
+      renderList();
+      updatePreview();
+      selectionText.textContent = `既存項目を編集中 #${selectedIndex + 1}`;
+      if (updateStatus) setStatus('編集中の変更を反映しました。');
+      return true;
+    }
+
+    function saveCurrentItem() {
+      if (currentType === 'site') return;
+      const arr = getCurrentArray();
+      let payload;
+      if (currentType === 'portfolio') payload = getPortfolioFormData();
+      if (currentType === 'memory') payload = getMemoryFormData();
+      if (currentType === 'tools') payload = getToolFormData();
+
+      if (selectedIndex === null) {
+        arr.unshift(payload);
+        selectedIndex = 0;
+        setStatus('新規項目を追加しました。');
+      } else {
+        arr[selectedIndex] = payload;
+        setStatus('項目を更新しました。');
+      }
+      renderList();
+      updatePreview();
+      selectionText.textContent = `既存項目を編集中 #${selectedIndex + 1}`;
+    }
+
+    function duplicateItem(index = selectedIndex) {
+      if (currentType === 'site') return;
+      const arr = getCurrentArray();
+      if (index == null || !arr[index]) return;
+      const copy = structuredClone(arr[index]);
+      arr.splice(index + 1, 0, copy);
+      selectedIndex = index + 1;
+      loadItem(selectedIndex);
+      setStatus('項目を複製しました。');
+      updatePreview();
+    }
+
+    function deleteItem(index = selectedIndex) {
+      if (currentType === 'site') return;
+      const arr = getCurrentArray();
+      if (index == null || !arr[index]) {
+        alert('削除する項目を選択してください。');
+        return;
+      }
+      const label = titleForItem(currentType, arr[index], index);
+      const ok = confirm(`「${label}」を削除します。よろしいですか？`);
+      if (!ok) return;
+      arr.splice(index, 1);
+      selectedIndex = null;
+      clearCurrentForm();
+      renderList();
+      updatePreview();
+      setStatus('項目を削除しました。');
+    }
+
+    function saveSite() {
+      syncCurrentEditorState({ allowCreate: false, updateStatus: true });
+    }
+
+    function downloadJson() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'data.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      setStatus('data.json をダウンロードしました。GitHub の data.json を置き換えてください。');
+    }
+
+    async function copyJson() {
+      try {
+        await navigator.clipboard.writeText(JSON.stringify(state, null, 2));
+        setStatus('JSONをクリップボードにコピーしました。');
+      } catch (err) {
+        setStatus('コピーに失敗しました。ブラウザの権限をご確認ください。');
+      }
+    }
+
+    async function loadLiveData() {
+      try {
+        const res = await fetch('/api/data', { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        state = ensureShape(data);
+        selectedIndex = null;
+        updatePreview();
+        renderList();
+        if (currentType === 'site') loadSiteForm(); else clearCurrentForm();
+        setStatus('現在の公開データを読み込みました。');
+      } catch (err) {
+        console.error(err);
+        setStatus('公開データを読み込めませんでした。ローカルで開いている場合は Import data.json を使ってください。');
+      }
+    }
+
+    async function saveToCloud(options = {}) {
+      const { silent = false, successMessage = 'サイトに保存しました。', failureMessage = '保存に失敗しました。/editor が Access で保護されているかと、KV バインディングを確認してください。' } = options;
+      try {
+        syncCurrentEditorState({ allowCreate: true, updateStatus: false });
+        if (!silent) setStatus('保存しています...');
+        const res = await fetch('./save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(state)
+        });
+        if (!res.ok) throw new Error('save failed');
+        setStatus(successMessage);
+        return true;
+      } catch (error) {
+        console.error(error);
+        setStatus(failureMessage);
+        return false;
+      }
+    }
+
+    function queueAutoSave(message = '変更を自動保存しました。') {
+      clearTimeout(autoSaveTimer);
+      autoSaveTimer = setTimeout(async () => {
+        if (isAutoSaving) return;
+        isAutoSaving = true;
+        try {
+          await saveToCloud({
+            silent: true,
+            successMessage: message,
+            failureMessage: '自動保存に失敗しました。もう一度「サイトに保存」を押してください。'
+          });
+        } finally {
+          isAutoSaving = false;
+        }
+      }, 250);
+    }
+
+    function importJsonFile(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(String(reader.result || '{}'));
+          state = ensureShape(parsed);
+          selectedIndex = null;
+          updatePreview();
+          renderList();
+          if (currentType === 'site') loadSiteForm(); else clearCurrentForm();
+          setStatus('data.json を読み込みました。');
+        } catch (err) {
+          alert('JSON の読み込みに失敗しました。');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    // image helper
+    const cropCanvas = $('cropCanvas');
+    const ctx = cropCanvas.getContext('2d');
+    const imageState = {
+      img: null,
+      ratio: '4:3',
+      zoom: 1,
+      moveX: 0,
+      moveY: 0,
+    };
+
+    function canvasRatioValue() {
+      if (imageState.ratio === '1:1') return 1;
+      if (imageState.ratio === '3:4') return 3 / 4;
+      if (imageState.ratio === '2:3') return 2 / 3;
+      return 4 / 3;
+    }
+
+    function syncCanvasSize() {
+      const w = 1000;
+      const h = Math.round(w / canvasRatioValue());
+      cropCanvas.width = w;
+      cropCanvas.height = h;
+      drawCrop();
+    }
+
+    function drawCrop() {
+      ctx.clearRect(0, 0, cropCanvas.width, cropCanvas.height);
+      ctx.fillStyle = '#ecece7';
+      ctx.fillRect(0, 0, cropCanvas.width, cropCanvas.height);
+
+      if (!imageState.img) {
+        ctx.fillStyle = '#777';
+        ctx.font = '16px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('画像を読み込むとここにプレビューされます', cropCanvas.width / 2, cropCanvas.height / 2);
+        return;
+      }
+
+      const img = imageState.img;
+      const cw = cropCanvas.width;
+      const ch = cropCanvas.height;
+      const baseScale = Math.max(cw / img.width, ch / img.height);
+      const scale = baseScale * imageState.zoom;
+      const drawW = img.width * scale;
+      const drawH = img.height * scale;
+      const extraX = Math.max(0, drawW - cw);
+      const extraY = Math.max(0, drawH - ch);
+      const dx = (cw - drawW) / 2 - extraX * imageState.moveX;
+      const dy = (ch - drawH) / 2 - extraY * imageState.moveY;
+
+      ctx.drawImage(img, dx, dy, drawW, drawH);
+    }
+
+    $('imageInput').addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const fr = new FileReader();
+      fr.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          imageState.img = img;
+          imageState.zoom = 1;
+          imageState.moveX = 0;
+          imageState.moveY = 0;
+          $('zoomRange').value = '1';
+          $('moveXRange').value = '0';
+          $('moveYRange').value = '0';
+          if (!$('helper_name').value.trim()) {
+            $('helper_name').value = file.name.replace(/\.[^.]+$/, '') + '.jpg';
+          }
+          drawCrop();
+        };
+        img.src = fr.result;
+      };
+      fr.readAsDataURL(file);
+    });
+    $('zoomRange').addEventListener('input', (e) => {
+      imageState.zoom = Number(e.target.value);
+      drawCrop();
+    });
+    $('moveXRange').addEventListener('input', (e) => {
+      imageState.moveX = Number(e.target.value);
+      drawCrop();
+    });
+    $('moveYRange').addEventListener('input', (e) => {
+      imageState.moveY = Number(e.target.value);
+      drawCrop();
+    });
+    $('downloadCropBtn').addEventListener('click', () => {
+      if (!imageState.img) {
+        alert('先に画像を読み込んでください。');
+        return;
+      }
+      const a = document.createElement('a');
+      a.href = cropCanvas.toDataURL('image/jpeg', 0.92);
+      a.download = ($('helper_name').value.trim() || 'cropped-image.jpg');
+      a.click();
+    });
+
+    // event bindings
+    document.querySelectorAll('.tabbtn').forEach(btn => {
+      btn.addEventListener('click', () => switchType(btn.dataset.type));
+    });
+
+    $('newItemBtn').addEventListener('click', () => {
+      selectedIndex = null;
+      clearCurrentForm();
+      renderList();
+      setStatus('新規作成モードに切り替えました。');
+    });
+
+    $('savePortfolioBtn').addEventListener('click', saveCurrentItem);
+    $('saveMemoryBtn').addEventListener('click', saveCurrentItem);
+    $('saveToolBtn').addEventListener('click', saveCurrentItem);
+    $('saveSiteBtn').addEventListener('click', saveSite);
+
+    $('duplicatePortfolioBtn').addEventListener('click', () => duplicateItem());
+    $('duplicateMemoryBtn').addEventListener('click', () => duplicateItem());
+    $('duplicateToolBtn').addEventListener('click', () => duplicateItem());
+
+    $('deletePortfolioBtn').addEventListener('click', () => deleteItem());
+    $('deleteMemoryBtn').addEventListener('click', () => deleteItem());
+    $('deleteToolBtn').addEventListener('click', () => deleteItem());
+
+    $('resetPortfolioBtn').addEventListener('click', () => {
+      selectedIndex = null;
+      clearCurrentForm();
+      renderList();
+    });
+    $('resetMemoryBtn').addEventListener('click', () => {
+      selectedIndex = null;
+      clearCurrentForm();
+      renderList();
+    });
+    $('resetToolBtn').addEventListener('click', () => {
+      selectedIndex = null;
+      clearCurrentForm();
+      renderList();
+    });
+
+    $('saveCloudBtn').addEventListener('click', saveToCloud);
+    $('downloadBtn').addEventListener('click', downloadJson);
+    $('copyJsonBtn').addEventListener('click', copyJson);
+    $('loadLiveBtn').addEventListener('click', loadLiveData);
+    $('importBtn').addEventListener('click', () => $('importInput').click());
+    $('importInput').addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (file) importJsonFile(file);
+      e.target.value = '';
+    });
+
+    function bindAutoSync(formId) {
+      const form = $(formId);
+      form.querySelectorAll('input, textarea, select').forEach(el => {
+        const evt = el.tagName === 'SELECT' ? 'change' : 'input';
+        el.addEventListener(evt, () => {
+          if (form.hidden) return;
+          syncCurrentEditorState({ allowCreate: false, updateStatus: false });
+        });
+      });
+    }
+
+    bindAutoSync('siteForm');
+    bindAutoSync('portfolioForm');
+    bindAutoSync('memoryForm');
+    bindAutoSync('toolsForm');
+
+    $('p_ratio').addEventListener('change', (e) => {
+      imageState.ratio = e.target.value;
+      syncCanvasSize();
+      if (currentType === 'portfolio') {
+        syncCurrentEditorState({ allowCreate: true, updateStatus: false });
+        queueAutoSave('画像比率を自動保存しました。');
+      }
+    });
+
+    // init
+    syncCanvasSize();
+    updatePreview();
+    clearCurrentForm();
+    renderList();
+    switchType('portfolio');
+    loadLiveData();
+  </script>
+</body>
+</html>

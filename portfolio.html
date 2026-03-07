@@ -127,10 +127,11 @@
     .work-media.portrait {
       display: grid;
       place-items: center;
+      aspect-ratio: 4 / 3 !important;
     }
     .work-media.portrait .portrait-stage {
       position: absolute;
-      inset: 12px 0;
+      inset: 0;
       display: grid;
       place-items: center;
       z-index: 2;
@@ -143,8 +144,8 @@
       height: 100%;
       object-fit: cover;
       object-position: center center;
-      transform: scale(1.16);
-      filter: blur(22px) saturate(1.1);
+      transform: scale(1.14);
+      filter: blur(24px) saturate(1.08);
       opacity: 0.96;
       z-index: 0;
     }
@@ -152,15 +153,15 @@
       content: "";
       position: absolute;
       inset: 0;
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.12));
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.10));
       z-index: 1;
       pointer-events: none;
     }
     .work-media.portrait .main-image {
       width: auto;
-      height: 100%;
+      height: calc(100% - 28px);
       max-width: none;
-      max-height: 100%;
+      max-height: calc(100% - 28px);
       object-fit: contain;
       object-position: center center;
       box-shadow: 0 10px 26px rgba(0,0,0,.12);
@@ -262,11 +263,12 @@
       .work-meta {
         white-space: normal;
       }
-      .work-media.portrait .portrait-stage {
-        inset: 10px 0;
+      .work-media.portrait .main-image {
+        height: calc(100% - 20px);
+        max-height: calc(100% - 20px);
       }
       .work-media.portrait .color-fill {
-        transform: scale(1.22);
+        transform: scale(1.18);
         filter: blur(18px) saturate(1.08);
       }
     }
