@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Peripheral Memory</title>
+  <style>
+    :root {
+      --bg: #f5f5f2;
+      --panel: #ffffff;
+      --text: #111111;
+      --muted: #666666;
+      --line: #d8d8d2;
+      --shadow: 0 10px 28px rgba(0,0,0,.06);
+      --radius: 24px;
+      --max: 1180px;
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+    }
+    body {
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+    .wrap {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 22px 20px 56px;
+    }
+    .site-header {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .site-title {
+      margin: 0;
+      font-size: clamp(32px, 5vw, 54px);
+      line-height: 0.98;
+      letter-spacing: -0.03em;
+      font-weight: 700;
+    }
+    .nav {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+      align-items: center;
+      font-size: 15px;
+      padding-bottom: 10px;
+    }
+    .nav a[aria-current="page"] { font-weight: 700; }
+    .page-head {
+      margin: 20px 0 24px;
+    }
+    .page-title {
+      margin: 0;
+      font-size: clamp(34px, 6vw, 68px);
+      line-height: 0.98;
+      letter-spacing: -0.04em;
+      font-weight: 700;
+    }
+    .memories {
+      display: grid;
+      gap: 22px;
+    }
+    .memory-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: 22px;
+      display: grid;
+      gap: 12px;
+    }
+    .memory-title {
+      margin: 0;
+      font-size: clamp(22px, 3vw, 30px);
+      line-height: 1.08;
+      letter-spacing: -.02em;
+    }
+    .memory-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+    .memory-meta {
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .memory-url {
+      color: #3d4f6d;
+      font-size: 14px;
+      word-break: break-all;
+    }
+    .memory-comment {
+      margin: 0;
+      white-space: pre-wrap;
+      font-size: 15px;
+    }
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 32px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fafaf7;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0 16px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #111;
+      color: #fff;
+      font-size: 14px;
+      width: fit-content;
+    }
+    .empty-state,
+    .error-state {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 28px;
+      color: var(--muted);
+      box-shadow: var(--shadow);
+    }
+    @media (max-width: 720px) {
+      .wrap { padding: 18px 14px 36px; }
+      .memory-card { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="site-header">
+      <h1 class="site-title" id="site-title">MASATO NASU</h1>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="./index.html">Home</a>
+        <a href="./portfolio.html">Portfolio</a>
+        <a href="./memory.html" aria-current="page">Peripheral Memory</a>
+        <a href="./tools.html">Tools</a>
+        <a href="./about.html">About</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="page-head">
+        <h2 class="page-title">Peripheral Memory</h2>
+      </section>
+      <section id="memory-root" class="memories" aria-live="polite"></section>
+    </main>
+  </div>
+
+  <script>
+    const root = document.getElementById('memory-root');
+    const siteTitle = document.getElementById('site-title');
+
+    function escapeHtml(value = '') {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function normalizeTags(tags) {
+      if (Array.isArray(tags)) return tags.filter(Boolean);
+      if (typeof tags === 'string') return tags.split(',').map(s => s.trim()).filter(Boolean);
+      return [];
+    }
+
+    function safeUrl(url = '') {
+      const value = String(url || '').trim();
+      if (!value) return '';
+      return /^(https?:)?\/\//i.test(value) ? value : value;
+    }
+
+    function memoryCard(item) {
+      const title = escapeHtml(item.title || 'Untitled');
+      const comment = escapeHtml(item.comment || '');
+      const date = escapeHtml(item.date || '');
+      const url = safeUrl(item.url || '');
+      const urlText = escapeHtml((item.url || '').replace(/^https?:\/\//i, ''));
+      const tags = normalizeTags(item.tags);
+      const tagHtml = tags.length ? `<div class="tags">${tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}</div>` : '';
+      const actionHtml = url ? `<a class="btn" href="${escapeHtml(url)}" target="_blank" rel="noreferrer">Open Link</a>` : '';
+
+      return `
+        <article class="memory-card">
+          <div class="memory-head">
+            <div>
+              <h3 class="memory-title">${title}</h3>
+              ${url ? `<div class="memory-url">${urlText}</div>` : ''}
+            </div>
+            ${date ? `<div class="memory-meta">${date}</div>` : ''}
+          </div>
+          ${comment ? `<p class="memory-comment">${comment}</p>` : ''}
+          ${tagHtml}
+          ${actionHtml}
+        </article>
+      `;
+    }
+
+    async function loadSiteData() {
+      try {
+        const apiResponse = await fetch('/api/data', { cache: 'no-store' });
+        if (apiResponse.ok) return await apiResponse.json();
+      } catch (error) {
+        console.warn('API data unavailable, trying local fallback.', error);
+      }
+      const fallbackResponse = await fetch('./data.json', { cache: 'no-store' });
+      if (!fallbackResponse.ok) throw new Error('Failed to load fallback data.json');
+      return await fallbackResponse.json();
+    }
+
+    async function boot() {
+      try {
+        const data = await loadSiteData();
+        if (data.site?.name) {
+          siteTitle.textContent = data.site.name;
+          document.title = `${data.site.name} / Peripheral Memory`;
+        }
+        const memories = Array.isArray(data.memory) ? data.memory : [];
+
+        if (!memories.length) {
+          root.innerHTML = '<section class="empty-state">まだ Peripheral Memory 項目がありません。Editor で memory を追加して保存してください。</section>';
+          return;
+        }
+
+        root.innerHTML = memories.map(memoryCard).join('');
+      } catch (error) {
+        console.error(error);
+        root.innerHTML = '<section class="error-state">Peripheral Memory の読み込みに失敗しました。データの保存状態を確認してください。</section>';
+      }
+    }
+
+    boot();
+  </script>
+</body>
+</html>

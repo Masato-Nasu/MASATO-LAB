@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tools</title>
+  <style>
+    :root {
+      --bg: #f5f5f2;
+      --panel: #ffffff;
+      --text: #111111;
+      --muted: #666666;
+      --line: #d8d8d2;
+      --shadow: 0 10px 28px rgba(0,0,0,.06);
+      --radius: 24px;
+      --max: 1180px;
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+    }
+    body {
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+    .wrap {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 22px 20px 56px;
+    }
+    .site-header {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .site-title {
+      margin: 0;
+      font-size: clamp(32px, 5vw, 54px);
+      line-height: 0.98;
+      letter-spacing: -0.03em;
+      font-weight: 700;
+    }
+    .nav {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+      align-items: center;
+      font-size: 15px;
+      padding-bottom: 10px;
+    }
+    .nav a[aria-current="page"] { font-weight: 700; }
+    .page-head {
+      margin: 20px 0 24px;
+    }
+    .page-title {
+      margin: 0;
+      font-size: clamp(34px, 6vw, 68px);
+      line-height: 0.98;
+      letter-spacing: -0.04em;
+      font-weight: 700;
+    }
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 24px;
+    }
+    .tool-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      display: grid;
+    }
+    .tool-media {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      background: #ecece6;
+      border-bottom: 1px solid var(--line);
+      overflow: hidden;
+    }
+    .tool-media.empty {
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-size: 14px;
+      letter-spacing: .04em;
+    }
+    .tool-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
+    }
+    .tool-body {
+      padding: 20px 22px 22px;
+      display: grid;
+      gap: 12px;
+    }
+    .tool-title {
+      margin: 0;
+      font-size: clamp(22px, 3vw, 30px);
+      line-height: 1.08;
+      letter-spacing: -.02em;
+    }
+    .tool-desc {
+      margin: 0;
+      white-space: pre-wrap;
+      font-size: 15px;
+    }
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 32px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fafaf7;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0 16px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #111;
+      color: #fff;
+      font-size: 14px;
+    }
+    .btn.secondary {
+      background: #fff;
+      color: #111;
+    }
+    .empty-state,
+    .error-state {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 28px;
+      color: var(--muted);
+      box-shadow: var(--shadow);
+    }
+    @media (max-width: 900px) {
+      .tools-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      .wrap { padding: 18px 14px 36px; }
+      .tool-body { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="site-header">
+      <h1 class="site-title" id="site-title">MASATO NASU</h1>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="./index.html">Home</a>
+        <a href="./portfolio.html">Portfolio</a>
+        <a href="./memory.html">Peripheral Memory</a>
+        <a href="./tools.html" aria-current="page">Tools</a>
+        <a href="./about.html">About</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="page-head">
+        <h2 class="page-title">Tools</h2>
+      </section>
+      <section id="tools-root" class="tools-grid" aria-live="polite"></section>
+    </main>
+  </div>
+
+  <script>
+    const root = document.getElementById('tools-root');
+    const siteTitle = document.getElementById('site-title');
+
+    function escapeHtml(value = '') {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function normalizeTags(tags) {
+      if (Array.isArray(tags)) return tags.filter(Boolean);
+      if (typeof tags === 'string') return tags.split(',').map(s => s.trim()).filter(Boolean);
+      return [];
+    }
+
+    function resolveImagePath(path) {
+      if (!path) return '';
+      if (/^(https?:|data:|blob:)/i.test(path)) return path;
+      if (path.startsWith('./') || path.startsWith('../') || path.startsWith('/')) return path;
+      if (path.startsWith('images/')) return './' + path;
+      return './images/' + path.replace(/^\.\//, '');
+    }
+
+    function toolCard(item) {
+      const title = escapeHtml(item.title || 'Untitled');
+      const description = escapeHtml(item.description || '');
+      const appUrl = String(item.appUrl || '').trim();
+      const repoUrl = String(item.repoUrl || '').trim();
+      const tags = normalizeTags(item.tags);
+      const image = resolveImagePath(item.image || '');
+      const media = image
+        ? `<div class="tool-media"><img src="${escapeHtml(image)}" alt="${title}" loading="lazy" decoding="async"></div>`
+        : '<div class="tool-media empty">IMAGE</div>';
+      const tagHtml = tags.length ? `<div class="tags">${tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}</div>` : '';
+      const actionParts = [];
+      if (appUrl) actionParts.push(`<a class="btn" href="${escapeHtml(appUrl)}" target="_blank" rel="noreferrer">Open App</a>`);
+      if (repoUrl) actionParts.push(`<a class="btn secondary" href="${escapeHtml(repoUrl)}" target="_blank" rel="noreferrer">GitHub</a>`);
+      const actionHtml = actionParts.length ? `<div class="actions">${actionParts.join('')}</div>` : '';
+
+      return `
+        <article class="tool-card">
+          ${media}
+          <div class="tool-body">
+            <h3 class="tool-title">${title}</h3>
+            ${description ? `<p class="tool-desc">${description}</p>` : ''}
+            ${tagHtml}
+            ${actionHtml}
+          </div>
+        </article>
+      `;
+    }
+
+    async function loadSiteData() {
+      try {
+        const apiResponse = await fetch('/api/data', { cache: 'no-store' });
+        if (apiResponse.ok) return await apiResponse.json();
+      } catch (error) {
+        console.warn('API data unavailable, trying local fallback.', error);
+      }
+      const fallbackResponse = await fetch('./data.json', { cache: 'no-store' });
+      if (!fallbackResponse.ok) throw new Error('Failed to load fallback data.json');
+      return await fallbackResponse.json();
+    }
+
+    async function boot() {
+      try {
+        const data = await loadSiteData();
+        if (data.site?.name) {
+          siteTitle.textContent = data.site.name;
+          document.title = `${data.site.name} / Tools`;
+        }
+        const tools = Array.isArray(data.tools) ? data.tools : [];
+
+        if (!tools.length) {
+          root.innerHTML = '<section class="empty-state">まだ Tool 項目がありません。Editor で tools を追加して保存してください。</section>';
+          return;
+        }
+
+        root.innerHTML = tools.map(toolCard).join('');
+      } catch (error) {
+        console.error(error);
+        root.innerHTML = '<section class="error-state">Tools の読み込みに失敗しました。データの保存状態を確認してください。</section>';
+      }
+    }
+
+    boot();
+  </script>
+</body>
+</html>
