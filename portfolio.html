@@ -128,6 +128,14 @@
       display: grid;
       place-items: center;
     }
+    .work-media.portrait .portrait-stage {
+      position: absolute;
+      inset: 12px 0;
+      display: grid;
+      place-items: center;
+      z-index: 2;
+      pointer-events: none;
+    }
     .work-media.portrait .color-fill {
       position: absolute;
       inset: 0;
@@ -254,6 +262,9 @@
       .work-meta {
         white-space: normal;
       }
+      .work-media.portrait .portrait-stage {
+        inset: 10px 0;
+      }
       .work-media.portrait .color-fill {
         transform: scale(1.22);
         filter: blur(18px) saturate(1.08);
@@ -331,7 +342,9 @@
         return `
           <div class="work-media ${ratio.cls} portrait">
             <img class="color-fill" src="${escapeHtml(image)}" alt="" aria-hidden="true" loading="lazy" decoding="async">
-            <img class="main-image" src="${escapeHtml(image)}" alt="${title}" loading="lazy" decoding="async">
+            <div class="portrait-stage">
+              <img class="main-image" src="${escapeHtml(image)}" alt="${title}" loading="lazy" decoding="async">
+            </div>
           </div>
         `;
       }
