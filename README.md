@@ -33,3 +33,19 @@
 ## メモ
 - `/editor*` だけ Access で守るので、公開ページには Editor リンクを出していません。
 - KV にまだデータが無い場合、`/api/data` は同梱の `data.json` を返します。
+
+
+## Updated in this ZIP
+
+- Home hero title / intro / card texts are now editable in the editor
+- Portfolio / Peripheral Memory / Tools each have editable intro text
+- About page now has a dedicated intro plus body copy
+- Top page shows section counts and simple highlights
+
+
+## Image search control
+
+Set `noImageIndex: true` on a portfolio item to serve its image through `/api/image` with `X-Robots-Tag: noindex, noimageindex`. Titles `Smott` and `AIRNIUM` are also matched automatically.
+
+
+Set `noSnippet: true` on a portfolio item to wrap its visible text with `data-nosnippet`. Titles `Smott` and `AIRNIUM` are also matched automatically. This helps suppress snippet text, but does not noindex the whole page.

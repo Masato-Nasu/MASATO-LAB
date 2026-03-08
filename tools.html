@@ -1,287 +1,220 @@
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tools</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MASATO NASU – Tools</title>
   <style>
-    :root {
-      --bg: #f5f5f2;
-      --panel: #ffffff;
-      --text: #111111;
-      --muted: #666666;
-      --line: #d8d8d2;
-      --shadow: 0 10px 28px rgba(0,0,0,.06);
-      --radius: 24px;
-      --max: 1180px;
-      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
-    }
-    * { box-sizing: border-box; }
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: var(--bg);
-      color: var(--text);
-    }
-    body {
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
-    }
-    a { color: inherit; text-decoration: none; }
-    img { display: block; max-width: 100%; }
-    .wrap {
-      max-width: var(--max);
-      margin: 0 auto;
-      padding: 22px 20px 56px;
-    }
-    .site-header {
-      display: grid;
-      gap: 10px;
-      margin-bottom: 18px;
-    }
-    .site-title {
-      margin: 0;
-      font-size: clamp(32px, 5vw, 54px);
-      line-height: 0.98;
-      letter-spacing: -0.03em;
-      font-weight: 700;
-    }
-    .nav {
-      display: flex;
-      gap: 18px;
-      flex-wrap: wrap;
-      align-items: center;
-      font-size: 15px;
-      padding-bottom: 10px;
-    }
-    .nav a[aria-current="page"] { font-weight: 700; }
-    .page-head {
-      margin: 20px 0 24px;
-    }
-    .page-title {
-      margin: 0;
-      font-size: clamp(34px, 6vw, 68px);
-      line-height: 0.98;
-      letter-spacing: -0.04em;
-      font-weight: 700;
-    }
-    .tools-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 24px;
-    }
-    .tool-card {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 28px;
-      overflow: hidden;
-      box-shadow: var(--shadow);
-      display: grid;
-    }
-    .tool-media {
-      width: 100%;
-      aspect-ratio: 4 / 3;
-      background: #ecece6;
-      border-bottom: 1px solid var(--line);
-      overflow: hidden;
-    }
-    .tool-media.empty {
-      display: grid;
-      place-items: center;
-      color: var(--muted);
-      font-size: 14px;
-      letter-spacing: .04em;
-    }
-    .tool-media img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center center;
-    }
-    .tool-body {
-      padding: 20px 22px 22px;
-      display: grid;
-      gap: 12px;
-    }
-    .tool-title {
-      margin: 0;
-      font-size: clamp(22px, 3vw, 30px);
-      line-height: 1.08;
-      letter-spacing: -.02em;
-    }
-    .tool-desc {
-      margin: 0;
-      white-space: pre-wrap;
-      font-size: 15px;
-    }
-    .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      min-height: 32px;
-      padding: 0 12px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: #fafaf7;
-      color: var(--muted);
-      font-size: 12px;
-    }
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 4px;
-    }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 44px;
-      padding: 0 16px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: #111;
-      color: #fff;
-      font-size: 14px;
-    }
-    .btn.secondary {
-      background: #fff;
-      color: #111;
-    }
-    .empty-state,
-    .error-state {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      padding: 28px;
-      color: var(--muted);
-      box-shadow: var(--shadow);
-    }
-    @media (max-width: 900px) {
-      .tools-grid { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 720px) {
-      .wrap { padding: 18px 14px 36px; }
-      .tool-body { padding: 16px; }
-    }
+    :root{--bg:#f5f5f3;--text:#111;--muted:#6b7280;--line:#d9d9d4;--card:#ffffff;--radius:24px;}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;color:var(--text);background:var(--bg);}
+    a{color:inherit;text-decoration:none}
+    .wrap{max-width:1360px;margin:0 auto;padding:28px 20px 56px}
+    .site-title{font-size:64px;line-height:.95;font-weight:800;letter-spacing:-.03em;margin:0 0 18px;}
+    .nav{display:flex;gap:22px;flex-wrap:wrap;margin:0 0 26px}
+    .nav a{font-size:18px}
+    .nav a.active{font-weight:700}
+    .eyebrow{display:inline-flex;align-items:center;min-height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:#fafaf7;color:var(--muted);font-size:12px;letter-spacing:.06em;text-transform:uppercase;}
+    .page-title{font-size:72px;line-height:.95;font-weight:800;letter-spacing:-.04em;margin:18px 0 14px;}
+    .page-intro{margin:0 0 26px;color:var(--muted);font-size:18px;max-width:860px;white-space:pre-wrap}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:22px;}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:28px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.02);}
+    .media{position:relative;width:100%;background:#efefec;border-bottom:1px solid var(--line);overflow:hidden;}
+    .media[data-ratio="1:1"]{aspect-ratio:1/1;}
+    .media[data-ratio="4:3"]{aspect-ratio:4/3;}
+    .media[data-ratio="3:4"]{aspect-ratio:3/4;}
+    .media[data-ratio="2:3"]{aspect-ratio:2/3;}
+    .media[data-ratio="16:9"]{aspect-ratio:16/9;}
+    .media:not([data-ratio]){aspect-ratio:4/3;}
+    .media-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.12);filter:blur(18px) saturate(1.04);opacity:.85;}
+    .media-overlay{position:absolute;inset:0;background:rgba(255,255,255,.08);pointer-events:none;}
+    .media-fg-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:18px;}
+    .media-fg{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block;position:relative;z-index:2;border-radius:14px;box-shadow:0 2px 16px rgba(0,0,0,.08);background:transparent;}
+    .content{padding:18px 18px 20px}
+    .tool-title{font-size:22px;line-height:1.15;font-weight:800;margin:0 0 10px;letter-spacing:-.02em;}
+    .desc{font-size:14px;line-height:1.8;color:#222;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;margin:0 0 12px;}
+    .meta{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px;}
+    .tag{font-size:12px;line-height:1;padding:8px 10px;border-radius:999px;border:1px solid var(--line);color:#444;background:#fafaf8;}
+    .links{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:14px;}
+    .empty{color:var(--muted);font-size:15px;border:1px dashed var(--line);border-radius:20px;padding:20px;}
+    .section-toc{background:rgba(255,255,255,.88);border:1px solid var(--line);border-radius:22px;padding:16px 16px 14px;margin:0 0 26px;box-shadow:0 8px 20px rgba(0,0,0,.04);backdrop-filter:blur(8px);}
+    .section-toc-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
+    .section-toc-title{margin:0;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;}
+    .section-toc-top{font-size:13px;color:var(--muted)}
+    .section-toc-list{display:flex;flex-wrap:wrap;gap:10px}
+    .section-toc-link{display:inline-flex;align-items:center;min-height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:14px;line-height:1.2;}
+    .card-jump{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:14px;}
+    @media (max-width:640px){.wrap{padding:18px 12px 40px}.site-title{font-size:40px}.page-title{font-size:56px;margin:10px 0 14px}.nav{gap:14px;margin-bottom:18px}.nav a{font-size:15px}.content{padding:16px}.tool-title{font-size:18px}}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header class="site-header">
-      <h1 class="site-title" id="site-title">MASATO NASU</h1>
-      <nav class="nav" aria-label="Main navigation">
-        <a href="./index.html">Home</a>
-        <a href="./portfolio.html">Portfolio</a>
-        <a href="./memory.html">Peripheral Memory</a>
-        <a href="./tools.html" aria-current="page">Tools</a>
-        <a href="./about.html">About</a>
-      </nav>
-    </header>
+  <div class="wrap" id="top">
+    <h1 class="site-title" id="site-title">MASATO NASU</h1>
+    <nav class="nav" aria-label="Main navigation">
+      <a href="./">Home</a>
+      <a href="./portfolio.html">Portfolio</a>
+      <a href="./memory.html">Peripheral Memory</a>
+      <a href="./tools.html" class="active">Tools</a>
+      <a href="./about.html">About</a>
+    </nav>
 
-    <main>
-      <section class="page-head">
-        <h2 class="page-title">Tools</h2>
-      </section>
-      <section id="tools-root" class="tools-grid" aria-live="polite"></section>
-    </main>
+    <div class="eyebrow" id="tools-eyebrow">Product Design · Computational Experiments · Personal Lab</div>
+    <h2 class="page-title">Tools</h2>
+    <p class="page-intro" id="tools-intro">Apps, prototypes, and utilities built for actual use.</p>
+
+    <section id="toolsToc" class="section-toc" hidden aria-label="Tools 目次">
+      <div class="section-toc-head">
+        <h3 class="section-toc-title">Contents</h3>
+        <a class="section-toc-top" href="#top">Top</a>
+      </div>
+      <div id="toolsTocList" class="section-toc-list"></div>
+    </section>
+
+    <div id="toolsGrid" class="grid"></div>
   </div>
 
   <script>
-    const root = document.getElementById('tools-root');
-    const siteTitle = document.getElementById('site-title');
 
-    function escapeHtml(value = '') {
-      return String(value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+function normalizeSite(site = {}) {
+  return {
+    name: site.name || 'MASATO NASU',
+    tagline: site.tagline || 'Product Design · Computational Experiments · Personal Lab',
+    homeTitle: site.homeTitle || 'Portfolio / Peripheral Memory / Tools',
+    homeIntro: site.homeIntro || String(site.about || '').split('\n').filter(Boolean)[0] || 'Product designer / computational experiments.',
+    homePortfolioText: site.homePortfolioText || 'Selected works, objects, and experiments.',
+    homeMemoryText: site.homeMemoryText || 'Links, notes, and records that stay at the edge of memory.',
+    homeToolsText: site.homeToolsText || 'Apps, prototypes, and utilities built for actual use.',
+    aboutIntro: site.aboutIntro || site.tagline || 'A compact overview of this site.',
+    about: site.about || '',
+    portfolioIntro: site.portfolioIntro || 'Selected works, objects, and experiments.',
+    memoryIntro: site.memoryIntro || 'Links and notes that remain nearby, ready to be revisited.',
+    toolsIntro: site.toolsIntro || 'Apps, prototypes, and utilities built for actual use.'
+  };
+}
+
+function escapeHtml(value = '') {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function normalizeTags(tags) {
+  if (Array.isArray(tags)) return tags.filter(Boolean);
+  if (typeof tags === 'string') return tags.split(',').map(s => s.trim()).filter(Boolean);
+  return [];
+}
+
+async function loadSiteData() {
+  const candidates = ['/api/data', './data.json', 'data.json'];
+  let lastError = null;
+  for (const url of candidates) {
+    try {
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`Failed to load ${url}`);
+      return await res.json();
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError || new Error('Failed to load data');
+}
+
+
+    const toolsToc = document.getElementById('toolsToc');
+    const toolsTocList = document.getElementById('toolsTocList');
+
+    function ratioOf(tool) {
+      return tool.imageRatio || '4:3';
     }
 
-    function normalizeTags(tags) {
-      if (Array.isArray(tags)) return tags.filter(Boolean);
-      if (typeof tags === 'string') return tags.split(',').map(s => s.trim()).filter(Boolean);
-      return [];
+    function slugify(value='') {
+      const base = String(value || '').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9぀-ヿ㐀-鿿]+/g,'-').replace(/^-+|-+$/g,'');
+      return base || 'item';
     }
 
-    function resolveImagePath(path) {
-      if (!path) return '';
-      if (/^(https?:|data:|blob:)/i.test(path)) return path;
-      if (path.startsWith('./') || path.startsWith('../') || path.startsWith('/')) return path;
-      if (path.startsWith('images/')) return './' + path;
-      return './images/' + path.replace(/^\.\//, '');
+    function uniqueIds(items, keyName) {
+      const used = new Map();
+      return items.map((item, index) => {
+        const raw = item?.[keyName] || `item-${index + 1}`;
+        const base = slugify(raw);
+        const count = used.get(base) || 0;
+        used.set(base, count + 1);
+        return count ? `${base}-${count + 1}` : base;
+      });
     }
 
-    function toolCard(item) {
-      const title = escapeHtml(item.title || 'Untitled');
-      const description = escapeHtml(item.description || '');
-      const appUrl = String(item.appUrl || '').trim();
-      const repoUrl = String(item.repoUrl || '').trim();
-      const tags = normalizeTags(item.tags);
-      const image = resolveImagePath(item.image || '');
-      const media = image
-        ? `<div class="tool-media"><img src="${escapeHtml(image)}" alt="${title}" loading="lazy" decoding="async"></div>`
-        : '<div class="tool-media empty">IMAGE</div>';
-      const tagHtml = tags.length ? `<div class="tags">${tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}</div>` : '';
-      const actionParts = [];
-      if (appUrl) actionParts.push(`<a class="btn" href="${escapeHtml(appUrl)}" target="_blank" rel="noreferrer">Open App</a>`);
-      if (repoUrl) actionParts.push(`<a class="btn secondary" href="${escapeHtml(repoUrl)}" target="_blank" rel="noreferrer">GitHub</a>`);
-      const actionHtml = actionParts.length ? `<div class="actions">${actionParts.join('')}</div>` : '';
-
-      return `
-        <article class="tool-card">
-          ${media}
-          <div class="tool-body">
-            <h3 class="tool-title">${title}</h3>
-            ${description ? `<p class="tool-desc">${description}</p>` : ''}
-            ${tagHtml}
-            ${actionHtml}
-          </div>
-        </article>
-      `;
-    }
-
-    async function loadSiteData() {
-      try {
-        const apiResponse = await fetch('/api/data', { cache: 'no-store' });
-        if (apiResponse.ok) return await apiResponse.json();
-      } catch (error) {
-        console.warn('API data unavailable, trying local fallback.', error);
+    function buildToc(items, ids) {
+      if (!items.length) {
+        toolsToc.hidden = true;
+        toolsTocList.innerHTML = '';
+        return;
       }
-      const fallbackResponse = await fetch('./data.json', { cache: 'no-store' });
-      if (!fallbackResponse.ok) throw new Error('Failed to load fallback data.json');
-      return await fallbackResponse.json();
+      toolsToc.hidden = false;
+      toolsTocList.innerHTML = items.map((item, index) => `<a class="section-toc-link" href="#${ids[index]}">${escapeHtml(item.title || `Item ${index + 1}`)}</a>`).join('');
     }
 
-    async function boot() {
+    function toolCard(tool, anchorId) {
+      const title = escapeHtml(tool.title || '');
+      const desc = escapeHtml(tool.description || '');
+      const tags = normalizeTags(tool.tags);
+      const image = tool.image || '';
+      const ratio = ratioOf(tool);
+      const media = image ? `
+        <div class="media" data-ratio="${escapeHtml(ratio)}">
+          <img class="media-bg" src="${escapeHtml(image)}" alt="" loading="lazy" aria-hidden="true">
+          <div class="media-overlay"></div>
+          <div class="media-fg-wrap"><img class="media-fg" src="${escapeHtml(image)}" alt="${title}" loading="lazy"></div>
+        </div>` : '';
+      const tagHtml = tags.map(tag => `<span class="tag">#${escapeHtml(tag)}</span>`).join('');
+      const appLink = tool.appUrl ? `<a class="btn" href="${escapeHtml(tool.appUrl)}" target="_blank" rel="noopener noreferrer">Open app</a>` : '';
+      const repoLink = tool.repoUrl ? `<a class="btn" href="${escapeHtml(tool.repoUrl)}" target="_blank" rel="noopener noreferrer">GitHub</a>` : '';
+      return `
+        <article id="${anchorId}" class="card">
+          ${media}
+          <div class="content">
+            <h3 class="tool-title">${title}</h3>
+            ${desc ? `<p class="desc">${desc}</p>` : ''}
+            ${tagHtml ? `<div class="meta">${tagHtml}</div>` : ''}
+            <div class="links">
+              ${appLink}
+              ${repoLink}
+              <a class="card-jump" href="#top">↑ Contents</a>
+            </div>
+          </div>
+        </article>`;
+    }
+
+    async function main() {
+      const grid = document.getElementById('toolsGrid');
       try {
         const data = await loadSiteData();
-        if (data.site?.name) {
-          siteTitle.textContent = data.site.name;
-          document.title = `${data.site.name} / Tools`;
-        }
-        const tools = Array.isArray(data.tools) ? data.tools : [];
+        const site = normalizeSite(data.site || {});
+        document.getElementById('site-title').textContent = site.name;
+        document.getElementById('tools-eyebrow').textContent = site.tagline;
+        document.getElementById('tools-intro').textContent = site.toolsIntro;
+        document.title = `${site.name} / Tools`;
 
-        if (!tools.length) {
-          root.innerHTML = '<section class="empty-state">まだ Tool 項目がありません。Editor で tools を追加して保存してください。</section>';
+        const items = Array.isArray(data.tools) ? data.tools : [];
+        if (!items.length) {
+          toolsToc.hidden = true;
+          grid.innerHTML = `<div class="empty">まだ Tools 項目がありません。</div>`;
           return;
         }
-
-        root.innerHTML = tools.map(toolCard).join('');
+        const ids = uniqueIds(items, 'title');
+        buildToc(items, ids);
+        grid.innerHTML = items.map((tool, index) => toolCard(tool, ids[index])).join('');
       } catch (error) {
         console.error(error);
-        root.innerHTML = '<section class="error-state">Tools の読み込みに失敗しました。データの保存状態を確認してください。</section>';
+        toolsToc.hidden = true;
+        grid.innerHTML = `<div class="empty">Tools の読み込みに失敗しました。/api/data または data.json を確認してください。</div>`;
       }
     }
 
-    boot();
+    main();
   </script>
 </body>
 </html>

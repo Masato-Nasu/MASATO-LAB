@@ -1,430 +1,272 @@
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Portfolio</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MASATO NASU – Portfolio</title>
   <style>
-    :root {
-      --bg: #f5f5f2;
-      --panel: #ffffff;
-      --text: #111111;
-      --muted: #666666;
-      --line: #d8d8d2;
-      --shadow: 0 10px 28px rgba(0,0,0,.06);
-      --radius: 28px;
-      --max: 1180px;
-      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
-    }
-
-    * { box-sizing: border-box; }
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: var(--bg);
-      color: var(--text);
-    }
-    body {
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
-    }
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-    img {
-      display: block;
-      max-width: 100%;
-    }
-
-    .wrap {
-      max-width: var(--max);
-      margin: 0 auto;
-      padding: 22px 20px 56px;
-    }
-
-    .site-header {
-      display: grid;
-      gap: 10px;
-      margin-bottom: 18px;
-    }
-    .site-title {
-      margin: 0;
-      font-size: clamp(32px, 5vw, 54px);
-      line-height: 0.98;
-      letter-spacing: -0.03em;
-      font-weight: 700;
-    }
-
-    .nav {
-      display: flex;
-      gap: 18px;
-      flex-wrap: wrap;
-      align-items: center;
-      font-size: 15px;
-      padding-bottom: 10px;
-    }
-    .nav a[aria-current="page"] {
-      font-weight: 700;
-    }
-
-    .page-head {
-      margin: 20px 0 24px;
-    }
-    .page-title {
-      margin: 0;
-      font-size: clamp(34px, 6vw, 68px);
-      line-height: 0.98;
-      letter-spacing: -0.04em;
-      font-weight: 700;
-    }
-
-    .works {
-      display: grid;
-      gap: 28px;
-    }
-
-    .work-card {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      overflow: hidden;
-      box-shadow: var(--shadow);
-    }
-
-    .work-media {
-      width: 100%;
-      position: relative;
-      overflow: hidden;
-      border-bottom: 1px solid var(--line);
-      background: #ecece6;
-      isolation: isolate;
-    }
-    .work-media.ratio-43 { aspect-ratio: 4 / 3; }
-    .work-media.ratio-11 { aspect-ratio: 1 / 1; }
-    .work-media.ratio-34 { aspect-ratio: 3 / 4; }
-    .work-media.ratio-23 { aspect-ratio: 2 / 3; }
-
-    .work-media.empty {
-      display: grid;
-      place-items: center;
-      color: var(--muted);
-      font-size: 14px;
-      letter-spacing: .04em;
-      min-height: 320px;
-    }
-
-    .work-media .main-image {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center center;
-      position: relative;
-      z-index: 2;
-    }
-
-    .work-media.portrait {
-      display: grid;
-      place-items: center;
-      aspect-ratio: 4 / 3 !important;
-    }
-    .work-media.portrait .portrait-stage {
-      position: absolute;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      z-index: 2;
-      pointer-events: none;
-    }
-    .work-media.portrait .color-fill {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center center;
-      transform: scale(1.14);
-      filter: blur(24px) saturate(1.08);
-      opacity: 0.96;
-      z-index: 0;
-    }
-    .work-media.portrait::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.10));
-      z-index: 1;
-      pointer-events: none;
-    }
-    .work-media.portrait .main-image {
-      width: auto;
-      height: calc(100% - 28px);
-      max-width: none;
-      max-height: calc(100% - 28px);
-      object-fit: contain;
-      object-position: center center;
-      box-shadow: 0 10px 26px rgba(0,0,0,.12);
-    }
-
-    .work-body {
-      padding: 20px 22px 22px;
-      display: grid;
-      gap: 12px;
-    }
-
-    .work-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: start;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-    .work-title {
-      margin: 0;
-      font-size: clamp(22px, 3vw, 34px);
-      line-height: 1.08;
-      letter-spacing: -.02em;
-    }
-    .work-meta {
-      color: var(--muted);
-      font-size: 14px;
-      white-space: nowrap;
-      padding-top: 4px;
-    }
-    .work-role {
-      font-size: 15px;
-      color: var(--text);
-      opacity: .82;
-    }
-    .work-desc {
-      margin: 0;
-      white-space: pre-wrap;
-      color: #222;
-      font-size: 15px;
-    }
-
-    .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      min-height: 32px;
-      padding: 0 12px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: #fafaf7;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 4px;
-    }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 44px;
-      padding: 0 16px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: #111;
-      color: #fff;
-      font-size: 14px;
-    }
-
-    .empty-state,
-    .error-state {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      padding: 28px;
-      color: var(--muted);
-      box-shadow: var(--shadow);
-    }
-
-    @media (max-width: 720px) {
-      .wrap {
-        padding: 18px 14px 36px;
-      }
-      .work-body {
-        padding: 16px;
-      }
-      .work-media.empty {
-        min-height: 240px;
-      }
-      .work-meta {
-        white-space: normal;
-      }
-      .work-media.portrait .main-image {
-        height: calc(100% - 20px);
-        max-height: calc(100% - 20px);
-      }
-      .work-media.portrait .color-fill {
-        transform: scale(1.18);
-        filter: blur(18px) saturate(1.08);
-      }
-    }
+    :root{ --bg:#f5f5f3; --text:#111; --muted:#6b7280; --line:#d9d9d4; --card:#ffffff; }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif; color:var(--text); background:var(--bg); }
+    a{color:inherit;text-decoration:none}
+    .wrap{max-width:1480px;margin:0 auto;padding:28px 20px 56px}
+    .site-title{font-size:64px;line-height:.95;font-weight:800;letter-spacing:-.03em;margin:0 0 18px;}
+    .nav{display:flex;gap:22px;flex-wrap:wrap;margin:0 0 26px}
+    .nav a{font-size:18px}
+    .nav a.active{font-weight:700}
+    .eyebrow{display:inline-flex;align-items:center;min-height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:#fafaf7;color:var(--muted);font-size:12px;letter-spacing:.06em;text-transform:uppercase;}
+    .page-title{font-size:72px;line-height:.95;font-weight:800;letter-spacing:-.04em;margin:18px 0 14px;}
+    .page-intro{margin:0 0 26px;color:var(--muted);font-size:18px;max-width:860px;white-space:pre-wrap}
+    .section-toc{background:rgba(255,255,255,.88);border:1px solid var(--line);border-radius:22px;padding:16px 16px 14px;margin:0 0 26px;box-shadow:0 8px 20px rgba(0,0,0,.04);backdrop-filter:blur(8px);}
+    .section-toc[hidden]{display:none !important}
+    .section-toc-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
+    .section-toc-title{margin:0;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;}
+    .section-toc-top{font-size:13px;color:var(--muted)}
+    .section-toc-list{display:flex;flex-wrap:wrap;gap:10px}
+    .section-toc-link{display:inline-flex;align-items:center;min-height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:14px;line-height:1.2;}
+    .works{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:26px}
+    .work-card{background:var(--card);border:1px solid var(--line);border-radius:28px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.02);}
+    .media{position:relative;width:100%;background:#f2f2ef;border-bottom:1px solid var(--line);overflow:hidden;display:flex;align-items:center;justify-content:center;padding:10px;min-height:420px;}
+    .media[data-ratio="1:1"]{aspect-ratio:1/1;}
+    .media[data-ratio="4:3"]{aspect-ratio:4/3;}
+    .media[data-ratio="3:4"]{aspect-ratio:3/4;}
+    .media[data-ratio="2:3"]{aspect-ratio:2/3;}
+    .media[data-ratio="16:9"]{aspect-ratio:16/9;}
+    .media:not([data-ratio]){aspect-ratio:4/3;}
+    .media img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block;border-radius:14px;background:transparent;}
+    .content{padding:22px 22px 24px}
+    .head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:12px;}
+    .title{font-size:30px;line-height:1.08;font-weight:800;margin:0;letter-spacing:-.03em;}
+    .role{margin-top:6px;color:var(--muted);font-size:15px;line-height:1.5;}
+    .year{flex:0 0 auto;font-size:14px;color:var(--muted);border:1px solid var(--line);background:#fafaf8;border-radius:999px;padding:8px 12px;white-space:nowrap;}
+    .desc{font-size:17px;line-height:1.9;color:#222;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;margin:0 0 14px;}
+    .tags{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px;}
+    .tag{font-size:12px;line-height:1;padding:8px 10px;border-radius:999px;border:1px solid var(--line);color:#444;background:#fafaf8;}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .btn,.jump{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:14px;}
+    .empty,.error{color:var(--muted);font-size:16px;border:1px dashed var(--line);border-radius:20px;padding:20px;background:#fff;}
+    @media (max-width:900px){ .works{grid-template-columns:1fr} .media{min-height:360px} }
+    @media (max-width:640px){ .wrap{padding:18px 12px 40px} .site-title{font-size:40px} .page-title{font-size:56px;margin:10px 0 14px} .nav{gap:14px;margin-bottom:18px} .nav a{font-size:15px} .content{padding:18px} .title{font-size:24px} .desc{font-size:16px;line-height:1.82} .head{flex-direction:column} .year{align-self:flex-start} .media{min-height:300px;padding:8px} }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header class="site-header">
-      <h1 class="site-title" id="site-title">MASATO NASU</h1>
-      <nav class="nav" aria-label="Main navigation">
-        <a href="./index.html">Home</a>
-        <a href="./portfolio.html" aria-current="page">Portfolio</a>
-        <a href="./memory.html">Peripheral Memory</a>
-        <a href="./tools.html">Tools</a>
-        <a href="./about.html">About</a>
-      </nav>
-    </header>
+  <div class="wrap" id="top">
+    <h1 class="site-title" id="site-title">MASATO NASU</h1>
+    <nav class="nav" aria-label="Main navigation">
+      <a href="./">Home</a>
+      <a href="./portfolio.html" class="active">Portfolio</a>
+      <a href="./memory.html">Peripheral Memory</a>
+      <a href="./tools.html">Tools</a>
+      <a href="./about.html">About</a>
+    </nav>
 
-    <main>
-      <section class="page-head">
-        <h2 class="page-title">Portfolio</h2>
-      </section>
-      <section id="portfolio-root" class="works" aria-live="polite"></section>
-    </main>
+    <div class="eyebrow" id="portfolio-eyebrow">Product Design · Computational Experiments · Personal Lab</div>
+    <h2 class="page-title">Portfolio</h2>
+    <p class="page-intro" id="portfolio-intro">Selected works, objects, and experiments.</p>
+
+    <section id="toc" class="section-toc" hidden aria-label="Portfolio 目次">
+      <div class="section-toc-head">
+        <h3 class="section-toc-title">Contents</h3>
+        <a class="section-toc-top" href="#top">Top</a>
+      </div>
+      <div id="tocList" class="section-toc-list"></div>
+    </section>
+
+    <section id="works" class="works" aria-live="polite"></section>
   </div>
 
   <script>
-    const root = document.getElementById('portfolio-root');
-    const dataEndpoints = ['./api/data', '/api/data', './data.json'];
 
-    function escapeHtml(value = '') {
-      return String(value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+function normalizeSite(site = {}) {
+  return {
+    name: site.name || 'MASATO NASU',
+    tagline: site.tagline || 'Product Design · Computational Experiments · Personal Lab',
+    homeTitle: site.homeTitle || 'Portfolio / Peripheral Memory / Tools',
+    homeIntro: site.homeIntro || String(site.about || '').split('\n').filter(Boolean)[0] || 'Product designer / computational experiments.',
+    homePortfolioText: site.homePortfolioText || 'Selected works, objects, and experiments.',
+    homeMemoryText: site.homeMemoryText || 'Links, notes, and records that stay at the edge of memory.',
+    homeToolsText: site.homeToolsText || 'Apps, prototypes, and utilities built for actual use.',
+    aboutIntro: site.aboutIntro || site.tagline || 'A compact overview of this site.',
+    about: site.about || '',
+    portfolioIntro: site.portfolioIntro || 'Selected works, objects, and experiments.',
+    memoryIntro: site.memoryIntro || 'Links and notes that remain nearby, ready to be revisited.',
+    toolsIntro: site.toolsIntro || 'Apps, prototypes, and utilities built for actual use.'
+  };
+}
+
+function escapeHtml(value = '') {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function normalizeTags(tags) {
+  if (Array.isArray(tags)) return tags.filter(Boolean);
+  if (typeof tags === 'string') return tags.split(',').map(s => s.trim()).filter(Boolean);
+  return [];
+}
+
+async function loadSiteData() {
+  const candidates = ['/api/data', './data.json', 'data.json'];
+  let lastError = null;
+  for (const url of candidates) {
+    try {
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`Failed to load ${url}`);
+      return await res.json();
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError || new Error('Failed to load data');
+}
+
+
+    function ratioOf(item) {
+      const r = String(item.imageRatio || '').trim();
+      return ['1:1','4:3','3:4','2:3','16:9'].includes(r) ? r : '4:3';
     }
 
-    function normalizeTags(tags) {
-      if (Array.isArray(tags)) return tags.filter(Boolean);
-      if (typeof tags === 'string') return tags.split(',').map(s => s.trim()).filter(Boolean);
-      return [];
+    function resolveImagePath(path='') {
+      const p = String(path || '').trim();
+      if (!p) return '';
+      if (/^(https?:|data:|blob:)/i.test(p)) return p;
+      if (p.startsWith('/') || p.startsWith('./') || p.startsWith('../')) return p;
+      return './' + p;
     }
 
-    function resolveImagePath(path) {
-      if (!path) return '';
-      if (/^(https?:|data:|blob:)/i.test(path)) return path;
-      if (path.startsWith('./') || path.startsWith('../') || path.startsWith('/')) return path;
-      if (path.startsWith('images/')) return './' + path;
-      return './images/' + path.replace(/^\.\//, '');
+    function normalizeKey(value='') {
+      return String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
     }
 
-    function ratioInfo(value) {
-      const normalized = String(value || '4:3').trim();
-      switch (normalized) {
-        case '1:1': return { cls: 'ratio-11', portrait: false };
-        case '3:4': return { cls: 'ratio-34', portrait: true };
-        case '2:3': return { cls: 'ratio-23', portrait: true };
-        default: return { cls: 'ratio-43', portrait: false };
+    function shouldNoImageIndex(item = {}) {
+      if (item && item.noImageIndex === true) return true;
+      const key = normalizeKey(item && item.title ? item.title : '');
+      return key === 'smott' || key === 'airnium';
+    }
+
+    function shouldNoSnippet(item = {}) {
+      if (item && item.noSnippet === true) return true;
+      const key = normalizeKey(item && item.title ? item.title : '');
+      return key === 'smott' || key === 'airnium';
+    }
+
+    function buildProtectedImageUrl(path='') {
+      const resolved = resolveImagePath(path);
+      if (!resolved || /^(data:|blob:)/i.test(resolved)) return resolved;
+      try {
+        const absolute = new URL(resolved, window.location.href);
+        if (absolute.origin !== window.location.origin) return resolved;
+      } catch {
+        return resolved;
       }
+      return `/api/image?src=${encodeURIComponent(resolved)}`;
     }
 
-    function mediaMarkup(item, title) {
-      const image = resolveImagePath(item.image || '');
-      const ratio = ratioInfo(item.imageRatio);
-
-      if (!image) {
-        return `<div class="work-media ${ratio.cls} empty">IMAGE</div>`;
-      }
-
-      if (ratio.portrait) {
-        return `
-          <div class="work-media ${ratio.cls} portrait">
-            <img class="color-fill" src="${escapeHtml(image)}" alt="" aria-hidden="true" loading="lazy" decoding="async">
-            <div class="portrait-stage">
-              <img class="main-image" src="${escapeHtml(image)}" alt="${title}" loading="lazy" decoding="async">
-            </div>
-          </div>
-        `;
-      }
-
-      return `
-        <div class="work-media ${ratio.cls}">
-          <img class="main-image" src="${escapeHtml(image)}" alt="${title}" loading="lazy" decoding="async">
-        </div>
-      `;
+    function slugify(value='') {
+      const base = String(value || '').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9぀-ヿ㐀-鿿]+/g,'-').replace(/^-+|-+$/g,'');
+      return base || 'item';
     }
 
-    function workCard(item) {
+    function uniqueIds(items, keyName) {
+      const used = new Map();
+      return items.map((item, index) => {
+        const raw = shouldNoSnippet(item) ? `work-${index + 1}` : (item?.[keyName] || `item-${index + 1}`);
+        const base = slugify(raw);
+        const count = used.get(base) || 0;
+        used.set(base, count + 1);
+        return count ? `${base}-${count + 1}` : base;
+      });
+    }
+
+    function buildToc(items, ids) {
+      const tocRoot = document.getElementById('toc');
+      const tocList = document.getElementById('tocList');
+      if (!items.length) {
+        tocRoot.hidden = true;
+        tocList.innerHTML = '';
+        return;
+      }
+      tocRoot.hidden = false;
+      tocList.innerHTML = items.map((item, index) => {
+        const label = escapeHtml(item.title || `Item ${index + 1}`);
+        return `<a class="section-toc-link" href="#${ids[index]}">${shouldNoSnippet(item) ? `<span data-nosnippet>${label}</span>` : label}</a>`;
+      }).join('');
+    }
+
+    function workCard(item, anchorId) {
       const title = escapeHtml(item.title || 'Untitled');
       const year = escapeHtml(item.year || '');
       const role = escapeHtml(item.role || '');
-      const description = escapeHtml(item.description || '');
+      const desc = escapeHtml(item.description || '');
+      const noImageIndex = shouldNoImageIndex(item);
+      const noSnippet = shouldNoSnippet(item);
+      const image = noImageIndex ? buildProtectedImageUrl(item.image || '') : resolveImagePath(item.image || '');
+      const ratio = ratioOf(item);
       const link = item.link ? String(item.link) : '';
       const tags = normalizeTags(item.tags);
-      const media = mediaMarkup(item, title);
-      const tagHtml = tags.length
-        ? `<div class="tags">${tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}</div>`
-        : '';
-      const actionHtml = link
-        ? `<div class="actions"><a class="btn" href="${escapeHtml(link)}" target="_blank" rel="noreferrer">Open Link</a></div>`
-        : '';
+
+      const imageAlt = noSnippet ? 'Portfolio image' : title;
+      const media = image ? `<div class="media" data-ratio="${escapeHtml(ratio)}"><img src="${escapeHtml(image)}" alt="${escapeHtml(imageAlt)}" loading="lazy"></div>` : `<div class="media" data-ratio="${escapeHtml(ratio)}"></div>`;
+      const tagParts = [...tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`)];
+      if (noImageIndex) tagParts.push(`<span class="tag">Image noindex</span>`);
+      const tagHtml = tagParts.length ? `<div class="tags">${tagParts.join('')}</div>` : '';
+      const openLink = link ? `<a class="btn" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">Open Link</a>` : '';
+      const textBlock = `
+            <div class="head">
+              <div>
+                <h3 class="title">${title}</h3>
+                ${role ? `<div class="role">${role}</div>` : ''}
+              </div>
+              ${year ? `<div class="year">${year}</div>` : ''}
+            </div>
+            ${desc ? `<p class="desc">${desc}</p>` : ''}
+            ${tagHtml}`;
 
       return `
-        <article class="work-card">
+        <article id="${anchorId}" class="work-card">
           ${media}
-          <div class="work-body">
-            <div class="work-head">
-              <div>
-                <h2 class="work-title">${title}</h2>
-                ${role ? `<div class="work-role">${role}</div>` : ''}
-              </div>
-              ${year ? `<div class="work-meta">${year}</div>` : ''}
+          <div class="content">
+            ${noSnippet ? `<div data-nosnippet>${textBlock}</div>` : textBlock}
+            <div class="actions">
+              ${openLink}
+              <a class="jump" href="#top">↑ Contents</a>
             </div>
-            ${description ? `<p class="work-desc">${description}</p>` : ''}
-            ${tagHtml}
-            ${actionHtml}
           </div>
-        </article>
-      `;
+        </article>`;
     }
 
-    async function fetchData() {
-      let lastError = null;
-      for (const url of dataEndpoints) {
-        try {
-          const response = await fetch(url, { cache: 'no-store' });
-          if (!response.ok) throw new Error(`Failed to load ${url}`);
-          return await response.json();
-        } catch (error) {
-          lastError = error;
-        }
-      }
-      throw lastError || new Error('Failed to load site data');
-    }
-
-    async function boot() {
+    async function main() {
+      const worksRoot = document.getElementById('works');
       try {
-        const data = await fetchData();
-        if (data?.site?.name) document.getElementById('site-title').textContent = data.site.name;
-        const works = Array.isArray(data.portfolio) ? data.portfolio : [];
+        const data = await loadSiteData();
+        const site = normalizeSite(data.site || {});
+        document.getElementById('site-title').textContent = site.name;
+        document.getElementById('portfolio-eyebrow').textContent = site.tagline;
+        document.getElementById('portfolio-intro').textContent = site.portfolioIntro;
+        document.title = `${site.name} / Portfolio`;
 
-        if (!works.length) {
-          root.innerHTML = '<section class="empty-state">まだポートフォリオ項目がありません。</section>';
+        const items = Array.isArray(data.portfolio) ? data.portfolio : [];
+        if (!items.length) {
+          document.getElementById('toc').hidden = true;
+          worksRoot.innerHTML = `<div class="empty">まだポートフォリオ項目がありません。</div>`;
           return;
         }
-
-        root.innerHTML = works.map(workCard).join('');
+        const ids = uniqueIds(items, 'title');
+        buildToc(items, ids);
+        worksRoot.innerHTML = items.map((item, index) => workCard(item, ids[index])).join('');
       } catch (error) {
         console.error(error);
-        root.innerHTML = '<section class="error-state">ポートフォリオの読み込みに失敗しました。KV または data.json の内容を確認してください。</section>';
+        document.getElementById('toc').hidden = true;
+        worksRoot.innerHTML = `<div class="error">ポートフォリオの読み込みに失敗しました。/api/data または data.json の内容を確認してください。</div>`;
       }
     }
 
-    boot();
+    main();
   </script>
 </body>
 </html>
