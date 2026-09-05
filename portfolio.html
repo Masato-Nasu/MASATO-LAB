@@ -10,6 +10,7 @@
     html{scroll-behavior:smooth}
     body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif; color:var(--text); background:var(--bg); }
     a{color:inherit;text-decoration:none}
+    button{font:inherit}
     .wrap{max-width:1480px;margin:0 auto;padding:28px 20px 56px}
     .site-title{font-size:64px;line-height:.95;font-weight:800;letter-spacing:-.03em;margin:0 0 18px;}
     .nav{display:flex;gap:22px;flex-wrap:wrap;margin:0 0 26px}
@@ -40,7 +41,10 @@
     .title{font-size:30px;line-height:1.08;font-weight:800;margin:0;letter-spacing:-.03em;}
     .role{margin-top:6px;color:var(--muted);font-size:15px;line-height:1.5;}
     .year{flex:0 0 auto;font-size:14px;color:var(--muted);border:1px solid var(--line);background:#fafaf8;border-radius:999px;padding:8px 12px;white-space:nowrap;}
-    .desc{font-size:17px;line-height:1.9;color:#222;margin:0 0 14px;white-space:normal;word-break:break-word;overflow-wrap:anywhere;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;}
+    .desc{font-size:17px;line-height:1.9;color:#222;margin:0 0 10px;white-space:normal;word-break:break-word;overflow-wrap:anywhere;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;}
+    .desc.expanded{display:block;overflow:visible;-webkit-line-clamp:unset;line-clamp:unset;white-space:pre-wrap;}
+    .read-more{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:0;border:0;background:transparent;color:#555;font-size:12px;font-weight:700;letter-spacing:.04em;cursor:pointer;margin:0 0 14px;text-decoration:underline;text-underline-offset:4px;}
+    .read-more[hidden]{display:none !important}
     .tags{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px;}
     .tag{font-size:12px;line-height:1;padding:8px 10px;border-radius:999px;border:1px solid var(--line);color:#444;background:#fafaf8;}
     .actions{display:flex;gap:10px;flex-wrap:wrap}
@@ -125,7 +129,6 @@ async function loadSiteData() {
   throw lastError || new Error('Failed to load data');
 }
 
-
     function ratioOf(item) {
       const r = String(item.imageRatio || '').trim();
       return ['1:1','4:3','3:4','2:3','16:9'].includes(r) ? r : '4:3';
@@ -209,6 +212,7 @@ async function loadSiteData() {
       const ratio = ratioOf(item);
       const link = item.link ? String(item.link) : '';
       const tags = normalizeTags(item.tags);
+      const descId = `desc-${anchorId}`;
 
       const imageAlt = noSnippet ? 'Portfolio image' : title;
       const media = image ? `<div class="media" data-ratio="${escapeHtml(ratio)}"><img src="${escapeHtml(image)}" alt="${escapeHtml(imageAlt)}" loading="lazy"></div>` : `<div class="media" data-ratio="${escapeHtml(ratio)}"></div>`;
@@ -224,7 +228,7 @@ async function loadSiteData() {
               </div>
               ${year ? `<div class="year">${year}</div>` : ''}
             </div>
-            ${desc ? `<p class="desc">${desc}</p>` : ''}
+            ${desc ? `<p class="desc" id="${descId}">${desc}</p><button class="read-more" type="button" data-desc="${descId}" aria-expanded="false">READ MORE</button>` : ''}
             ${tagHtml}`;
 
       return `
@@ -238,6 +242,21 @@ async function loadSiteData() {
             </div>
           </div>
         </article>`;
+    }
+
+    function initReadMore(){
+      document.querySelectorAll('.read-more').forEach(button=>{
+        const desc=document.getElementById(button.dataset.desc||'');
+        if(!desc) return;
+        requestAnimationFrame(()=>{
+          if(desc.scrollHeight<=desc.clientHeight+2) button.hidden=true;
+        });
+        button.addEventListener('click',()=>{
+          const expanded=desc.classList.toggle('expanded');
+          button.textContent=expanded?'SHOW LESS':'READ MORE';
+          button.setAttribute('aria-expanded',expanded?'true':'false');
+        });
+      });
     }
 
     async function main() {
@@ -259,6 +278,7 @@ async function loadSiteData() {
         const ids = uniqueIds(items, 'title');
         buildToc(items, ids);
         worksRoot.innerHTML = items.map((item, index) => workCard(item, ids[index])).join('');
+        initReadMore();
       } catch (error) {
         console.error(error);
         document.getElementById('toc').hidden = true;
