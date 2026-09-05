@@ -1,14 +1,13 @@
 (()=>{
   const CATEGORY_OPTIONS=[
     ['', 'AUTO（自動判定）'],
-    ['ai-language','AI・LANGUAGE'],
-    ['camera-image','CAMERA・IMAGE'],
-    ['audio-music','AUDIO・MUSIC'],
-    ['productivity','PRODUCTIVITY'],
-    ['security-cipher','SECURITY・CIPHER'],
-    ['visual-generative','VISUAL・GENERATIVE'],
-    ['memory-lifelog','MEMORY・LIFELOG'],
-    ['experiment','EXPERIMENT']
+    ['language-learning','LANGUAGE・LEARNING'],
+    ['photo-camera','PHOTO・CAMERA'],
+    ['music-sound','MUSIC・SOUND'],
+    ['life-utility','LIFE・UTILITY'],
+    ['cipher-security','CIPHER・SECURITY'],
+    ['visual-math','VISUAL・MATH'],
+    ['art-concept','ART・CONCEPT']
   ];
   const PLATFORM_OPTIONS=[
     ['', 'AUTO（自動判定）'],
@@ -45,7 +44,7 @@
     const note=document.createElement('div');
     note.className='preview-note';
     note.id='tools-taxonomy-note';
-    note.textContent='AUTO の場合はタイトル・説明・タグから自動分類します。必要な作品だけ手動指定できます。';
+    note.textContent='Category は「使っている技術」ではなく「何をするアプリか」で選びます。AUTO は新規項目の補助用です。';
     row.insertAdjacentElement('afterend',note);
   }
 
@@ -64,6 +63,7 @@
     if(!category||!platform) return;
     const tool=selectedTool();
     category.value=tool?.category||tool?.genre||'';
+    if(![...category.options].some(opt=>opt.value===category.value)) category.value='';
     const rawPlatform=tool?.platform;
     if(Array.isArray(rawPlatform)){
       const lower=rawPlatform.map(v=>String(v).toLowerCase());
