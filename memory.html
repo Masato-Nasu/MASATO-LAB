@@ -5,163 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Peripheral Memory</title>
   <style>
-    :root { --bg:#f5f5f2; --panel:#ffffff; --text:#111111; --muted:#666666; --line:#d8d8d2; --shadow:0 10px 28px rgba(0,0,0,.06); --radius:24px; --max:1180px; font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Helvetica,Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif; }
-    * { box-sizing:border-box; }
-    html, body { margin:0; padding:0; background:var(--bg); color:var(--text); }
-    body { line-height:1.6; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
-    a { color:inherit; text-decoration:none; }
-    .wrap { max-width:var(--max); margin:0 auto; padding:22px 20px 56px; }
-    .site-header { display:grid; gap:10px; margin-bottom:18px; }
-    .site-title { margin:0; font-size:clamp(32px,5vw,54px); line-height:.98; letter-spacing:-.03em; font-weight:700; }
-    .nav { display:flex; gap:18px; flex-wrap:wrap; align-items:center; font-size:15px; padding-bottom:10px; }
-    .nav a[aria-current="page"] { font-weight:700; }
-    .page-head { margin:20px 0 24px; display:grid; gap:12px; }
-    .eyebrow { display:inline-flex; align-items:center; width:fit-content; min-height:34px; padding:0 12px; border-radius:999px; border:1px solid var(--line); background:#fafaf7; color:var(--muted); font-size:12px; letter-spacing:.06em; text-transform:uppercase; }
-    .page-title { margin:0; font-size:clamp(34px,6vw,68px); line-height:.98; letter-spacing:-.04em; font-weight:700; }
-    .page-intro { margin:0; color:var(--muted); font-size:18px; max-width:820px; white-space:pre-wrap; }
-    .memories { display:grid; gap:22px; }
-    .memory-card { background:var(--panel); border:1px solid var(--line); border-radius:28px; box-shadow:var(--shadow); padding:22px; display:grid; gap:12px; }
-    .memory-title { margin:0; font-size:clamp(22px,3vw,30px); line-height:1.08; letter-spacing:-.02em; }
-    .memory-head { display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; align-items:flex-start; }
-    .memory-meta { color:var(--muted); font-size:14px; }
-    .memory-url { color:#3d4f6d; font-size:14px; word-break:break-all; }
-    .memory-comment { margin:0; white-space:pre-wrap; font-size:15px; }
-    .tags { display:flex; flex-wrap:wrap; gap:8px; }
-    .tag { display:inline-flex; align-items:center; min-height:32px; padding:0 12px; border-radius:999px; border:1px solid var(--line); background:#fafaf7; color:var(--muted); font-size:12px; }
-    .btn { display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:0 16px; border-radius:999px; border:1px solid var(--line); background:#111; color:#fff; font-size:14px; width:fit-content; }
-    .empty-state, .error-state { background:var(--panel); border:1px solid var(--line); border-radius:24px; padding:28px; color:var(--muted); box-shadow:var(--shadow); }
-    @media (max-width: 720px) { .wrap { padding:18px 14px 36px; } .memory-card { padding:18px; } }
+    :root{--bg:#f5f5f2;--panel:#fff;--text:#111;--muted:#666;--line:#d8d8d2;--shadow:0 8px 24px rgba(0,0,0,.045);--max:1180px;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Helvetica,Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif}
+    *{box-sizing:border-box}html,body{margin:0;padding:0;background:var(--bg);color:var(--text)}body{line-height:1.6;-webkit-font-smoothing:antialiased}a{color:inherit;text-decoration:none}.wrap{max-width:var(--max);margin:0 auto;padding:22px 20px 56px}.site-header{display:grid;gap:10px;margin-bottom:18px}.site-title{margin:0;font-size:clamp(32px,5vw,54px);line-height:.98;letter-spacing:-.03em;font-weight:700}.nav{display:flex;gap:18px;flex-wrap:wrap;align-items:center;font-size:15px;padding-bottom:10px}.nav a[aria-current="page"]{font-weight:700}.page-head{margin:20px 0 26px;display:grid;gap:12px}.eyebrow{display:inline-flex;align-items:center;width:fit-content;min-height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:#fafaf7;color:var(--muted);font-size:12px;letter-spacing:.06em;text-transform:uppercase}.page-title{margin:0;font-size:clamp(34px,6vw,68px);line-height:.98;letter-spacing:-.04em;font-weight:700}.page-intro{margin:0;color:var(--muted);font-size:18px;max-width:820px;white-space:pre-wrap}.memories{display:grid;gap:22px}.memory-card{background:var(--panel);border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);overflow:hidden;display:grid;grid-template-columns:minmax(280px,42%) minmax(0,1fr)}.memory-media{position:relative;background:#ecece8;border-right:1px solid var(--line);overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:320px}.memory-media[data-ratio="1:1"]{aspect-ratio:1/1}.memory-media[data-ratio="4:3"]{aspect-ratio:4/3}.memory-media[data-ratio="3:4"]{aspect-ratio:3/4}.memory-media[data-ratio="2:3"]{aspect-ratio:2/3}.memory-media[data-ratio="16:9"]{aspect-ratio:16/9}.memory-media img{width:100%;height:100%;display:block;transform-origin:center center}.memory-content{padding:22px;display:flex;flex-direction:column;gap:12px}.memory-title{margin:0;font-size:clamp(22px,3vw,30px);line-height:1.08;letter-spacing:-.02em}.memory-head{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start}.memory-meta{color:var(--muted);font-size:14px}.memory-url{color:#3d4f6d;font-size:13px;word-break:break-all}.memory-comment{margin:0;white-space:pre-wrap;font-size:15px;line-height:1.8}.tags{display:flex;flex-wrap:wrap;gap:8px}.tag{display:inline-flex;align-items:center;min-height:30px;padding:0 11px;border-radius:999px;border:1px solid var(--line);background:#fafaf7;color:var(--muted);font-size:11px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:2px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:#111;color:#fff;font-size:13px}.btn.secondary{background:#fff;color:#111}.memory-card.no-image{display:block}.memory-card.no-image .memory-content{padding:24px}.empty-state,.error-state{background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:28px;color:var(--muted);box-shadow:var(--shadow)}
+    @media(max-width:760px){.wrap{padding:18px 14px 36px}.memory-card{grid-template-columns:1fr}.memory-media{border-right:0;border-bottom:1px solid var(--line);min-height:260px}.memory-content{padding:18px}}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header class="site-header">
-      <h1 class="site-title" id="site-title">MASATO NASU</h1>
-      <nav class="nav" aria-label="Main navigation">
-        <a href="./index.html">Home</a>
-        <a href="./portfolio.html">Portfolio</a>
-        <a href="./memory.html" aria-current="page">Peripheral Memory</a>
-        <a href="./tools.html">Tools</a>
-        <a href="./about.html">About</a>
-      </nav>
-    </header>
-
-    <main>
-      <section class="page-head">
-        <div class="eyebrow" id="memory-eyebrow">Product Design · Computational Experiments · Personal Lab</div>
-        <h2 class="page-title">Peripheral Memory</h2>
-        <p class="page-intro" id="memory-intro">Links and notes that remain nearby, ready to be revisited.</p>
-      </section>
-      <section id="memory-root" class="memories" aria-live="polite"></section>
-    </main>
-  </div>
-
-  <script>
-
-function normalizeSite(site = {}) {
-  return {
-    name: site.name || 'MASATO NASU',
-    tagline: site.tagline || 'Product Design · Computational Experiments · Personal Lab',
-    homeTitle: site.homeTitle || 'Portfolio / Peripheral Memory / Tools',
-    homeIntro: site.homeIntro || String(site.about || '').split('\n').filter(Boolean)[0] || 'Product designer / computational experiments.',
-    homePortfolioText: site.homePortfolioText || 'Selected works, objects, and experiments.',
-    homeMemoryText: site.homeMemoryText || 'Links, notes, and records that stay at the edge of memory.',
-    homeToolsText: site.homeToolsText || 'Apps, prototypes, and utilities built for actual use.',
-    aboutIntro: site.aboutIntro || site.tagline || 'A compact overview of this site.',
-    about: site.about || '',
-    portfolioIntro: site.portfolioIntro || 'Selected works, objects, and experiments.',
-    memoryIntro: site.memoryIntro || 'Links and notes that remain nearby, ready to be revisited.',
-    toolsIntro: site.toolsIntro || 'Apps, prototypes, and utilities built for actual use.'
-  };
-}
-
-function escapeHtml(value = '') {
-  return String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function normalizeTags(tags) {
-  if (Array.isArray(tags)) return tags.filter(Boolean);
-  if (typeof tags === 'string') return tags.split(',').map(s => s.trim()).filter(Boolean);
-  return [];
-}
-
-async function loadSiteData() {
-  const candidates = ['/api/data', './data.json', 'data.json'];
-  let lastError = null;
-  for (const url of candidates) {
-    try {
-      const res = await fetch(url, { cache: 'no-store' });
-      if (!res.ok) throw new Error(`Failed to load ${url}`);
-      return await res.json();
-    } catch (error) {
-      lastError = error;
-    }
-  }
-  throw lastError || new Error('Failed to load data');
-}
-
-
-    function safeUrl(url = '') {
-      const value = String(url || '').trim();
-      if (!value) return '';
-      return /^(https?:)?\/\//i.test(value) ? value : value;
-    }
-
-    function memoryCard(item) {
-      const title = escapeHtml(item.title || 'Untitled');
-      const comment = escapeHtml(item.comment || '');
-      const date = escapeHtml(item.date || '');
-      const url = safeUrl(item.url || '');
-      const urlText = escapeHtml((item.url || '').replace(/^https?:\/\//i, ''));
-      const tags = normalizeTags(item.tags);
-      const tagHtml = tags.length ? `<div class="tags">${tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}</div>` : '';
-      const actionHtml = url ? `<a class="btn" href="${escapeHtml(url)}" target="_blank" rel="noreferrer">Open Link</a>` : '';
-
-      return `
-        <article class="memory-card">
-          <div class="memory-head">
-            <div>
-              <h3 class="memory-title">${title}</h3>
-              ${url ? `<div class="memory-url">${urlText}</div>` : ''}
-            </div>
-            ${date ? `<div class="memory-meta">${date}</div>` : ''}
-          </div>
-          ${comment ? `<p class="memory-comment">${comment}</p>` : ''}
-          ${tagHtml}
-          ${actionHtml}
-        </article>
-      `;
-    }
-
-    async function boot() {
-      const root = document.getElementById('memory-root');
-      try {
-        const data = await loadSiteData();
-        const site = normalizeSite(data.site || {});
-        document.getElementById('site-title').textContent = site.name;
-        document.getElementById('memory-eyebrow').textContent = site.tagline;
-        document.getElementById('memory-intro').textContent = site.memoryIntro;
-        document.title = `${site.name} / Peripheral Memory`;
-
-        const memories = Array.isArray(data.memory) ? data.memory : [];
-        if (!memories.length) {
-          root.innerHTML = '<section class="empty-state">まだ Peripheral Memory 項目がありません。Editor で memory を追加して保存してください。</section>';
-          return;
-        }
-
-        root.innerHTML = memories.map(memoryCard).join('');
-      } catch (error) {
-        console.error(error);
-        root.innerHTML = '<section class="error-state">Peripheral Memory の読み込みに失敗しました。データの保存状態を確認してください。</section>';
-      }
-    }
-
-    boot();
-  </script>
+<div class="wrap">
+  <header class="site-header"><h1 class="site-title" id="site-title">MASATO NASU</h1><nav class="nav" aria-label="Main navigation"><a href="./index.html">Home</a><a href="./portfolio.html">Portfolio</a><a href="./memory.html" aria-current="page">Peripheral Memory</a><a href="./tools.html">Tools</a><a href="./about.html">About</a></nav></header>
+  <main><section class="page-head"><div class="eyebrow" id="memory-eyebrow">Product Design · Computational Experiments · Personal Lab</div><h2 class="page-title">Peripheral Memory</h2><p class="page-intro" id="memory-intro">Links and notes that remain nearby, ready to be revisited.</p></section><section id="memory-root" class="memories" aria-live="polite"></section></main>
+</div>
+<script>
+function normalizeSite(site={}){return{name:site.name||'MASATO NASU',tagline:site.tagline||'Product Design · Computational Experiments · Personal Lab',memoryIntro:site.memoryIntro||'Links and notes that remain nearby, ready to be revisited.'};}
+function escapeHtml(value=''){return String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function normalizeTags(tags){if(Array.isArray(tags))return tags.filter(Boolean);if(typeof tags==='string')return tags.split(',').map(s=>s.trim()).filter(Boolean);return[];}
+async function loadSiteData(){const candidates=['/api/data','./data.json','data.json'];let lastError=null;for(const url of candidates){try{const res=await fetch(url,{cache:'no-store'});if(!res.ok)throw new Error('Failed to load '+url);return await res.json();}catch(error){lastError=error;}}throw lastError||new Error('Failed to load data');}
+function normalizeUrls(item){const raw=Array.isArray(item?.urls)&&item.urls.length?item.urls:[item?.url||''];return raw.map(v=>String(v||'').trim()).filter(Boolean).slice(0,3);}
+function ratioOf(item){const r=String(item.imageRatio||'').trim();return['1:1','4:3','3:4','2:3','16:9'].includes(r)?r:'4:3';}
+function clampNumber(value,fallback,min,max){const n=Number(value);return Number.isFinite(n)?Math.max(min,Math.min(max,n)):fallback;}
+function memoryCard(item){const title=escapeHtml(item.title||'Untitled');const comment=escapeHtml(item.comment||'');const date=escapeHtml(item.date||'');const urls=normalizeUrls(item);const image=String(item.image||'').trim();const ratio=ratioOf(item);const fit=item.imageFit==='cover'?'cover':'contain';const scale=clampNumber(item.listImageScale,100,60,140)/100;const x=clampNumber(item.listImageX,0,-25,25);const y=clampNumber(item.listImageY,0,-25,25);const tags=normalizeTags(item.tags);const tagsHtml=tags.length?`<div class="tags">${tags.map(tag=>`<span class="tag">${escapeHtml(tag)}</span>`).join('')}</div>`:'';const linkList=urls.length?`<div>${urls.map(url=>`<div class="memory-url">${escapeHtml(url.replace(/^https?:\/\//i,''))}</div>`).join('')}</div>`:'';const actions=urls.length?`<div class="actions">${urls.map((url,i)=>`<a class="btn${i?' secondary':''}" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${i===0?'OPEN LINK':`LINK ${i+1}`}</a>`).join('')}</div>`:'';const media=image?`<div class="memory-media" data-ratio="${escapeHtml(ratio)}"><img src="${escapeHtml(image)}" alt="${title}" loading="lazy" style="object-fit:${fit};transform:translate(${x}%,${y}%) scale(${scale})"></div>`:'';return`<article class="memory-card${image?'':' no-image'}">${media}<div class="memory-content"><div class="memory-head"><div><h3 class="memory-title">${title}</h3>${linkList}</div>${date?`<div class="memory-meta">${date}</div>`:''}</div>${comment?`<p class="memory-comment">${comment}</p>`:''}${tagsHtml}${actions}</div></article>`;}
+async function boot(){const root=document.getElementById('memory-root');try{const data=await loadSiteData();const site=normalizeSite(data.site||{});document.getElementById('site-title').textContent=site.name;document.getElementById('memory-eyebrow').textContent=site.tagline;document.getElementById('memory-intro').textContent=site.memoryIntro;document.title=`${site.name} / Peripheral Memory`;const memories=Array.isArray(data.memory)?data.memory:[];if(!memories.length){root.innerHTML='<section class="empty-state">まだ Peripheral Memory 項目がありません。</section>';return;}root.innerHTML=memories.map(memoryCard).join('');}catch(error){console.error(error);root.innerHTML='<section class="error-state">Peripheral Memory の読み込みに失敗しました。</section>';}}
+boot();
+</script>
 </body>
 </html>
