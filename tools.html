@@ -100,7 +100,7 @@
       </div>
       <div class="filter-row">
         <div class="filter-label">Platform</div>
-        <div class="filters" id="platformFilters" role="group" aria-label="Filter tools by platform">
+        <div class="filters" id="platformFilters" role="group" aria-label="Filter tools by platform. Multiple selections are allowed.">
           <button class="filter active" type="button" data-platform="all">ALL</button>
           <button class="filter" type="button" data-platform="web">WEB・PWA</button>
           <button class="filter" type="button" data-platform="android">ANDROID</button>
@@ -324,7 +324,11 @@
     }
 
     function genreMatch(tool,genre){return genre==='all'||inferCategory(tool)===genre;}
-    function platformMatch(tool,platform){return platform==='all'||inferPlatforms(tool).includes(platform);}
+    function platformMatch(tool,platforms){
+      if(!platforms.size) return true;
+      const toolPlatforms=inferPlatforms(tool);
+      return [...platforms].every(platform=>toolPlatforms.includes(platform));
+    }
 
     function mediaHtml(tool,title){
       const image=tool.image||'';
@@ -361,7 +365,7 @@
       </article>`;
     }
 
-    const state={items:[],genre:'all',platform:'all',query:''};
+    const state={items:[],genre:'all',platforms:new Set(),query:''};
     const grid=document.getElementById('toolsGrid');
     const searchInput=document.getElementById('searchInput');
     const clearSearch=document.getElementById('clearSearch');
@@ -371,19 +375,26 @@
     const genreButtons=[...document.querySelectorAll('[data-genre]')];
     const platformButtons=[...document.querySelectorAll('[data-platform]')];
 
+    function syncPlatformButtons(){
+      platformButtons.forEach(btn=>{
+        const platform=btn.dataset.platform||'all';
+        btn.classList.toggle('active',platform==='all'?state.platforms.size===0:state.platforms.has(platform));
+      });
+    }
+
     function render(){
       const query=state.query.trim().toLowerCase();
-      const visible=state.items.filter(tool=>genreMatch(tool,state.genre)&&platformMatch(tool,state.platform)&&(!query||searchableText(tool).includes(query)));
+      const visible=state.items.filter(tool=>genreMatch(tool,state.genre)&&platformMatch(tool,state.platforms)&&(!query||searchableText(tool).includes(query)));
       grid.innerHTML=visible.length?visible.map(toolCard).join(''):'<div class="empty">該当するToolがありません。検索語またはフィルターを変更してください。</div>';
       resultCount.textContent=`${visible.length} / ${state.items.length} tools`;
       projectCount.textContent=`${state.items.length} PROJECTS`;
-      resetBtn.hidden=state.genre==='all'&&state.platform==='all'&&!query;
+      resetBtn.hidden=state.genre==='all'&&state.platforms.size===0&&!query;
     }
 
     function reset(){
-      state.genre='all';state.platform='all';state.query='';searchInput.value='';
+      state.genre='all';state.platforms.clear();state.query='';searchInput.value='';
       genreButtons.forEach(btn=>btn.classList.toggle('active',btn.dataset.genre==='all'));
-      platformButtons.forEach(btn=>btn.classList.toggle('active',btn.dataset.platform==='all'));
+      syncPlatformButtons();
       render();
     }
 
@@ -396,8 +407,15 @@
       render();
     }));
     platformButtons.forEach(btn=>btn.addEventListener('click',()=>{
-      state.platform=btn.dataset.platform||'all';
-      platformButtons.forEach(b=>b.classList.toggle('active',b===btn));
+      const platform=btn.dataset.platform||'all';
+      if(platform==='all'){
+        state.platforms.clear();
+      }else if(state.platforms.has(platform)){
+        state.platforms.delete(platform);
+      }else{
+        state.platforms.add(platform);
+      }
+      syncPlatformButtons();
       render();
     }));
 
