@@ -50,7 +50,7 @@
     .meta{display:flex;align-items:center;gap:6px;min-height:26px;margin:0 0 13px;overflow:hidden}
     .tag{flex:0 1 auto;max-width:106px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10px;line-height:1;padding:7px 8px;border-radius:999px;border:1px solid var(--line);color:#555;background:var(--soft)}
     .tag.more{flex:0 0 auto;color:var(--muted)}
-    .links{display:flex;align-items:center;gap:8px;min-height:36px}
+    .links{display:flex;align-items:center;gap:8px;min-height:36px;flex-wrap:wrap}
     .btn{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12px;font-weight:650;transition:background .16s ease,border-color .16s ease}
     .btn:hover{border-color:#aaa}.btn.primary{background:#111;color:#fff;border-color:#111}.btn.primary:hover{background:#292929}
     .empty{grid-column:1/-1;color:var(--muted);font-size:15px;border:1px dashed var(--line);border-radius:20px;padding:28px;text-align:center;background:rgba(255,255,255,.48)}
@@ -126,6 +126,20 @@
 
     function titleKey(value=''){
       return String(value).normalize('NFKC').toLowerCase().replace(/[‐‑‒–—―]/g,'-').replace(/\s+/g,' ').trim();
+    }
+
+    function slugify(value=''){
+      return String(value||'').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\u3040-\u30ff\u3400-\u9fff]+/g,'-').replace(/^-+|-+$/g,'')||'item';
+    }
+
+    function buildSlugs(items){
+      const used=new Map();
+      return items.map((item,index)=>{
+        const base=slugify(item.slug||item.title||`item-${index+1}`);
+        const count=used.get(base)||0;
+        used.set(base,count+1);
+        return count?`${base}-${count+1}`:base;
+      });
     }
 
     const CURATED_CATEGORY=new Map(Object.entries({
@@ -310,6 +324,8 @@
       const shownTags=tags.slice(0,3);
       const extra=Math.max(0,tags.length-shownTags.length);
       const tagHtml=shownTags.map(tag=>`<span class="tag">#${escapeHtml(tag)}</span>`).join('')+(extra?`<span class="tag more">+${extra}</span>`:'');
+      const detailSlug=tool.__detailSlug||slugify(tool.title||'item');
+      const detailLink=`<a class="btn" href="/tools/${encodeURIComponent(detailSlug)}">READ MORE</a>`;
       const appLink=tool.appUrl?`<a class="btn primary" href="${escapeHtml(tool.appUrl)}" target="_blank" rel="noopener noreferrer">OPEN</a>`:'';
       const repoLink=tool.repoUrl?`<a class="btn" href="${escapeHtml(tool.repoUrl)}" target="_blank" rel="noopener noreferrer">GITHUB</a>`:'';
       return `<article class="card">
@@ -319,7 +335,7 @@
           <h3 class="tool-title">${title}</h3>
           ${desc?`<p class="desc">${desc}</p>`:'<p class="desc"></p>'}
           <div class="meta">${tagHtml}</div>
-          <div class="links">${appLink}${repoLink}</div>
+          <div class="links">${detailLink}${appLink}${repoLink}</div>
         </div>
       </article>`;
     }
@@ -372,7 +388,9 @@
         document.getElementById('tools-eyebrow').textContent=site.tagline;
         document.getElementById('tools-intro').textContent=site.toolsIntro;
         document.title=`${site.name} / Tools`;
-        state.items=Array.isArray(data.tools)?data.tools:[];
+        const items=Array.isArray(data.tools)?data.tools:[];
+        const slugs=buildSlugs(items);
+        state.items=items.map((tool,index)=>({...tool,__detailSlug:slugs[index]}));
         render();
       }catch(error){
         console.error(error);
