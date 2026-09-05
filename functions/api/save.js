@@ -21,7 +21,25 @@ export async function onRequestPost(context) {
     if (!context.env || !context.env.SITE_DATA) {
       return json({ ok: false, error: "missing_kv_binding" }, 500);
     }
+
     const body = await context.request.json();
+
+    // Older editor builds do not expose site.profileImage.
+    // Preserve the existing About portrait instead of deleting it on save.
+    if (!body.site || typeof body.site !== "object") body.site = {};
+    if (!String(body.site.profileImage || "").trim()) {
+      try {
+        const currentRaw = await context.env.SITE_DATA.get("site-data");
+        if (currentRaw) {
+          const current = JSON.parse(currentRaw);
+          const existing = String(current?.site?.profileImage || "").trim();
+          if (existing) body.site.profileImage = existing;
+        }
+      } catch (mergeError) {
+        console.error("profileImage preserve failed", mergeError);
+      }
+    }
+
     await context.env.SITE_DATA.put("site-data", JSON.stringify(body));
     return json({ ok: true });
   } catch (error) {
