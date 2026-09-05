@@ -67,6 +67,17 @@ const DEFAULT_DATA = {
   ]
 };
 
+function applyFixedClassifications(data) {
+  if (!data || !Array.isArray(data.tools)) return data;
+  for (const tool of data.tools) {
+    const title = String(tool?.title || '').normalize('NFKC').toLowerCase();
+    if (title.includes('oulipo')) {
+      tool.category = 'art-concept';
+    }
+  }
+  return data;
+}
+
 export async function onRequestGet(context) {
   const headers = {
     "content-type": "application/json; charset=utf-8",
@@ -75,10 +86,13 @@ export async function onRequestGet(context) {
 
   try {
     const raw = await context.env.SITE_DATA.get("site-data");
-    if (raw) return new Response(raw, { headers });
+    if (raw) {
+      const data = applyFixedClassifications(JSON.parse(raw));
+      return new Response(JSON.stringify(data), { headers });
+    }
   } catch (error) {
     console.error("KV read failed", error);
   }
 
-  return new Response(JSON.stringify(DEFAULT_DATA), { headers });
+  return new Response(JSON.stringify(applyFixedClassifications(DEFAULT_DATA)), { headers });
 }
