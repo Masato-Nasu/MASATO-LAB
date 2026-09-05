@@ -94,6 +94,7 @@
           <button class="filter" type="button" data-genre="life-utility">LIFE・UTILITY</button>
           <button class="filter" type="button" data-genre="cipher-security">CIPHER・SECURITY</button>
           <button class="filter" type="button" data-genre="visual-math">VISUAL・MATH</button>
+          <button class="filter" type="button" data-genre="6seg">6SEG</button>
           <button class="filter" type="button" data-genre="art-concept">ART・CONCEPT</button>
         </div>
       </div>
@@ -121,6 +122,7 @@
       'life-utility':'LIFE・UTILITY',
       'cipher-security':'CIPHER・SECURITY',
       'visual-math':'VISUAL・MATH',
+      '6seg':'6SEG',
       'art-concept':'ART・CONCEPT'
     };
 
@@ -156,10 +158,10 @@
       'sana language':'language-learning',
       'day-grid':'visual-math',
       'fog glass':'photo-camera',
-      'glyph-cypher-6seg-revised':'cipher-security',
-      'glyph-cypher-6seg':'cipher-security',
-      '6 seg script':'visual-math',
-      '6 seg clock':'visual-math',
+      'glyph-cypher-6seg-revised':'6seg',
+      'glyph-cypher-6seg':'6seg',
+      '6 seg script':'6seg',
+      '6 seg clock':'6seg',
       'done':'life-utility',
       'kakei-bo3':'life-utility',
       '言い間違い採取帳':'life-utility',
@@ -185,7 +187,7 @@
       'reaction-diffusion (rd)':'visual-math',
       'mandelbrot explorer (ultradeep)':'visual-math',
       'ephemeralcypher / エフェメラルサイファー':'cipher-security',
-      'oulipo〈s+7〉':'language-learning',
+      'oulipo〈s+7〉':'art-concept',
       '100% horoscope':'life-utility',
       'siren terminal':'life-utility',
       'photo translator / 画像タグ翻訳 pwa':'language-learning',
@@ -260,15 +262,17 @@
         life:'life-utility',utility:'life-utility',productivity:'life-utility','life-utility':'life-utility',
         cipher:'cipher-security',security:'cipher-security','cipher-security':'cipher-security','security-cipher':'cipher-security',
         visual:'visual-math',math:'visual-math','visual-math':'visual-math','visual-generative':'visual-math',
+        '6seg':'6seg','6-seg':'6seg','sixseg':'6seg',
         art:'art-concept',concept:'art-concept',experiment:'art-concept','art-concept':'art-concept','memory-lifelog':'life-utility'
       };
       return aliases[v]||'';
     }
 
     function inferCategory(tool){
+      const curated=CURATED_CATEGORY.get(titleKey(tool.title));
+      if(curated==='6seg') return curated;
       const explicit=normalizeCategory(tool.category||tool.genre||tagValue(tool,['category','genre']));
       if(explicit) return explicit;
-      const curated=CURATED_CATEGORY.get(titleKey(tool.title));
       if(curated) return curated;
       const text=searchableText(tool);
       if(/(translator|translation|language|英語|英単語|単語|学習|study|reading|lyrics|言語|文章|文字|辞書|俳句)/i.test(text)) return 'language-learning';
