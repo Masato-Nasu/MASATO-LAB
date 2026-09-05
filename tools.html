@@ -104,6 +104,7 @@
           <button class="filter active" type="button" data-platform="all">ALL</button>
           <button class="filter" type="button" data-platform="web">WEB・PWA</button>
           <button class="filter" type="button" data-platform="android">ANDROID</button>
+          <button class="filter" type="button" data-platform="ai">AI</button>
         </div>
       </div>
     </section>
@@ -207,6 +208,18 @@
       'ephemeralcypher / エフェメラルサイファー':['android']
     }).map(([k,v])=>[titleKey(k),v]));
 
+    const CURATED_AI=new Set([
+      '付喪神の独り言',
+      'DREAM ANALYZER',
+      'REALTIME TRANSLATOR',
+      'KANON',
+      'YEAR 4000 O-PARTS',
+      'AIのひとりごと',
+      'HYPER-HAIKU',
+      'CODE 904',
+      'Photo Translator / 画像タグ翻訳 PWA'
+    ].map(titleKey));
+
     function normalizeSite(site={}){
       return{
         name:site.name||'MASATO NASU',
@@ -284,25 +297,30 @@
     }
 
     function normalizePlatforms(value){
-      const raw=Array.isArray(value)?value:String(value||'').split(/[,/|]/);
+      const raw=Array.isArray(value)?value:String(value||'').split(/[,/|+]/);
       const set=new Set();
       raw.map(v=>String(v).trim().toLowerCase()).forEach(v=>{
         if(!v) return;
         if(v==='both'||v==='all'){set.add('web');set.add('android');return;}
         if(/android|apk|play/.test(v)) set.add('android');
         if(/web|pwa|browser/.test(v)) set.add('web');
+        if(v==='ai'||/openai|gpt|claude|gemini|llm/.test(v)) set.add('ai');
       });
       return [...set];
     }
 
     function inferPlatforms(tool){
       const explicit=normalizePlatforms(tool.platform||tool.platforms||tagValue(tool,['platform']));
-      if(explicit.length) return explicit;
       const curated=CURATED_PLATFORM.get(titleKey(tool.title));
-      if(curated) return curated;
+      const set=new Set(explicit.length?explicit:(curated||[]));
+      if(!explicit.length&&!curated){
+        const text=searchableText(tool);
+        if(/(android app|androidアプリ|\bapk\b|google play|play store)/i.test(text)) set.add('android');
+        else set.add('web');
+      }
       const text=searchableText(tool);
-      if(/(android app|androidアプリ|\bapk\b|google play|play store)/i.test(text)) return ['android'];
-      return ['web'];
+      if(CURATED_AI.has(titleKey(tool.title))||/(^|[^a-z])ai([^a-z]|$)|gpt|openai|claude|gemini|llm|whisper|生成ai|人工知能/i.test(text)) set.add('ai');
+      return [...set];
     }
 
     function genreMatch(tool,genre){return genre==='all'||inferCategory(tool)===genre;}
