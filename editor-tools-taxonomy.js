@@ -7,13 +7,18 @@
     ['life-utility','LIFE・UTILITY'],
     ['cipher-security','CIPHER・SECURITY'],
     ['visual-math','VISUAL・MATH'],
+    ['6seg','6SEG'],
     ['art-concept','ART・CONCEPT']
   ];
   const PLATFORM_OPTIONS=[
     ['', 'AUTO（自動判定）'],
     ['web','WEB・PWA'],
     ['android','ANDROID'],
-    ['both','WEB・PWA + ANDROID']
+    ['ai','AI'],
+    ['web,ai','WEB・PWA + AI'],
+    ['android,ai','ANDROID + AI'],
+    ['both','WEB・PWA + ANDROID'],
+    ['web,android,ai','WEB・PWA + ANDROID + AI']
   ];
 
   function optionHtml(options){
@@ -44,7 +49,7 @@
     const note=document.createElement('div');
     note.className='preview-note';
     note.id='tools-taxonomy-note';
-    note.textContent='Category は「使っている技術」ではなく「何をするアプリか」で選びます。AUTO は新規項目の補助用です。';
+    note.textContent='Category は「何をするアプリか」で選びます。Platform の AI は WEB・PWA / ANDROID と併用できます。AUTO は新規項目の補助用です。';
     row.insertAdjacentElement('afterend',note);
   }
 
@@ -56,6 +61,26 @@
     }catch(_){return null;}
   }
 
+  function platformChoice(rawPlatform){
+    const set=new Set();
+    const raw=Array.isArray(rawPlatform)?rawPlatform:String(rawPlatform||'').split(/[,/|+]/);
+    raw.map(v=>String(v).trim().toLowerCase()).forEach(v=>{
+      if(!v) return;
+      if(v==='both'||v==='all'){set.add('web');set.add('android');return;}
+      if(/android|apk|play/.test(v)) set.add('android');
+      if(/web|pwa|browser/.test(v)) set.add('web');
+      if(v==='ai'||/openai|gpt|claude|gemini|llm/.test(v)) set.add('ai');
+    });
+    if(set.has('web')&&set.has('android')&&set.has('ai')) return 'web,android,ai';
+    if(set.has('web')&&set.has('android')) return 'both';
+    if(set.has('web')&&set.has('ai')) return 'web,ai';
+    if(set.has('android')&&set.has('ai')) return 'android,ai';
+    if(set.has('web')) return 'web';
+    if(set.has('android')) return 'android';
+    if(set.has('ai')) return 'ai';
+    return '';
+  }
+
   function syncControls(){
     ensureControls();
     const category=document.getElementById('tools-category');
@@ -64,14 +89,8 @@
     const tool=selectedTool();
     category.value=tool?.category||tool?.genre||'';
     if(![...category.options].some(opt=>opt.value===category.value)) category.value='';
-    const rawPlatform=tool?.platform;
-    if(Array.isArray(rawPlatform)){
-      const lower=rawPlatform.map(v=>String(v).toLowerCase());
-      platform.value=lower.includes('web')&&lower.includes('android')?'both':lower.includes('android')?'android':lower.includes('web')?'web':'';
-    }else{
-      platform.value=String(rawPlatform||'').toLowerCase();
-      if(!['','web','android','both'].includes(platform.value)) platform.value='';
-    }
+    platform.value=platformChoice(tool?.platform);
+    if(![...platform.options].some(opt=>opt.value===platform.value)) platform.value='';
   }
 
   ensureControls();
