@@ -155,7 +155,7 @@
       'time will tell':'life-utility',
       'toktok':'life-utility',
       '7d camera':'photo-camera',
-      'sana language':'language-learning',
+      'sana language':'6seg',
       'day-grid':'visual-math',
       'fog glass':'photo-camera',
       'glyph-cypher-6seg-revised':'6seg',
@@ -237,7 +237,6 @@
       }
       throw lastError||new Error('Failed to load data');
     }
-
     function searchableText(tool){
       return [tool.title,tool.description,tool.category,tool.genre,tool.platform,...normalizeTags(tool.tags),tool.appUrl,tool.repoUrl].filter(Boolean).join(' ').toLowerCase();
     }
