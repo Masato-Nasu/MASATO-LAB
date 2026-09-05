@@ -20,7 +20,6 @@
     .page-title{font-size:72px;line-height:.95;font-weight:800;letter-spacing:-.04em;margin:0 0 14px}
     .page-intro{margin:0;color:var(--muted);font-size:18px;max-width:760px;white-space:pre-wrap}
     .project-count{font-size:14px;color:var(--muted);white-space:nowrap;padding-bottom:4px}
-
     .toolbar{display:grid;gap:12px;padding:14px;margin:0 0 13px;background:rgba(255,255,255,.82);border:1px solid var(--line);border-radius:22px;box-shadow:0 6px 20px rgba(0,0,0,.035);backdrop-filter:blur(10px)}
     .search-wrap{position:relative;max-width:520px}
     .search{width:100%;min-height:46px;border:1px solid var(--line);border-radius:15px;background:#fff;color:var(--text);outline:none;padding:0 44px 0 15px;transition:border-color .18s ease,box-shadow .18s ease}
@@ -35,7 +34,6 @@
     .status-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 2px 14px}
     .result-count{font-size:13px;color:var(--muted)}
     .reset{border:0;background:transparent;color:var(--muted);font-size:13px;cursor:pointer;padding:4px 0;text-decoration:underline;text-underline-offset:3px}.reset[hidden]{display:none}
-
     .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
     .card{min-width:0;background:var(--card);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.02);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
     .card:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(0,0,0,.065);border-color:#c7c7c1}
@@ -56,7 +54,6 @@
     .btn{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12px;font-weight:650;transition:background .16s ease,border-color .16s ease}
     .btn:hover{border-color:#aaa}.btn.primary{background:#111;color:#fff;border-color:#111}.btn.primary:hover{background:#292929}
     .empty{grid-column:1/-1;color:var(--muted);font-size:15px;border:1px dashed var(--line);border-radius:20px;padding:28px;text-align:center;background:rgba(255,255,255,.48)}
-
     @media(max-width:1100px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
     @media(max-width:820px){.page-head{grid-template-columns:1fr;gap:8px}.project-count{padding:0}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media(max-width:640px){.filter-row{grid-template-columns:1fr;gap:4px}.filter-label{padding-top:2px}.filters{margin-right:-10px;padding-right:10px}}
@@ -74,7 +71,6 @@
       <a href="./tools.html" class="active">Tools</a>
       <a href="./about.html">About</a>
     </nav>
-
     <div class="eyebrow" id="tools-eyebrow">Product Design · Computational Experiments · Personal Lab</div>
     <div class="page-head">
       <div>
@@ -83,28 +79,24 @@
       </div>
       <div class="project-count" id="projectCount"></div>
     </div>
-
     <section class="toolbar" aria-label="Tools search and filters">
       <div class="search-wrap">
         <input id="searchInput" class="search" type="search" placeholder="Search tools…" autocomplete="off" aria-label="Search tools">
         <button id="clearSearch" class="search-clear" type="button" aria-label="Clear search" title="Clear">×</button>
       </div>
-
       <div class="filter-row">
         <div class="filter-label">Genre</div>
         <div class="filters" id="genreFilters" role="group" aria-label="Filter tools by genre">
           <button class="filter active" type="button" data-genre="all">ALL</button>
-          <button class="filter" type="button" data-genre="ai-language">AI・LANGUAGE</button>
-          <button class="filter" type="button" data-genre="camera-image">CAMERA・IMAGE</button>
-          <button class="filter" type="button" data-genre="audio-music">AUDIO・MUSIC</button>
-          <button class="filter" type="button" data-genre="productivity">PRODUCTIVITY</button>
-          <button class="filter" type="button" data-genre="security-cipher">SECURITY・CIPHER</button>
-          <button class="filter" type="button" data-genre="visual-generative">VISUAL・GENERATIVE</button>
-          <button class="filter" type="button" data-genre="memory-lifelog">MEMORY・LIFELOG</button>
-          <button class="filter" type="button" data-genre="experiment">EXPERIMENT</button>
+          <button class="filter" type="button" data-genre="language-learning">LANGUAGE・LEARNING</button>
+          <button class="filter" type="button" data-genre="photo-camera">PHOTO・CAMERA</button>
+          <button class="filter" type="button" data-genre="music-sound">MUSIC・SOUND</button>
+          <button class="filter" type="button" data-genre="life-utility">LIFE・UTILITY</button>
+          <button class="filter" type="button" data-genre="cipher-security">CIPHER・SECURITY</button>
+          <button class="filter" type="button" data-genre="visual-math">VISUAL・MATH</button>
+          <button class="filter" type="button" data-genre="art-concept">ART・CONCEPT</button>
         </div>
       </div>
-
       <div class="filter-row">
         <div class="filter-label">Platform</div>
         <div class="filters" id="platformFilters" role="group" aria-label="Filter tools by platform">
@@ -114,26 +106,90 @@
         </div>
       </div>
     </section>
-
     <div class="status-row">
       <div class="result-count" id="resultCount"></div>
       <button id="resetBtn" class="reset" type="button" hidden>Reset filters</button>
     </div>
-
     <div id="toolsGrid" class="grid"></div>
   </div>
 
   <script>
     const CATEGORY_LABELS={
-      'ai-language':'AI・LANGUAGE',
-      'camera-image':'CAMERA・IMAGE',
-      'audio-music':'AUDIO・MUSIC',
-      'productivity':'PRODUCTIVITY',
-      'security-cipher':'SECURITY・CIPHER',
-      'visual-generative':'VISUAL・GENERATIVE',
-      'memory-lifelog':'MEMORY・LIFELOG',
-      'experiment':'EXPERIMENT'
+      'language-learning':'LANGUAGE・LEARNING',
+      'photo-camera':'PHOTO・CAMERA',
+      'music-sound':'MUSIC・SOUND',
+      'life-utility':'LIFE・UTILITY',
+      'cipher-security':'CIPHER・SECURITY',
+      'visual-math':'VISUAL・MATH',
+      'art-concept':'ART・CONCEPT'
     };
+
+    function titleKey(value=''){
+      return String(value).normalize('NFKC').toLowerCase().replace(/[‐‑‒–—―]/g,'-').replace(/\s+/g,' ').trim();
+    }
+
+    const CURATED_CATEGORY=new Map(Object.entries({
+      '付喪神の独り言':'art-concept',
+      'dream analyzer':'life-utility',
+      'realtime translator':'language-learning',
+      'trash to track':'music-sound',
+      'data bottle':'visual-math',
+      'kanon':'language-learning',
+      '5 words':'language-learning',
+      'time will tell':'life-utility',
+      'toktok':'life-utility',
+      '7d camera':'photo-camera',
+      'sana language':'language-learning',
+      'day-grid':'visual-math',
+      'fog glass':'photo-camera',
+      'glyph-cypher-6seg-revised':'cipher-security',
+      'glyph-cypher-6seg':'cipher-security',
+      '6 seg script':'visual-math',
+      '6 seg clock':'visual-math',
+      'done':'life-utility',
+      'kakei-bo3':'life-utility',
+      '言い間違い採取帳':'life-utility',
+      'year 4000 o-parts':'art-concept',
+      'dem hidden cypher':'cipher-security',
+      'turing cypher 2':'cipher-security',
+      'turing-cypher':'cipher-security',
+      'kakei-bo2':'life-utility',
+      'inner-animal':'life-utility',
+      'kirei filter air':'photo-camera',
+      'aiのひとりごと':'art-concept',
+      'a massage to you!':'art-concept',
+      'hyper-haiku':'art-concept',
+      'code 904':'art-concept',
+      'kakei-bo':'life-utility',
+      'kirei-filter':'photo-camera',
+      'glance note':'music-sound',
+      '放課後camera':'photo-camera',
+      'visualized-theremin-2':'music-sound',
+      'aerial - theremin recorder':'music-sound',
+      'wakemusic':'music-sound',
+      'gray-scott visualizer':'visual-math',
+      'reaction-diffusion (rd)':'visual-math',
+      'mandelbrot explorer (ultradeep)':'visual-math',
+      'ephemeralcypher / エフェメラルサイファー':'cipher-security',
+      'oulipo〈s+7〉':'language-learning',
+      '100% horoscope':'life-utility',
+      'siren terminal':'art-concept',
+      'photo translator / 画像タグ翻訳 pwa':'language-learning',
+      'tango-cho':'language-learning',
+      'lyricspocket':'language-learning',
+      'pocketbridge':'language-learning'
+    }).map(([k,v])=>[titleKey(k),v]));
+
+    const CURATED_PLATFORM=new Map(Object.entries({
+      'trash to track':['android'],
+      'data bottle':['android'],
+      'kanon':['android'],
+      'day-grid':['android'],
+      '6 seg clock':['android'],
+      'done':['android'],
+      'wakemusic':['android'],
+      'ephemeralcypher / エフェメラルサイファー':['android']
+    }).map(([k,v])=>[titleKey(k),v]));
 
     function normalizeSite(site={}){
       return{
@@ -184,14 +240,13 @@
     function normalizeCategory(value){
       const v=String(value||'').trim().toLowerCase().replace(/[_ ]+/g,'-');
       const aliases={
-        ai:'ai-language',language:'ai-language','ai-language':'ai-language',
-        camera:'camera-image',image:'camera-image','camera-image':'camera-image',
-        audio:'audio-music',music:'audio-music','audio-music':'audio-music',
-        utility:'productivity',productivity:'productivity',
-        security:'security-cipher',cipher:'security-cipher','security-cipher':'security-cipher',
-        visual:'visual-generative',generative:'visual-generative','visual-generative':'visual-generative',
-        memory:'memory-lifelog',lifelog:'memory-lifelog','memory-lifelog':'memory-lifelog',
-        experiment:'experiment',experimental:'experiment'
+        language:'language-learning',learning:'language-learning','language-learning':'language-learning','ai-language':'language-learning',
+        photo:'photo-camera',camera:'photo-camera',image:'photo-camera','photo-camera':'photo-camera','camera-image':'photo-camera',
+        music:'music-sound',sound:'music-sound',audio:'music-sound','music-sound':'music-sound','audio-music':'music-sound',
+        life:'life-utility',utility:'life-utility',productivity:'life-utility','life-utility':'life-utility',
+        cipher:'cipher-security',security:'cipher-security','cipher-security':'cipher-security','security-cipher':'cipher-security',
+        visual:'visual-math',math:'visual-math','visual-math':'visual-math','visual-generative':'visual-math',
+        art:'art-concept',concept:'art-concept',experiment:'art-concept','art-concept':'art-concept','memory-lifelog':'life-utility'
       };
       return aliases[v]||'';
     }
@@ -199,15 +254,16 @@
     function inferCategory(tool){
       const explicit=normalizeCategory(tool.category||tool.genre||tagValue(tool,['category','genre']));
       if(explicit) return explicit;
+      const curated=CURATED_CATEGORY.get(titleKey(tool.title));
+      if(curated) return curated;
       const text=searchableText(tool);
-      if(/(cipher|cypher|crypto|encrypt|decrypt|暗号|aes|hash|stegan|security|認証)/i.test(text)) return 'security-cipher';
-      if(/(camera|photo|image|画像|写真|撮影|filter|ocr|street view|double exposure)/i.test(text)) return 'camera-image';
-      if(/(audio|music|sound|radio|lyric|theremin|音楽|音声|録音|再生|dub|speaker)/i.test(text)) return 'audio-music';
-      if(/(memory|lifelog|journal|diary|archive|record|remember|記録|日記|思い出|夢|dream)/i.test(text)) return 'memory-lifelog';
-      if(/(todo|task|calendar|schedule|shift|alarm|clock|timer|note|memo|家計|budget|utility|便利|予定|単語|study|学習)/i.test(text)) return 'productivity';
-      if(/(\bai\b|artificial intelligence|gpt|openai|claude|gemini|whisper|llm|language|translator|translation|生成ai|人工知能|翻訳|言語|文章|haiku|俳句)/i.test(text)) return 'ai-language';
-      if(/(visual|generative|mandelbrot|gray.?scott|fractal|kaleidoscope|shader|particle|canvas|webgl|visualizer|simulation|生成|可視化|グラフィック)/i.test(text)) return 'visual-generative';
-      return 'experiment';
+      if(/(translator|translation|language|英語|英単語|単語|学習|study|reading|lyrics|言語|文章|文字|辞書|俳句)/i.test(text)) return 'language-learning';
+      if(/(camera|photo|image|写真|撮影|filter|画像補正|画像処理)/i.test(text)) return 'photo-camera';
+      if(/(theremin|music|sound|audio|音楽|楽器|録音|再生)/i.test(text)) return 'music-sound';
+      if(/(cipher|cypher|crypto|encrypt|decrypt|暗号|aes|stegan|security|認証)/i.test(text)) return 'cipher-security';
+      if(/(mandelbrot|gray.?scott|reaction.?diffusion|fractal|math|simulation|可視化|visualizer|時計|clock|widget|segment)/i.test(text)) return 'visual-math';
+      if(/(家計|todo|task|reminder|alarm|horoscope|診断|生活|utility|予定|deal|coupon|dream)/i.test(text)) return 'life-utility';
+      return 'art-concept';
     }
 
     function normalizePlatforms(value){
@@ -225,11 +281,11 @@
     function inferPlatforms(tool){
       const explicit=normalizePlatforms(tool.platform||tool.platforms||tagValue(tool,['platform']));
       if(explicit.length) return explicit;
+      const curated=CURATED_PLATFORM.get(titleKey(tool.title));
+      if(curated) return curated;
       const text=searchableText(tool);
-      const out=[];
-      if(/(android|\bapk\b|google play|play store)/i.test(text)) out.push('android');
-      if(/(\bpwa\b|web app|website|browser|cloudflare|pages\.dev|workers\.dev|github\.io|chatgpt\.site|javascript|html|css)/i.test(text)) out.push('web');
-      return out.length?out:['web'];
+      if(/(android app|androidアプリ|\bapk\b|google play|play store)/i.test(text)) return ['android'];
+      return ['web'];
     }
 
     function genreMatch(tool,genre){return genre==='all'||inferCategory(tool)===genre;}
@@ -259,7 +315,7 @@
       return `<article class="card">
         ${mediaHtml(tool,title)}
         <div class="content">
-          <div class="category">${escapeHtml(CATEGORY_LABELS[category]||'EXPERIMENT')}</div>
+          <div class="category">${escapeHtml(CATEGORY_LABELS[category]||'ART・CONCEPT')}</div>
           <h3 class="tool-title">${title}</h3>
           ${desc?`<p class="desc">${desc}</p>`:'<p class="desc"></p>'}
           <div class="meta">${tagHtml}</div>
