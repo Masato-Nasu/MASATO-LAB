@@ -156,6 +156,25 @@ async function loadSiteData() {
 }
 
 
+    function slugify(value = '') {
+      return String(value || '')
+        .toLowerCase()
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\u3040-\u30ff\u3400-\u9fff]+/g, '-')
+        .replace(/^-+|-+$/g, '') || 'item';
+    }
+
+    function buildSlugs(items) {
+      const used = new Map();
+      return items.map((item, index) => {
+        const base = slugify(item.slug || item.title || `item-${index + 1}`);
+        const count = used.get(base) || 0;
+        used.set(base, count + 1);
+        return count ? `${base}-${count + 1}` : base;
+      });
+    }
+
     function trimSummary(value = '', max = 120) {
       const text = String(value || '').replace(/\s+/g, ' ').trim();
       if (!text) return '';
@@ -196,7 +215,10 @@ async function loadSiteData() {
         const highlights = [];
         if (portfolio[0]) highlights.push(buildHighlight('Portfolio', portfolio[0].title || 'Portfolio', trimSummary(portfolio[0].description || site.homePortfolioText), './portfolio.html'));
         if (memory[0]) highlights.push(buildHighlight('Peripheral Memory', memory[0].title || 'Peripheral Memory', trimSummary(memory[0].comment || site.homeMemoryText), './memory.html'));
-        if (tools[0]) highlights.push(buildHighlight('Tools', tools[0].title || 'Tools', trimSummary(tools[0].description || site.homeToolsText), './tools.html'));
+        if (tools[0]) {
+          const toolSlugs = buildSlugs(tools);
+          highlights.push(buildHighlight('Tools', tools[0].title || 'Tools', trimSummary(tools[0].description || site.homeToolsText), `/tools/${encodeURIComponent(toolSlugs[0])}`));
+        }
         if (!highlights.length) highlights.push(`<div class="empty-note">Editor で項目を追加すると、ここに導線が表示されます。</div>`);
         document.getElementById('highlight-grid').innerHTML = highlights.join('');
       } catch (error) {
