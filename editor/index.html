@@ -139,6 +139,18 @@
             <div class="field"><label>Peripheral Memory intro</label><textarea id="about-memoryIntro"></textarea></div>
             <div class="field"><label>Tools intro</label><textarea id="about-toolsIntro"></textarea></div>
           </div>
+          <div class="field">
+            <label for="about-profileImage">プロフィール写真</label>
+            <div class="uploadrow">
+              <input id="about-profileImage" placeholder="画像URL">
+              <button class="btn" id="about-uploadBtn" type="button">写真を選ぶ</button>
+            </div>
+            <input id="about-photoFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" hidden>
+            <div class="preview">
+              <img id="about-preview" alt="プロフィール写真のプレビュー" style="display:none;max-height:200px">
+              <div class="preview-note" id="about-photoStatus" role="status">写真を選んだあと、上部の「サイトに保存」を押してください。</div>
+            </div>
+          </div>
           <div class="field"><label>About body</label><textarea id="about-about"></textarea></div>
         </div>
         <div class="actions">
@@ -557,6 +569,8 @@ function renderForm(){
   $('about-homeToolsText').value = site.homeToolsText || '';
   $('about-aboutIntro').value = site.aboutIntro || '';
   $('about-about').value = site.about || '';
+  $('about-profileImage').value = site.profileImage || '';
+  updateProfilePreview();
   $('about-portfolioIntro').value = site.portfolioIntro || '';
   $('about-memoryIntro').value = site.memoryIntro || '';
   $('about-toolsIntro').value = site.toolsIntro || '';
@@ -598,6 +612,8 @@ function renderForm(){
 
 function collectSite(){
   return {
+    ...state.data.site,
+    profileImage: $('about-profileImage').value.trim(),
     name: $('about-name').value.trim(),
     tagline: $('about-tagline').value.trim(),
     homeTitle: $('about-homeTitle').value.trim(),
@@ -740,7 +756,7 @@ async function saveSite(){
   }
 
   try{
-    const res = await fetch('/api/save', {
+    const res = await fetch(state.currentType === 'about' ? '/editor/save' : '/api/save', {
       method:'POST',
       headers:{ 'content-type':'application/json' },
       body: JSON.stringify(state.data)
@@ -802,6 +818,54 @@ async function uploadImage(kind){
   };
   input.click();
 }
+
+function updateProfilePreview(){
+  const url = $('about-profileImage').value.trim();
+  const preview = $('about-preview');
+  if(url) preview.src = url;
+  else preview.removeAttribute('src');
+  preview.style.display = url ? 'block' : 'none';
+}
+
+async function uploadProfilePhoto(){
+  const file = $('about-photoFile').files?.[0];
+  if(!file) return;
+  const status = $('about-photoStatus');
+  if(!['image/jpeg','image/png','image/webp','image/gif','image/avif'].includes(file.type) || file.size > 10 * 1024 * 1024){
+    status.textContent = 'JPEG・PNG・WebP・GIF・AVIF形式の10MB以下の写真を選んでください。';
+    $('about-photoFile').value = '';
+    return;
+  }
+  const buttons = ['about-uploadBtn','saveAboutBtn','siteSaveBtn'];
+  buttons.forEach(id => $(id).disabled = true);
+  status.textContent = '写真をアップロードしています…';
+  const fd = new FormData();
+  fd.append('file', file);
+  try{
+    const res = await fetch('/editor/upload', {method:'POST', body:fd});
+    const json = await res.json().catch(() => ({}));
+    if(!res.ok || !json.ok || !json.url) throw new Error(json.error || 'ログイン状態をご確認ください');
+    $('about-profileImage').value = json.url;
+    state.data.site.profileImage = json.url;
+    updateProfilePreview();
+    markDirty(true);
+    renderJsonPreview();
+    status.textContent = '写真をアップロードしました。上部の「サイトに保存」で公開ページに反映されます。';
+  }catch(err){
+    status.textContent = '写真のアップロードに失敗しました: ' + err.message;
+  }finally{
+    buttons.forEach(id => $(id).disabled = false);
+    $('about-photoFile').value = '';
+  }
+}
+
+$('about-uploadBtn').addEventListener('click', () => $('about-photoFile').click());
+$('about-photoFile').addEventListener('change', uploadProfilePhoto);
+$('about-profileImage').addEventListener('input', () => {
+  state.data.site.profileImage = $('about-profileImage').value.trim();
+  updateProfilePreview();
+  markDirty(true);
+});
 
 function renderJsonPreview(){ $('jsonPreview').textContent = JSON.stringify(state.data, null, 2); }
 
