@@ -41,7 +41,7 @@ export async function onRequestPost(context) {
       return json({ ok: false, error: "missing_file" }, 400);
     }
 
-    const allowedKind = kind === "tools" ? "tools" : "portfolio";
+    const allowedKind = kind === "memory" ? "memory" : kind === "tools" ? "tools" : "portfolio";
     const { base, ext } = sanitizeFilename(file.name);
     const now = new Date();
     const stamp = now.toISOString().replace(/[:.]/g, "-");
