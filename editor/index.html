@@ -230,6 +230,26 @@
             <div class="field"><label>Date</label><input id="memory-date" placeholder="YYYY-MM-DD"></div>
           </div>
           <div class="field"><label>URL</label><input id="memory-url"></div>
+          <div class="field">
+            <label>Image URL</label>
+            <div class="uploadrow">
+              <input id="memory-image" placeholder="画像URL（またはR2アップロード）">
+              <button class="btn" id="memory-uploadBtn" type="button">R2アップロード</button>
+            </div>
+          </div>
+          <div class="grid2">
+            <div class="field"><label>Image ratio</label>
+              <select id="memory-ratio">
+                <option>1:1</option><option>4:3</option><option>3:4</option><option>2:3</option><option>16:9</option>
+              </select>
+            </div>
+            <div class="field"><label>Image fit</label>
+              <select id="memory-fit">
+                <option value="contain">contain（全体表示）</option>
+                <option value="cover">cover（枠いっぱい）</option>
+              </select>
+            </div>
+          </div>
           <div class="field"><label>Comment</label><textarea id="memory-comment"></textarea></div>
           <div class="field"><label>Tags (comma separated)</label><input id="memory-tags"></div>
         </div>
@@ -237,6 +257,10 @@
           <button class="btn primary" id="saveMemoryBtn">保存 / 更新</button>
           <button class="btn danger" id="deleteMemoryBtn">削除</button>
           <button class="btn" id="clearMemoryBtn">フォームをクリア</button>
+        </div>
+        <div class="preview">
+          <img id="memory-preview" alt="" style="display:none" />
+          <div class="preview-note">Peripheral Memory の画像プレビューです。反映するには「サイトに保存」を押してください。</div>
         </div>
       </section>
 
@@ -550,7 +574,7 @@ function renderList(){
 
 function getBlank(type){
   if(type==='portfolio') return { title:'', year:'', role:'', description:'', image:'', imageRatio:'4:3', imageFit:'contain', link:'', tags:[], noImageIndex:false, noSnippet:false };
-  if(type==='memory') return { title:'', url:'', comment:'', tags:[], date:'' };
+  if(type==='memory') return { title:'', url:'', comment:'', tags:[], date:'', image:'', imageRatio:'4:3', imageFit:'contain' };
   if(type==='tools') return { title:'', description:'', image:'', imageRatio:'4:3', imageFit:'contain', appUrl:'', repoUrl:'', tags:[] };
   return {};
 }
@@ -596,6 +620,11 @@ function renderForm(){
   $('memory-url').value = m.url || '';
   $('memory-comment').value = m.comment || '';
   $('memory-tags').value = tagsToString(m.tags);
+  $('memory-image').value = m.image || '';
+  $('memory-ratio').value = m.imageRatio || '4:3';
+  $('memory-fit').value = m.imageFit || 'contain';
+  $('memory-preview').src = m.image || '';
+  $('memory-preview').style.display = m.image ? 'block' : 'none';
 
   const t = (state.currentType==='tools' && state.selectedIndex>=0) ? state.data.tools[state.selectedIndex] : getBlank('tools');
   $('tools-title').value = t.title || '';
@@ -645,12 +674,17 @@ function collectPortfolio(){
   };
 }
 function collectMemory(){
+  const existing = state.selectedIndex >= 0 ? (state.data.memory[state.selectedIndex] || {}) : {};
   return {
+    ...existing,
     title: $('memory-title').value.trim(),
     date: $('memory-date').value.trim(),
     url: $('memory-url').value.trim(),
     comment: $('memory-comment').value,
-    tags: parseTags($('memory-tags').value)
+    tags: parseTags($('memory-tags').value),
+    image: $('memory-image').value.trim(),
+    imageRatio: $('memory-ratio').value,
+    imageFit: $('memory-fit').value
   };
 }
 function collectTools(){
@@ -793,6 +827,7 @@ async function uploadImage(kind){
     showMessage('画像をアップロードしています...', true);
     const fd = new FormData();
     fd.append('file', file);
+    if(kind === 'memory') fd.append('kind', 'memory');
     try{
       const res = await fetch('/api/upload', { method:'POST', body:fd });
       const json = await res.json().catch(()=>({ ok:false, error:'invalid_json' }));
@@ -805,6 +840,10 @@ async function uploadImage(kind){
         $('portfolio-image').value = url;
         $('portfolio-preview').src = url;
         $('portfolio-preview').style.display = 'block';
+      }else if(kind === 'memory'){
+        $('memory-image').value = url;
+        $('memory-preview').src = url;
+        $('memory-preview').style.display = 'block';
       }else{
         $('tools-image').value = url;
         $('tools-preview').src = url;
@@ -887,6 +926,8 @@ $('portfolio-image').addEventListener('input', ()=>{ $('portfolio-preview').src 
 $('saveMemoryBtn').addEventListener('click', ()=>saveCurrentItem('memory'));
 $('deleteMemoryBtn').addEventListener('click', ()=>deleteCurrentItem('memory'));
 $('clearMemoryBtn').addEventListener('click', ()=>clearForm('memory'));
+$('memory-uploadBtn').addEventListener('click', ()=>uploadImage('memory'));
+$('memory-image').addEventListener('input', ()=>{ $('memory-preview').src = $('memory-image').value.trim(); $('memory-preview').style.display = $('memory-image').value.trim() ? 'block' : 'none'; markDirty(true); });
 $('saveToolsBtn').addEventListener('click', ()=>saveCurrentItem('tools'));
 $('deleteToolsBtn').addEventListener('click', ()=>deleteCurrentItem('tools'));
 $('clearToolsBtn').addEventListener('click', ()=>clearForm('tools'));
