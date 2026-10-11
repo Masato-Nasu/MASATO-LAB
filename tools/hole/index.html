@@ -9,7 +9,7 @@ nav a{text-decoration:none}.hero{display:grid;grid-template-columns:1.35fr .65fr
 .label{font-size:12px;letter-spacing:.14em;color:#555;font-weight:700}h1{font-size:clamp(85px,15vw,170px);letter-spacing:-.1em;line-height:.85;margin:20px 0}
 .subtitle{font-weight:700;letter-spacing:.07em}p{line-height:1.85}.lead{font-size:19px;margin:30px 0 36px}
 .actions{display:flex;gap:10px;flex-wrap:wrap}.btn{display:inline-flex;align-items:center;min-height:48px;border:1px solid #111;padding:0 20px;border-radius:100px;text-decoration:none;font-size:13px;font-weight:700}
-.primary{color:white;background:#111}.visual{min-height:320px;display:grid;place-items:center}
+.primary{color:white;background:#111}.visual{min-height:320px;display:grid;place-items:center}.real-screen{display:block;max-width:100%;height:390px;width:auto;object-fit:contain;border:1px solid #d6d6d2;border-radius:22px;box-shadow:0 12px 30px rgba(0,0,0,.12)}.real-screen[hidden]{display:none}
 .phone{width:175px;height:330px;border:11px solid #111;border-radius:35px;position:relative;background:repeating-linear-gradient(130deg,#bcbdb7 0 13px,#e2e3dd 13px 28px);box-shadow:23px 23px 0 #e6e6e2}
 .phone:after{content:"50%";position:absolute;bottom:22px;left:0;right:0;text-align:center;font-size:47px;font-weight:800}
 .small{font-size:12px;color:#666}section.info{border-top:1px solid #d8d8d2;padding:38px 0}
@@ -21,7 +21,7 @@ h2{font-size:30px;letter-spacing:-.035em}.features{display:grid;grid-template-co
 <p class="lead">スマートフォンの画面を、向こう側が見える「穴」にする。背面カメラのライブ映像をほかのアプリに重ね、画面を窓のように見せる実験です。</p>
 <div class="actions"><a class="btn primary" href="https://github.com/Masato-Nasu/HOLE/releases/latest">APK / RELEASES ↗</a><a class="btn" href="https://github.com/Masato-Nasu/HOLE">SOURCE CODE ↗</a></div>
 <p class="small">APK公開後にダウンロードできます。Android 8+ / P0.1 prototype</p></div>
-<div><div class="visual" aria-label="コンセプト図：電話と半透明表示"><div class="phone" aria-hidden="true"></div></div><div class="small">コンセプト図。実機スクリーンショットではありません。</div></div></div>
+<div><div class="visual" aria-label="HOLEの実機スクリーンショット"><img class="real-screen" hidden src="https://raw.githubusercontent.com/Masato-Nasu/HOLE/main/docs/screenshots/HOLE-active-50.jpg" alt="Nothing Phone (2)で撮影したHOLEの実機スクリーンショット。建物のカメラ映像の上にホーム画面が半透明で重なっている。" onload="this.hidden=false;this.nextElementSibling.hidden=true"><div class="phone" aria-label="スクリーンショット公開前の代替イラスト"></div></div><div class="small">Nothing Phone (2)で撮影した実機スクリーンショット（GitHub画像公開後に表示）。</div></div></div>
 <section class="info"><div class="label">THE MECHANISM</div><h2>画面を表示面から、窓へ。</h2><div class="features">
 <div><h3>01 — OVERLAY</h3><p>リアカメラを半透明で重ねます。標準は50%です。</p></div>
 <div><h3>02 — ALIGN</h3><p>倍率・X/Y位置を補正し、背後の景色に近づけます。</p></div>
