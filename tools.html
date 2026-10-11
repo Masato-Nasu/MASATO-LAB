@@ -104,6 +104,9 @@
           <button class="filter active" type="button" data-platform="all">ALL</button>
           <button class="filter" type="button" data-platform="web">WEB・PWA</button>
           <button class="filter" type="button" data-platform="android">ANDROID</button>
+          <button class="filter" type="button" data-platform="linux">LINUX</button>
+          <button class="filter" type="button" data-platform="windows">WINDOWS</button>
+          <button class="filter" type="button" data-platform="mac">MAC</button>
           <button class="filter" type="button" data-platform="ai">AI</button>
         </div>
       </div>
@@ -251,7 +254,7 @@
       throw lastError||new Error('Failed to load data');
     }
     function searchableText(tool){
-      return [tool.title,tool.description,tool.category,tool.genre,tool.platform,...normalizeTags(tool.tags),tool.appUrl,tool.repoUrl].filter(Boolean).join(' ').toLowerCase();
+      return [tool.title,tool.description,tool.category,tool.genre,tool.platform,tool.platforms,...normalizeTags(tool.tags),tool.appUrl,tool.repoUrl].filter(Boolean).join(' ').toLowerCase();
     }
 
     function tagValue(tool,prefixes){
@@ -304,13 +307,16 @@
         if(v==='both'||v==='all'){set.add('web');set.add('android');return;}
         if(/android|apk|play/.test(v)) set.add('android');
         if(/web|pwa|browser/.test(v)) set.add('web');
+        if(/linux|ubuntu|debian|mint/.test(v)) set.add('linux');
+        if(/windows|win32|win64|win10|win11/.test(v)) set.add('windows');
+        if(/^(mac|macos|mac os|osx|darwin)$/.test(v)) set.add('mac');
         if(v==='ai'||/openai|gpt|claude|gemini|llm/.test(v)) set.add('ai');
       });
       return [...set];
     }
 
     function inferPlatforms(tool){
-      const explicit=normalizePlatforms(tool.platform||tool.platforms||tagValue(tool,['platform']));
+      const explicit=normalizePlatforms(tool.platforms||tool.platform||tagValue(tool,['platform']));
       const curated=CURATED_PLATFORM.get(titleKey(tool.title));
       const set=new Set(explicit.length?explicit:(curated||[]));
       if(!explicit.length&&!curated){
