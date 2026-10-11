@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HOLE — Transparent Phone | MASATO LAB</title>
+<meta name="description" content="スマートフォンを「穴」に見せるAndroid実験。リアカメラ映像をほかのアプリへ重ねる。">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f5f5f2;color:#111;font-family:Helvetica,Arial,-apple-system,BlinkMacSystemFont,sans-serif}
+main{max-width:1050px;margin:auto;padding:24px 24px 80px}a{color:inherit}nav{display:flex;gap:20px;font-size:13px;padding-bottom:24px;border-bottom:1px solid #d8d8d2}
+nav a{text-decoration:none}.hero{display:grid;grid-template-columns:1.35fr .65fr;align-items:center;gap:36px;padding:65px 0}
+.label{font-size:12px;letter-spacing:.14em;color:#555;font-weight:700}h1{font-size:clamp(85px,15vw,170px);letter-spacing:-.1em;line-height:.85;margin:20px 0}
+.subtitle{font-weight:700;letter-spacing:.07em}p{line-height:1.85}.lead{font-size:19px;margin:30px 0 36px}
+.actions{display:flex;gap:10px;flex-wrap:wrap}.btn{display:inline-flex;align-items:center;min-height:48px;border:1px solid #111;padding:0 20px;border-radius:100px;text-decoration:none;font-size:13px;font-weight:700}
+.primary{color:white;background:#111}.visual{min-height:320px;display:grid;place-items:center}
+.phone{width:175px;height:330px;border:11px solid #111;border-radius:35px;position:relative;background:repeating-linear-gradient(130deg,#bcbdb7 0 13px,#e2e3dd 13px 28px);box-shadow:23px 23px 0 #e6e6e2}
+.phone:after{content:"50%";position:absolute;bottom:22px;left:0;right:0;text-align:center;font-size:47px;font-weight:800}
+.small{font-size:12px;color:#666}section.info{border-top:1px solid #d8d8d2;padding:38px 0}
+h2{font-size:30px;letter-spacing:-.035em}.features{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}.features h3{font-size:13px;letter-spacing:.08em}.features p{font-size:14px;color:#444}
+@media(max-width:700px){main{padding:18px 18px 60px}.hero{grid-template-columns:1fr;padding:44px 0 20px}.visual{min-height:270px}.phone{transform:scale(.85)}.features{grid-template-columns:1fr;gap:8px}.lead{font-size:16px}}
+</style></head><body><main>
+<nav><a href="/">MASATO LAB</a><a href="/tools.html">TOOLS</a><span>ANDROID / CAMERA</span></nav>
+<div class="hero"><div><div class="label">EXPERIMENTAL ANDROID APP · P0.1</div><h1>HOLE</h1><div class="subtitle">TRANSPARENT PHONE</div>
+<p class="lead">スマートフォンの画面を、向こう側が見える「穴」にする。背面カメラのライブ映像をほかのアプリに重ね、画面を窓のように見せる実験です。</p>
+<div class="actions"><a class="btn primary" href="https://github.com/Masato-Nasu/HOLE/releases/latest">APK / RELEASES ↗</a><a class="btn" href="https://github.com/Masato-Nasu/HOLE">SOURCE CODE ↗</a></div>
+<p class="small">APK公開後にダウンロードできます。Android 8+ / P0.1 prototype</p></div>
+<div><div class="visual" aria-label="コンセプト図：電話と半透明表示"><div class="phone" aria-hidden="true"></div></div><div class="small">コンセプト図。実機スクリーンショットではありません。</div></div></div>
+<section class="info"><div class="label">THE MECHANISM</div><h2>画面を表示面から、窓へ。</h2><div class="features">
+<div><h3>01 — OVERLAY</h3><p>リアカメラを半透明で重ねます。標準は50%です。</p></div>
+<div><h3>02 — ALIGN</h3><p>倍率・X/Y位置を補正し、背後の景色に近づけます。</p></div>
+<div><h3>03 — TOUCH THROUGH</h3><p>10〜79%では下のアプリを操作可能。100%は表示専用です。</p></div>
+</div></section>
+<section class="info"><div class="label">LIMITATIONS AND PRIVACY</div><p class="small">スマートフォンが物理的に透明になるわけではありません。画角と視差により完全な整合はできません。セキュリティ保護された画面でオーバーレイは制限されます。ネット通信や録画、画像保存は行いません。</p></section>
+<p class="small">MASATO NASU / MASATO LAB · HOLE P0.1</p></main></body></html>
