@@ -271,6 +271,34 @@
       <section class="section" id="section-tools">
         <div class="stack">
           <div class="field"><label>Title</label><input id="tools-title"></div>
+          <div class="grid2">
+            <div class="field">
+              <label>Category</label>
+              <select id="tools-category">
+                <option value="">AUTO</option>
+                <option value="language-learning">LANGUAGE・LEARNING</option>
+                <option value="photo-camera">PHOTO・CAMERA</option>
+                <option value="music-sound">MUSIC・SOUND</option>
+                <option value="life-utility">LIFE・UTILITY</option>
+                <option value="cipher-security">CIPHER・SECURITY</option>
+                <option value="visual-math">VISUAL・MATH</option>
+                <option value="6seg">6SEG</option>
+                <option value="art-concept">ART・CONCEPT</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Platform（複数選択可）</label>
+              <div class="platform-checks" role="group" aria-label="Tools platforms">
+                <label class="platform-choice"><input type="checkbox" name="tools-platform" value="web">WEB・PWA</label>
+                <label class="platform-choice"><input type="checkbox" name="tools-platform" value="android">ANDROID</label>
+                <label class="platform-choice"><input type="checkbox" name="tools-platform" value="linux">LINUX</label>
+                <label class="platform-choice"><input type="checkbox" name="tools-platform" value="windows">WINDOWS</label>
+                <label class="platform-choice"><input type="checkbox" name="tools-platform" value="mac">MAC</label>
+                <label class="platform-choice"><input type="checkbox" name="tools-platform" value="ai">AI</label>
+              </div>
+              <div class="platform-hint">複数選択できます。未指定の場合は従来の自動分類です。</div>
+            </div>
+          </div>
           <div class="field"><label>Description</label><textarea id="tools-description"></textarea></div>
           <div class="grid2">
             <div class="field">
@@ -285,18 +313,6 @@
           <div class="grid2">
             <div class="field"><label>App URL</label><input id="tools-appUrl"></div>
             <div class="field"><label>GitHub URL</label><input id="tools-repoUrl"></div>
-          </div>
-          <div class="field">
-            <label>Platform（複数選択可）</label>
-            <div class="platform-checks" role="group" aria-label="Tools platforms">
-              <label class="platform-choice"><input type="checkbox" name="tools-platform" value="web">WEB・PWA</label>
-              <label class="platform-choice"><input type="checkbox" name="tools-platform" value="android">ANDROID</label>
-              <label class="platform-choice"><input type="checkbox" name="tools-platform" value="linux">LINUX</label>
-              <label class="platform-choice"><input type="checkbox" name="tools-platform" value="windows">WINDOWS</label>
-              <label class="platform-choice"><input type="checkbox" name="tools-platform" value="mac">MAC</label>
-              <label class="platform-choice"><input type="checkbox" name="tools-platform" value="ai">AI</label>
-            </div>
-            <div class="platform-hint">対応する環境だけ選択してください。未指定の場合は従来の自動分類を使用します。</div>
           </div>
           <div class="grid2">
             <div class="field"><label>Image ratio</label>
@@ -651,6 +667,7 @@ function renderForm(){
 
   const t = (state.currentType==='tools' && state.selectedIndex>=0) ? state.data.tools[state.selectedIndex] : getBlank('tools');
   $('tools-title').value = t.title || '';
+  $('tools-category').value = t.category || '';
   $('tools-description').value = t.description || '';
   $('tools-image').value = t.image || '';
   $('tools-tags').value = tagsToString(t.tags);
@@ -719,6 +736,7 @@ function collectTools(){
   return {
     ...existing,
     platforms: [...document.querySelectorAll('input[name="tools-platform"]:checked')].map(input=>input.value),
+    category: $('tools-category').value,
     title: $('tools-title').value.trim(),
     description: $('tools-description').value,
     image: $('tools-image').value.trim(),
