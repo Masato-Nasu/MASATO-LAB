@@ -38,6 +38,10 @@
     .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
     .field{display:flex;flex-direction:column;gap:6px}
     .field label{font-size:12px;color:var(--muted)}
+    .platform-checks{display:flex;flex-wrap:wrap;gap:8px}
+    .platform-choice{display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid var(--line);border-radius:999px;background:#fff;cursor:pointer;font-size:12px;color:#333}
+    .platform-choice input[type="checkbox"]{width:16px;height:16px;margin:0;padding:0;accent-color:#111}
+    .platform-hint{font-size:12px;line-height:1.5;color:var(--muted)}
     input, textarea, select{width:100%;border:1px solid var(--line);border-radius:12px;background:#fff;padding:10px 12px;font-size:14px;color:#111}
     textarea{min-height:120px;resize:vertical;line-height:1.7}
     .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
@@ -281,6 +285,18 @@
           <div class="grid2">
             <div class="field"><label>App URL</label><input id="tools-appUrl"></div>
             <div class="field"><label>GitHub URL</label><input id="tools-repoUrl"></div>
+          </div>
+          <div class="field">
+            <label>Platform（複数選択可）</label>
+            <div class="platform-checks" role="group" aria-label="Tools platforms">
+              <label class="platform-choice"><input type="checkbox" name="tools-platform" value="web">WEB・PWA</label>
+              <label class="platform-choice"><input type="checkbox" name="tools-platform" value="android">ANDROID</label>
+              <label class="platform-choice"><input type="checkbox" name="tools-platform" value="linux">LINUX</label>
+              <label class="platform-choice"><input type="checkbox" name="tools-platform" value="windows">WINDOWS</label>
+              <label class="platform-choice"><input type="checkbox" name="tools-platform" value="mac">MAC</label>
+              <label class="platform-choice"><input type="checkbox" name="tools-platform" value="ai">AI</label>
+            </div>
+            <div class="platform-hint">対応する環境だけ選択してください。未指定の場合は従来の自動分類を使用します。</div>
           </div>
           <div class="grid2">
             <div class="field"><label>Image ratio</label>
@@ -580,6 +596,13 @@ function getBlank(type){
 }
 
 function parseTags(s){ return String(s||'').split(',').map(v=>v.trim()).filter(Boolean); }
+function editorPlatforms(tool = {}){
+  const value = tool.platforms ?? tool.platform ?? '';
+  const parts = Array.isArray(value) ? value : String(value).split(/[,/|+]/);
+  const selected = new Set(parts.map(v=>String(v).trim().toLowerCase()));
+  if(selected.has('both') || selected.has('all')){ selected.add('web'); selected.add('android'); }
+  return selected;
+}
 function tagsToString(arr){ return Array.isArray(arr) ? arr.join(', ') : ''; }
 
 function renderForm(){
@@ -631,6 +654,10 @@ function renderForm(){
   $('tools-description').value = t.description || '';
   $('tools-image').value = t.image || '';
   $('tools-tags').value = tagsToString(t.tags);
+  const checkedPlatforms = editorPlatforms(t);
+  document.querySelectorAll('input[name="tools-platform"]').forEach(input=>{
+    input.checked = checkedPlatforms.has(input.value);
+  });
   $('tools-appUrl').value = t.appUrl || '';
   $('tools-repoUrl').value = t.repoUrl || '';
   $('tools-ratio').value = t.imageRatio || '4:3';
@@ -688,7 +715,10 @@ function collectMemory(){
   };
 }
 function collectTools(){
+  const existing = state.selectedIndex >= 0 ? (state.data.tools[state.selectedIndex] || {}) : {};
   return {
+    ...existing,
+    platforms: [...document.querySelectorAll('input[name="tools-platform"]:checked')].map(input=>input.value),
     title: $('tools-title').value.trim(),
     description: $('tools-description').value,
     image: $('tools-image').value.trim(),
