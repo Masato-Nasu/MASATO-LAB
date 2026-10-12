@@ -8,6 +8,7 @@
     ['cipher-security','CIPHER・SECURITY'],
     ['visual-math','VISUAL・MATH'],
     ['6seg','6SEG'],
+    ['game','GAME'],
     ['art-concept','ART・CONCEPT']
   ];
   const PLATFORM_OPTIONS=[
