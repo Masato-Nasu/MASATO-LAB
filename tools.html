@@ -95,6 +95,7 @@
           <button class="filter" type="button" data-genre="cipher-security">CIPHER・SECURITY</button>
           <button class="filter" type="button" data-genre="visual-math">VISUAL・MATH</button>
           <button class="filter" type="button" data-genre="6seg">6SEG</button>
+          <button class="filter" type="button" data-genre="game">GAME</button>
           <button class="filter" type="button" data-genre="art-concept">ART・CONCEPT</button>
         </div>
       </div>
@@ -127,6 +128,7 @@
       'cipher-security':'CIPHER・SECURITY',
       'visual-math':'VISUAL・MATH',
       '6seg':'6SEG',
+      'game':'GAME',
       'art-concept':'ART・CONCEPT'
     };
 
@@ -197,7 +199,9 @@
       'photo translator / 画像タグ翻訳 pwa':'language-learning',
       'tango-cho':'language-learning',
       'lyricspocket':'language-learning',
-      'pocketbridge':'language-learning'
+      'pocketbridge':'language-learning',
+      'jiji fighter':'game',
+      'jiji-fighter':'game'
     }).map(([k,v])=>[titleKey(k),v]));
 
     const CURATED_PLATFORM=new Map(Object.entries({
@@ -278,6 +282,7 @@
         cipher:'cipher-security',security:'cipher-security','cipher-security':'cipher-security','security-cipher':'cipher-security',
         visual:'visual-math',math:'visual-math','visual-math':'visual-math','visual-generative':'visual-math',
         '6seg':'6seg','6-seg':'6seg','sixseg':'6seg',
+        'game':'game','games':'game','gaming':'game','ゲーム':'game','シューティング':'game',
         art:'art-concept',concept:'art-concept',experiment:'art-concept','art-concept':'art-concept','memory-lifelog':'life-utility'
       };
       return aliases[v]||'';
@@ -290,6 +295,7 @@
       if(explicit) return explicit;
       if(curated) return curated;
       const text=searchableText(tool);
+      if(/(シューティングゲーム|シューティング|shooting game|rail shooter|arcade game|ゲーム|video game|ゲーム開発|ジジファイター|jiji[ -]?fighter)/i.test(text)) return 'game';
       if(/(translator|translation|language|英語|英単語|単語|学習|study|reading|lyrics|言語|文章|文字|辞書|俳句)/i.test(text)) return 'language-learning';
       if(/(camera|photo|image|写真|撮影|filter|画像補正|画像処理)/i.test(text)) return 'photo-camera';
       if(/(theremin|music|sound|audio|音楽|楽器|録音|再生)/i.test(text)) return 'music-sound';
