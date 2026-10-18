@@ -93,9 +93,7 @@ function renderPage(site, item) {
     ? `<div class="tags">${tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}</div>`
     : '';
 
-  const linksHtml = links.length
-    ? `<div class="actions">${links.map((url, i) => `<a class="btn${i === 0 ? ' primary' : ''}" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${i === 0 ? 'OPEN LINK' : `LINK ${i + 1}`}</a>`).join('')}</div>`
-    : '';
+  const linksHtml = `<div class="actions">${links.map((url, i) => `<a class="btn${i === 0 ? ' primary' : ''}" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${i === 0 ? 'OPEN LINK' : `LINK ${i + 1}`}</a>`).join('')}<a class="btn" href="/portfolio.html">BACK TO PORTFOLIO</a></div>`;
 
   const mediaHtml = image
     ? `<figure class="media" data-ratio="${escapeHtml(ratio)}"><img src="${escapeHtml(image)}" alt="${noSnippet ? 'Portfolio image' : title}" style="object-fit:${fit}"></figure>`
@@ -179,3 +177,4 @@ export async function onRequestGet(context) {
     headers: {'content-type':'text/html; charset=utf-8','cache-control':'no-store'}
   });
 }
+
