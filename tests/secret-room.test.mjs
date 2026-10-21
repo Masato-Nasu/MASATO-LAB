@@ -9,7 +9,7 @@ assert.equal(projectData(fixture).portfolio.length,28);
 assert.equal(projectData(fixture,'secret').portfolio.length,17);
 assert.equal(projectData(fixture,'editor').portfolio.length,45);
 const html = await readFile(new URL('../portfolio.html',import.meta.url),'utf8');
-const env = {SECRET_ROOM_PASSWORD:'test-only-secret-strong-password',SITE_DATA:{get: async k => k==='site-data'?JSON.stringify(fixture):null,put:async()=>{}},ASSETS:{fetch:async()=>new Response(html,{headers:{'content-type':'text/html'}})}};
+const env = {SECRET_ROOM_PASSWORD:'test-only-secret-strong-password',SITE_DATA:{get: async k => k==='site-data'?JSON.stringify(fixture):null,put:async()=>{}},ASSETS:{fetch:async url=>{assert.equal(url.pathname,'/portfolio');return new Response(html,{headers:{'content-type':'text/html'}})}}};
 const validToken = await token(env.SECRET_ROOM_PASSWORD);
 const cookie = `__Host-masato-room=${validToken}`;
 const req = (path,init={}) => new Request(`https://masato-lab.pages.dev${path}`,init);

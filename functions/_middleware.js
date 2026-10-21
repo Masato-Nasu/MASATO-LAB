@@ -50,7 +50,7 @@ export async function onRequest(context) {
     if (path === '/secret-room/data') return json(projectData(data,'secret'));
     if (path === '/secret-room/editor-data') return json(projectData(data,'editor'));
     if (path !== '/secret-room') return new Response('Not found',{status:404,headers:privateHeaders});
-    const asset = await env.ASSETS.fetch(new URL('/portfolio.html',url));
+    const asset = await env.ASSETS.fetch(new URL('/portfolio',url));
     let body = await asset.text();
     body = body.replace("const candidates = ['/api/data', './data.json', 'data.json']", "const candidates = ['/secret-room/data']")
       .replace("const candidates=['/api/data','./data.json','data.json']", "const candidates=['/secret-room/data']")
