@@ -90,6 +90,7 @@
     <button class="btn primary" id="siteSaveBtn">サイトに保存</button>
     <button class="btn" id="downloadBtn">Download data.json</button>
     <button class="btn" id="jsonToggleBtn">JSON プレビュー</button>
+    <a class="btn" href="/secret-room" target="_blank" rel="noopener">SECRET ROOM を確認</a>
     <input type="file" id="importFile" accept="application/json" hidden>
   </div>
 
@@ -202,6 +203,7 @@
               </label>
             </div>
           </div>
+          <div class="field"><label>掲載先</label><label style="display:flex;align-items:center;gap:10px;min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;"><input type="checkbox" id="portfolio-secretroom"><span>シークレットルームに掲載</span></label><div class="helper-note">ON：パスワード付きの部屋に掲載 ／ OFF：通常のPortfolioに掲載。変更後は「保存 / 更新」→「サイトに保存」で反映します。</div></div>
           <div class="grid2">
             <div class="field"><label>Search snippet</label>
               <label style="display:flex;align-items:center;gap:10px;height:42px;padding:0 12px;border:1px solid var(--line);border-radius:12px;background:#fff;">
@@ -590,7 +592,7 @@ function renderList(){
   list.innerHTML = arr.map((item, i)=>{
     const title = escapeHtml(item.title || '(無題)');
     const meta = state.currentType === 'portfolio'
-      ? escapeHtml([item.year, item.role, item.noImageIndex ? 'image noindex' : '', item.noSnippet ? 'data-nosnippet' : ''].filter(Boolean).join(' / '))
+      ? escapeHtml([item.secretRoom ? '🔒 SECRET ROOM' : '公開', item.year, item.role, item.noImageIndex ? 'image noindex' : '', item.noSnippet ? 'data-nosnippet' : ''].filter(Boolean).join(' / '))
       : state.currentType === 'memory'
       ? escapeHtml([item.date, item.url].filter(Boolean).join(' / '))
       : escapeHtml([item.appUrl, item.repoUrl].filter(Boolean).join(' / '));
@@ -605,7 +607,7 @@ function renderList(){
 }
 
 function getBlank(type){
-  if(type==='portfolio') return { title:'', year:'', role:'', description:'', image:'', imageRatio:'4:3', imageFit:'contain', link:'', tags:[], noImageIndex:false, noSnippet:false };
+  if(type==='portfolio') return { title:'', year:'', role:'', description:'', image:'', imageRatio:'4:3', imageFit:'contain', link:'', tags:[], noImageIndex:false, noSnippet:false, secretRoom:false };
   if(type==='memory') return { title:'', url:'', comment:'', tags:[], date:'', image:'', imageRatio:'4:3', imageFit:'contain' };
   if(type==='tools') return { title:'', description:'', image:'', imageRatio:'4:3', imageFit:'contain', appUrl:'', repoUrl:'', tags:[] };
   return {};
@@ -652,6 +654,7 @@ function renderForm(){
   $('portfolio-preview').style.display = p.image ? 'block' : 'none';
   $('portfolio-noimageindex').checked = p.noImageIndex === true;
   $('portfolio-nosnippet').checked = p.noSnippet === true;
+  $('portfolio-secretroom').checked = p.secretRoom === true;
 
   const m = (state.currentType==='memory' && state.selectedIndex>=0) ? state.data.memory[state.selectedIndex] : getBlank('memory');
   $('memory-title').value = m.title || '';
@@ -703,7 +706,10 @@ function collectSite(){
 }
 
 function collectPortfolio(){
+  const existing = state.selectedIndex >= 0 ? (state.data.portfolio[state.selectedIndex] || {}) : {};
   return {
+    ...existing,
+    secretRoom: $('portfolio-secretroom').checked,
     title: $('portfolio-title').value.trim(),
     year: $('portfolio-year').value.trim(),
     role: $('portfolio-role').value.trim(),

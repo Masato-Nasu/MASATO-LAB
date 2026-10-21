@@ -58,6 +58,7 @@ export async function onRequest(context) {
       .replace(/<h1([^>]*)>Portfolio<\/h1>/,'<h1$1>SECRET ROOM</h1>')
       .replace('site.portfolioIntro','"限られた方へご紹介する作品。"')
       .replace('`${site.name} / Portfolio`','`${site.name} / SECRET ROOM`')
+      .replace(/<a id="secret-room-entry"[\s\S]*?<\/a>/,'<a class="secret-entry" href="/portfolio">BACK TO PORTFOLIO</a>')
       .replace('<script>','<form method="post" action="/secret-room/logout" style="margin-top:36px"><button class="read-more" type="submit">LOG OUT</button> <a href="/portfolio">BACK TO PORTFOLIO</a></form><script>');
     return html(body);
   }
@@ -99,7 +100,7 @@ export async function onRequest(context) {
   const response = await context.next();
   if (['/portfolio','/portfolio.html'].includes(path) && (response.headers.get('content-type')||'').includes('text/html')) {
     const headers = new Headers(response.headers); headers.delete('content-length'); headers.set('cache-control','no-store');
-    const body = (await response.text()).replace('<script>','<footer style="margin-top:44px;text-align:right"><a href="/secret-room" style="font-size:12px;letter-spacing:.12em;color:#6b7280">SECRET ROOM ↗</a></footer><script>');
+    const body = await response.text();
     return new Response(body,{status:response.status,headers});
   }
   return response;
