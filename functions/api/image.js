@@ -27,7 +27,7 @@ export async function onRequestGet(context) {
     return new Response('Invalid src', { status: 400 });
   }
 
-  const upstream = await fetch(assetUrl.toString());
+  const upstream = await fetch(assetUrl.toString(), {headers: {'cookie': context.request.headers.get('cookie') || ''}});
 
   if (!upstream.ok) {
     return new Response(upstream.body, {

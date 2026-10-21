@@ -542,7 +542,7 @@ function normalizeData(data = {}){
 }
 
 async function loadData(){
-  const candidates = ['/api/data', './data.json', 'data.json'];
+  const candidates = ['/secret-room/editor-data'];
   for (const url of candidates){
     try{
       const res = await fetch(url, { cache: 'no-store' });
@@ -554,8 +554,7 @@ async function loadData(){
       }
     }catch(e){}
   }
-  state.data = normalizeData(state.data);
-  render();
+  throw new Error('作品データを読み込めません。シークレットルームへログインしてから開き直してください。');
 }
 
 function currentCollection(){
