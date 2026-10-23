@@ -26,6 +26,18 @@ Before production rollout, retain Access protection on `/editor*` and extend the
 
 The editor loads all public and private works so saving cannot drop protected works. Existing KV/R2 bindings, content schemas, asset URLs and gallery links are unchanged. Authentication expiry produces an error without navigating away from unsaved edits; save a JSON backup before signing in again.
 
+### Diagnosing an administrator denial
+
+An `administrator_access_required` response now includes a fixed `reason` code. This does not relax authorization. It never echoes tokens, cookies, claim values, key data, or key-server response content.
+
+- `missing_access_token`: neither the Access assertion nor its application cookie reached the function. Check that the editor Access policy authenticates the user (an Access Bypass policy does not prove identity), and that the requested hostname/path is covered.
+- `access_issuer_mismatch` / `access_audience_mismatch` / `invalid_admin_configuration`: check the configured editor application's public identifiers.
+- `access_token_expired_or_invalid`, `access_token_not_yet_valid`, `access_token_issued_in_future`: check session renewal and token times.
+- `access_keys_unavailable` / `access_signing_key_unknown`: the function could not obtain the relevant public verification key. Check key-endpoint availability and rotation.
+- `invalid_access_token`, `invalid_token_header`, `access_signature_invalid`, `access_signature_validation_failed`: reject the token and investigate; never bypass signature checks to recover the editor.
+
+A successful anonymous denial does not validate a real administrator session. Verify the editor with an actual Access login before declaring the lockout resolved. Only share the fixed reason code for support, never the token or cookie.
+
 ### Release verification
 
 1. Run `node --test tests/*.test.mjs` and compile Pages Functions. Tests use generated RSA keys, mock JWKS and in-memory KV/R2; they do not authenticate to production, mutate real data or send uploads.

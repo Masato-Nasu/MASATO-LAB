@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {test,after} from 'node:test';
-import {adminAuthenticated,DEFAULT_ADMIN_AUD,DEFAULT_ADMIN_ISSUER} from '../functions/_admin-access.js';
+import {adminAuthenticated,inspectAdminAccess,requireAdmin,DEFAULT_ADMIN_AUD,DEFAULT_ADMIN_ISSUER} from '../functions/_admin-access.js';
 import {accessFixture} from './access-fixture.mjs';
 const fixture=await accessFixture();
 after(()=>fixture.restore());
@@ -33,6 +33,21 @@ test('tampering, other applications, wrong issuers, expired and future tokens fa
   assert(!await adminAuthenticated(request(parts.join('.')),{}));
   const attacker=await fixture.makeSigner('test-current');
   assert(!await adminAuthenticated(request(await attacker.sign({}, {jku:'https://evil.example/keys'})),{}));
+});
+
+test('diagnostics distinguish failures without echoing cookies, tokens, claims or upstream contents',async()=>{
+  assert.deepEqual(await inspectAdminAccess(request(null),{}),{authenticated:false,reason:'missing_access_token'});
+  assert.equal((await inspectAdminAccess(request('bad.token.value'),{})).reason,'invalid_access_token');
+  const wrongAudience=await fixture.sign({aud:['0'.repeat(64)]});
+  const denied=await requireAdmin(request(wrongAudience),{});
+  assert.equal(denied.status,403);
+  const body=await denied.json();
+  assert.deepEqual(body,{ok:false,error:'administrator_access_required',reason:'access_audience_mismatch'});
+  const serialized=JSON.stringify(body);
+  assert(!serialized.includes(wrongAudience));assert(!serialized.includes('admin@example.test'));
+  assert(!serialized.includes(DEFAULT_ADMIN_AUD));assert(!serialized.includes(DEFAULT_ADMIN_ISSUER));
+  assert.equal((await inspectAdminAccess(request(await fixture.sign({iss:'https://wrong.cloudflareaccess.com'})),{})).reason,'access_issuer_mismatch');
+  assert.equal((await inspectAdminAccess(request(await fixture.sign({exp:1})),{})).reason,'access_token_expired_or_invalid');
 });
 
 test('JWKS cache supports rotation and denies access if refreshed keys are unavailable',async()=>{
