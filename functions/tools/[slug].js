@@ -1,3 +1,4 @@
+import {isMainTool} from '../../tools-selection.js';
 function escapeHtml(value = '') {
   return String(value)
     .replace(/&/g, '&amp;')
@@ -41,6 +42,8 @@ function resolveImage(path = '') {
 }
 
 function renderPage(site, item) {
+  const backUrl = isMainTool(item) ? '/tools' : '/tools-other';
+  const backLabel = isMainTool(item) ? 'BACK TO TOOLS' : 'その他に戻る';
   const siteName = escapeHtml(site?.name || 'MASATO NASU');
   const tagline = escapeHtml(site?.tagline || 'Product Design · Computational Experiments · Personal Lab');
   const title = escapeHtml(item.title || 'Untitled');
@@ -56,7 +59,7 @@ function renderPage(site, item) {
   const links = [
     appUrl ? `<a class="btn primary" href="${escapeHtml(appUrl)}" target="_blank" rel="noopener noreferrer">OPEN APP</a>` : '',
     repoUrl ? `<a class="btn" href="${escapeHtml(repoUrl)}" target="_blank" rel="noopener noreferrer">GITHUB</a>` : '',
-    `<a class="btn" href="/tools.html">BACK TO TOOLS</a>`
+    `<a class="btn" href="${backUrl}">${backLabel}</a>`
   ].filter(Boolean).join('');
 
   return `<!doctype html>
@@ -78,7 +81,7 @@ function renderPage(site, item) {
     <h1 class="site-title">${siteName}</h1>
     <nav class="nav" aria-label="Main navigation"><a href="/">Home</a><a href="/portfolio.html">Portfolio</a><a href="/memory.html">Peripheral Memory</a><a href="/tools.html" class="active">Tools</a><a href="/about.html">About</a></nav>
     <div class="eyebrow">${tagline}</div><br>
-    <a class="back" href="/tools.html">← BACK TO TOOLS</a>
+    <a class="back" href="${backUrl}">← ${backLabel}</a>
     <article class="detail"><div class="kicker">TOOLS</div><h2>${title}</h2>${media}${description ? `<div class="description">${description}</div>` : ''}${tagsHtml}<div class="actions">${links}</div></article>
   </div>
 </body>

@@ -106,7 +106,8 @@
     </section>
   </div>
 
-  <script>
+  <script type="module">
+import {isMainTool, selectedToolRank} from "/tools-selection.js";
 
 function normalizeSite(site = {}) {
   return {
@@ -215,9 +216,10 @@ async function loadSiteData() {
         const highlights = [];
         if (portfolio[0]) highlights.push(buildHighlight('Portfolio', portfolio[0].title || 'Portfolio', trimSummary(portfolio[0].description || site.homePortfolioText), './portfolio.html'));
         if (memory[0]) highlights.push(buildHighlight('Peripheral Memory', memory[0].title || 'Peripheral Memory', trimSummary(memory[0].comment || site.homeMemoryText), './memory.html'));
-        if (tools[0]) {
+        const mainTool = tools.filter(isMainTool).sort((a,b)=>(selectedToolRank(a)<0?999:selectedToolRank(a))-(selectedToolRank(b)<0?999:selectedToolRank(b)))[0];
+        if (mainTool) {
           const toolSlugs = buildSlugs(tools);
-          highlights.push(buildHighlight('Tools', tools[0].title || 'Tools', trimSummary(tools[0].description || site.homeToolsText), `/tools/${encodeURIComponent(toolSlugs[0])}`));
+          highlights.push(buildHighlight('Tools', mainTool.title || 'Tools', trimSummary(mainTool.description || site.homeToolsText), `/tools/${encodeURIComponent(toolSlugs[tools.indexOf(mainTool)])}`));
         }
         if (!highlights.length) highlights.push(`<div class="empty-note">Editor で項目を追加すると、ここに導線が表示されます。</div>`);
         document.getElementById('highlight-grid').innerHTML = highlights.join('');

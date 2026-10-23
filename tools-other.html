@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MASATO NASU – その他</title>
+  <style>
+    [hidden]{display:none!important}.other-entry{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:28px;padding:22px 24px;border:1px solid var(--line);border-radius:20px;background:#fff;font-size:18px;font-weight:700}.other-entry span{font-size:14px;color:var(--muted);font-weight:400}
+    :root{--bg:#f5f5f3;--text:#111;--muted:#6b7280;--line:#d9d9d4;--card:#fff;--soft:#fafaf7}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;color:var(--text);background:var(--bg)}
+    a{color:inherit;text-decoration:none}
+    button,input{font:inherit}
+    .wrap{max-width:1360px;margin:0 auto;padding:28px 20px 64px}
+    .site-title{font-size:64px;line-height:.95;font-weight:800;letter-spacing:-.03em;margin:0 0 18px}
+    .nav{display:flex;gap:22px;flex-wrap:wrap;margin:0 0 28px}
+    .nav a{font-size:18px}.nav a.active{font-weight:700}
+    .eyebrow{display:inline-flex;align-items:center;min-height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:#fafaf7;color:var(--muted);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+    .page-head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:24px;margin:18px 0 26px}
+    .page-title{font-size:72px;line-height:.95;font-weight:800;letter-spacing:-.04em;margin:0 0 14px}
+    .page-intro{margin:0;color:var(--muted);font-size:18px;max-width:760px;white-space:pre-wrap}
+    .project-count{font-size:14px;color:var(--muted);white-space:nowrap;padding-bottom:4px}
+    .toolbar{display:grid;gap:12px;padding:14px;margin:0 0 13px;background:rgba(255,255,255,.82);border:1px solid var(--line);border-radius:22px;box-shadow:0 6px 20px rgba(0,0,0,.035);backdrop-filter:blur(10px)}
+    .search-wrap{position:relative;max-width:520px}
+    .search{width:100%;min-height:46px;border:1px solid var(--line);border-radius:15px;background:#fff;color:var(--text);outline:none;padding:0 44px 0 15px;transition:border-color .18s ease,box-shadow .18s ease}
+    .search:focus{border-color:#999;box-shadow:0 0 0 3px rgba(0,0,0,.05)}
+    .search-clear{position:absolute;right:7px;top:50%;transform:translateY(-50%);width:32px;height:32px;border:0;border-radius:50%;background:transparent;color:var(--muted);cursor:pointer;font-size:20px;line-height:1}
+    .search-clear:hover{background:#f1f1ee;color:var(--text)}
+    .filter-row{display:grid;grid-template-columns:88px minmax(0,1fr);gap:10px;align-items:start}
+    .filter-label{font-size:11px;font-weight:750;letter-spacing:.08em;color:var(--muted);padding:11px 0 0 2px;text-transform:uppercase}
+    .filters{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:1px}.filters::-webkit-scrollbar{display:none}
+    .filter{flex:0 0 auto;min-height:38px;padding:0 13px;border-radius:999px;border:1px solid var(--line);background:#fff;color:#333;cursor:pointer;font-size:12px;font-weight:650;letter-spacing:.01em}
+    .filter:hover{border-color:#aaa}.filter.active{background:#111;color:#fff;border-color:#111}
+    .status-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 2px 14px}
+    .result-count{font-size:13px;color:var(--muted)}
+    .reset{border:0;background:transparent;color:var(--muted);font-size:13px;cursor:pointer;padding:4px 0;text-decoration:underline;text-underline-offset:3px}.reset[hidden]{display:none}
+    .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+    .card{min-width:0;background:var(--card);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.02);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+    .card:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(0,0,0,.065);border-color:#c7c7c1}
+    .media{position:relative;width:100%;aspect-ratio:16/10;background:#efefec;border-bottom:1px solid var(--line);overflow:hidden}
+    .media-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.12);filter:blur(18px) saturate(1.03);opacity:.76}
+    .media-overlay{position:absolute;inset:0;background:rgba(255,255,255,.11);pointer-events:none}
+    .media-fg-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:14px}
+    .media-fg{max-width:100%;max-height:100%;width:auto;height:auto;display:block;position:relative;z-index:2;border-radius:10px;box-shadow:0 2px 14px rgba(0,0,0,.08)}
+    .media-placeholder{display:flex;align-items:flex-end;width:100%;aspect-ratio:16/10;padding:16px;background:linear-gradient(145deg,#ecece8,#f8f8f5);border-bottom:1px solid var(--line);color:#9a9a94;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+    .content{padding:15px 15px 16px}
+    .category{font-size:10px;line-height:1.2;color:var(--muted);font-weight:750;letter-spacing:.075em;text-transform:uppercase;margin:0 0 6px}
+    .tool-title{font-size:18px;line-height:1.2;font-weight:800;margin:0 0 8px;letter-spacing:-.018em;overflow-wrap:anywhere}
+    .desc{font-size:13px;line-height:1.6;color:#333;margin:0 0 12px;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;min-height:62px}
+    .meta{display:flex;align-items:center;gap:6px;min-height:26px;margin:0 0 13px;overflow:hidden}
+    .tag{flex:0 1 auto;max-width:106px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10px;line-height:1;padding:7px 8px;border-radius:999px;border:1px solid var(--line);color:#555;background:var(--soft)}
+    .tag.more{flex:0 0 auto;color:var(--muted)}
+    .links{display:flex;align-items:center;gap:8px;min-height:36px;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12px;font-weight:650;transition:background .16s ease,border-color .16s ease}
+    .btn:hover{border-color:#aaa}.btn.primary{background:#111;color:#fff;border-color:#111}.btn.primary:hover{background:#292929}
+    .empty{grid-column:1/-1;color:var(--muted);font-size:15px;border:1px dashed var(--line);border-radius:20px;padding:28px;text-align:center;background:rgba(255,255,255,.48)}
+    @media(max-width:1100px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media(max-width:820px){.page-head{grid-template-columns:1fr;gap:8px}.project-count{padding:0}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:640px){.filter-row{grid-template-columns:1fr;gap:4px}.filter-label{padding-top:2px}.filters{margin-right:-10px;padding-right:10px}}
+    @media(max-width:560px){.wrap{padding:18px 12px 44px}.site-title{font-size:40px}.page-title{font-size:54px}.nav{gap:14px;margin-bottom:20px}.nav a{font-size:15px}.eyebrow{font-size:10px}.page-intro{font-size:15px;line-height:1.65}.page-head{margin:12px 0 20px}.toolbar{padding:10px;border-radius:18px}.grid{grid-template-columns:1fr;gap:13px}.card{display:grid;grid-template-columns:124px minmax(0,1fr);border-radius:18px}.media,.media-placeholder{height:100%;min-height:188px;aspect-ratio:auto;border-bottom:0;border-right:1px solid var(--line)}.media-fg-wrap{padding:8px}.content{padding:13px}.tool-title{font-size:17px}.desc{font-size:12px;line-height:1.55;min-height:auto;-webkit-line-clamp:3}.meta{margin-bottom:10px}.tag{max-width:86px}.btn{min-height:34px;padding:0 10px;font-size:11px}}
+    @media(max-width:390px){.card{grid-template-columns:106px minmax(0,1fr)}.media,.media-placeholder{min-height:180px}.tag:nth-child(3){display:none}}
+  </style>
+</head>
+<body data-tools-page="other">
+  <div class="wrap">
+    <h1 class="site-title" id="site-title">MASATO NASU</h1>
+    <nav class="nav" aria-label="Main navigation">
+      <a href="./">Home</a>
+      <a href="./portfolio.html">Portfolio</a>
+      <a href="./memory.html">Peripheral Memory</a>
+      <a href="./tools.html" class="active">Tools</a>
+      <a href="./about.html">About</a>
+    </nav>
+    <div class="eyebrow" id="tools-eyebrow">Product Design · Computational Experiments · Personal Lab</div>
+    <div class="page-head">
+      <div>
+        <h2 class="page-title" id="pageTitle">その他</h2>
+        <p class="page-intro" id="tools-intro">Apps, prototypes, and utilities built for actual use.</p>
+      </div>
+      <div class="project-count" id="projectCount"></div>
+    </div>
+    <section class="toolbar" aria-label="Tools search and filters">
+      <div class="search-wrap">
+        <input id="searchInput" class="search" type="search" placeholder="Search tools…" autocomplete="off" aria-label="Search tools">
+        <button id="clearSearch" class="search-clear" type="button" aria-label="Clear search" title="Clear">×</button>
+      </div>
+      <div class="filter-row">
+        <div class="filter-label">Genre</div>
+        <div class="filters" id="genreFilters" role="group" aria-label="Filter tools by genre">
+          <button class="filter active" type="button" data-genre="all">ALL</button>
+          <button class="filter" type="button" data-genre="language-learning">LANGUAGE・LEARNING</button>
+          <button class="filter" type="button" data-genre="photo-camera">PHOTO・CAMERA</button>
+          <button class="filter" type="button" data-genre="music-sound">MUSIC・SOUND</button>
+          <button class="filter" type="button" data-genre="life-utility">LIFE・UTILITY</button>
+          <button class="filter" type="button" data-genre="cipher-security">CIPHER・SECURITY</button>
+          <button class="filter" type="button" data-genre="visual-math">VISUAL・MATH</button>
+          <button class="filter" type="button" data-genre="6seg">6SEG</button>
+          <button class="filter" type="button" data-genre="game">GAME</button>
+          <button class="filter" type="button" data-genre="art-concept">ART・CONCEPT</button>
+        </div>
+      </div>
+      <div class="filter-row">
+        <div class="filter-label">Platform</div>
+        <div class="filters" id="platformFilters" role="group" aria-label="Filter tools by platform. Multiple selections are allowed.">
+          <button class="filter active" type="button" data-platform="all">ALL</button>
+          <button class="filter" type="button" data-platform="web">WEB・PWA</button>
+          <button class="filter" type="button" data-platform="android">ANDROID</button>
+          <button class="filter" type="button" data-platform="linux">LINUX</button>
+          <button class="filter" type="button" data-platform="windows">WINDOWS</button>
+          <button class="filter" type="button" data-platform="mac">MAC</button>
+          <button class="filter" type="button" data-platform="ai">AI</button>
+        </div>
+      </div>
+    </section>
+    <div class="status-row">
+      <div class="result-count" id="resultCount"></div>
+      <button id="resetBtn" class="reset" type="button" hidden>Reset filters</button>
+    </div>
+    <div id="toolsGrid" class="grid"></div>
+    <a class="other-entry" id="otherToolsLink" href="/tools-other">その他 <span id="otherToolsCount">ほかのアプリを見る →</span></a>
+    <a class="other-entry" id="mainToolsLink" href="/tools" hidden>← TOOLSに戻る</a>
+  </div>
+
+  <script type="module">
+    import { isMainTool, selectedToolRank } from '/tools-selection.js';
+    const otherPage = document.body.dataset.toolsPage === 'other';
+    document.querySelector('.toolbar').hidden = !otherPage;
+    document.querySelector('.status-row').hidden = !otherPage;
+    document.getElementById('otherToolsLink').hidden = otherPage;
+    document.getElementById('mainToolsLink').hidden = !otherPage;
+    document.getElementById('pageTitle').textContent = otherPage ? 'その他' : 'Tools';
+
+    const CATEGORY_LABELS={
+      'language-learning':'LANGUAGE・LEARNING',
+      'photo-camera':'PHOTO・CAMERA',
+      'music-sound':'MUSIC・SOUND',
+      'life-utility':'LIFE・UTILITY',
+      'cipher-security':'CIPHER・SECURITY',
+      'visual-math':'VISUAL・MATH',
+      '6seg':'6SEG',
+      'game':'GAME',
+      'art-concept':'ART・CONCEPT'
+    };
+
+    function titleKey(value=''){
+      return String(value).normalize('NFKC').toLowerCase().replace(/[‐‑‒–—―]/g,'-').replace(/\s+/g,' ').trim();
+    }
+
+    function slugify(value=''){
+      return String(value||'').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\u3040-\u30ff\u3400-\u9fff]+/g,'-').replace(/^-+|-+$/g,'')||'item';
+    }
+
+    function buildSlugs(items){
+      const used=new Map();
+      return items.map((item,index)=>{
+        const base=slugify(item.slug||item.title||`item-${index+1}`);
+        const count=used.get(base)||0;
+        used.set(base,count+1);
+        return count?`${base}-${count+1}`:base;
+      });
+    }
+
+    const CURATED_CATEGORY=new Map(Object.entries({
+      '付喪神の独り言':'art-concept',
+      'dream analyzer':'life-utility',
+      'realtime translator':'language-learning',
+      'trash to track':'music-sound',
+      'data bottle':'visual-math',
+      'kanon':'language-learning',
+      '5 words':'language-learning',
+      'time will tell':'life-utility',
+      'toktok':'life-utility',
+      '7d camera':'photo-camera',
+      'sana language':'6seg',
+      'day-grid':'visual-math',
+      'fog glass':'photo-camera',
+      'glyph-cypher-6seg-revised':'6seg',
+      'glyph-cypher-6seg':'6seg',
+      '6 seg script':'6seg',
+      '6 seg clock':'6seg',
+      'done':'life-utility',
+      'kakei-bo3':'life-utility',
+      '言い間違い採取帳':'life-utility',
+      'year 4000 o-parts':'art-concept',
+      'dem hidden cypher':'cipher-security',
+      'turing cypher 2':'cipher-security',
+      'turing-cypher':'cipher-security',
+      'kakei-bo2':'life-utility',
+      'inner-animal':'life-utility',
+      'kirei filter air':'photo-camera',
+      'aiのひとりごと':'art-concept',
+      'a massage to you!':'art-concept',
+      'hyper-haiku':'art-concept',
+      'code 904':'art-concept',
+      'kakei-bo':'life-utility',
+      'kirei-filter':'photo-camera',
+      'glance note':'music-sound',
+      '放課後camera':'photo-camera',
+      'visualized-theremin-2':'music-sound',
+      'aerial - theremin recorder':'music-sound',
+      'wakemusic':'music-sound',
+      'gray-scott visualizer':'visual-math',
+      'reaction-diffusion (rd)':'visual-math',
+      'mandelbrot explorer (ultradeep)':'visual-math',
+      'ephemeralcypher / エフェメラルサイファー':'cipher-security',
+      'oulipo〈s+7〉':'art-concept',
+      '100% horoscope':'life-utility',
+      'siren terminal':'life-utility',
+      'photo translator / 画像タグ翻訳 pwa':'language-learning',
+      'tango-cho':'language-learning',
+      'lyricspocket':'language-learning',
+      'pocketbridge':'language-learning',
+      'jiji fighter':'game',
+      'jiji-fighter':'game'
+    }).map(([k,v])=>[titleKey(k),v]));
+
+    const CURATED_PLATFORM=new Map(Object.entries({
+      'trash to track':['android'],
+      'data bottle':['android'],
+      'kanon':['android'],
+      'day-grid':['android'],
+      '6 seg clock':['android'],
+      'done':['android'],
+      'wakemusic':['android'],
+      'ephemeralcypher / エフェメラルサイファー':['android']
+    }).map(([k,v])=>[titleKey(k),v]));
+
+    const CURATED_AI=new Set([
+      '付喪神の独り言',
+      'DREAM ANALYZER',
+      'REALTIME TRANSLATOR',
+      'KANON',
+      'YEAR 4000 O-PARTS',
+      'AIのひとりごと',
+      'HYPER-HAIKU',
+      'CODE 904',
+      'Photo Translator / 画像タグ翻訳 PWA'
+    ].map(titleKey));
+
+    function normalizeSite(site={}){
+      return{
+        name:site.name||'MASATO NASU',
+        tagline:site.tagline||'Product Design · Computational Experiments · Personal Lab',
+        toolsIntro:site.toolsIntro||'Apps, prototypes, and utilities built for actual use.'
+      };
+    }
+
+    function escapeHtml(value=''){
+      return String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+
+    function normalizeTags(tags){
+      if(Array.isArray(tags)) return tags.filter(Boolean).map(String);
+      if(typeof tags==='string') return tags.split(',').map(s=>s.trim()).filter(Boolean);
+      return [];
+    }
+
+    async function loadSiteData(){
+      const candidates=['/api/data','./data.json','data.json'];
+      let lastError=null;
+      for(const url of candidates){
+        try{
+          const res=await fetch(url,{cache:'no-store'});
+          if(!res.ok) throw new Error(`Failed to load ${url}`);
+          return await res.json();
+        }catch(error){lastError=error;}
+      }
+      throw lastError||new Error('Failed to load data');
+    }
+    function searchableText(tool){
+      return [tool.title,tool.description,tool.category,tool.genre,tool.platform,tool.platforms,...normalizeTags(tool.tags),tool.appUrl,tool.repoUrl].filter(Boolean).join(' ').toLowerCase();
+    }
+
+    function tagValue(tool,prefixes){
+      const tags=normalizeTags(tool.tags);
+      for(const tag of tags){
+        const lower=String(tag).toLowerCase();
+        for(const prefix of prefixes){
+          if(lower.startsWith(prefix+':')) return lower.slice(prefix.length+1).trim();
+        }
+      }
+      return '';
+    }
+
+    function normalizeCategory(value){
+      const v=String(value||'').trim().toLowerCase().replace(/[_ ]+/g,'-');
+      const aliases={
+        language:'language-learning',learning:'language-learning','language-learning':'language-learning','ai-language':'language-learning',
+        photo:'photo-camera',camera:'photo-camera',image:'photo-camera','photo-camera':'photo-camera','camera-image':'photo-camera',
+        music:'music-sound',sound:'music-sound',audio:'music-sound','music-sound':'music-sound','audio-music':'music-sound',
+        life:'life-utility',utility:'life-utility',productivity:'life-utility','life-utility':'life-utility',
+        cipher:'cipher-security',security:'cipher-security','cipher-security':'cipher-security','security-cipher':'cipher-security',
+        visual:'visual-math',math:'visual-math','visual-math':'visual-math','visual-generative':'visual-math',
+        '6seg':'6seg','6-seg':'6seg','sixseg':'6seg',
+        'game':'game','games':'game','gaming':'game','ゲーム':'game','シューティング':'game',
+        art:'art-concept',concept:'art-concept',experiment:'art-concept','art-concept':'art-concept','memory-lifelog':'life-utility'
+      };
+      return aliases[v]||'';
+    }
+
+    function inferCategory(tool){
+      const curated=CURATED_CATEGORY.get(titleKey(tool.title));
+      if(curated==='6seg') return curated;
+      const explicit=normalizeCategory(tool.category||tool.genre||tagValue(tool,['category','genre']));
+      if(explicit) return explicit;
+      if(curated) return curated;
+      const text=searchableText(tool);
+      if(/(シューティングゲーム|シューティング|shooting game|rail shooter|arcade game|ゲーム|video game|ゲーム開発|ジジファイター|jiji[ -]?fighter)/i.test(text)) return 'game';
+      if(/(translator|translation|language|英語|英単語|単語|学習|study|reading|lyrics|言語|文章|文字|辞書|俳句)/i.test(text)) return 'language-learning';
+      if(/(camera|photo|image|写真|撮影|filter|画像補正|画像処理)/i.test(text)) return 'photo-camera';
+      if(/(theremin|music|sound|audio|音楽|楽器|録音|再生)/i.test(text)) return 'music-sound';
+      if(/(cipher|cypher|crypto|encrypt|decrypt|暗号|aes|stegan|security|認証)/i.test(text)) return 'cipher-security';
+      if(/(mandelbrot|gray.?scott|reaction.?diffusion|fractal|math|simulation|可視化|visualizer|時計|clock|widget|segment)/i.test(text)) return 'visual-math';
+      if(/(家計|todo|task|reminder|alarm|horoscope|診断|生活|utility|予定|deal|coupon|dream)/i.test(text)) return 'life-utility';
+      return 'art-concept';
+    }
+
+    function normalizePlatforms(value){
+      const raw=Array.isArray(value)?value:String(value||'').split(/[,/|+]/);
+      const set=new Set();
+      raw.map(v=>String(v).trim().toLowerCase()).forEach(v=>{
+        if(!v) return;
+        if(v==='both'||v==='all'){set.add('web');set.add('android');return;}
+        if(/android|apk|play/.test(v)) set.add('android');
+        if(/web|pwa|browser/.test(v)) set.add('web');
+        if(/linux|ubuntu|debian|mint/.test(v)) set.add('linux');
+        if(/windows|win32|win64|win10|win11/.test(v)) set.add('windows');
+        if(/^(mac|macos|mac os|osx|darwin)$/.test(v)) set.add('mac');
+        if(v==='ai'||/openai|gpt|claude|gemini|llm/.test(v)) set.add('ai');
+      });
+      return [...set];
+    }
+
+    function inferPlatforms(tool){
+      const explicit=normalizePlatforms(tool.platforms||tool.platform||tagValue(tool,['platform']));
+      const curated=CURATED_PLATFORM.get(titleKey(tool.title));
+      const set=new Set(explicit.length?explicit:(curated||[]));
+      if(!explicit.length&&!curated){
+        const text=searchableText(tool);
+        if(/(android app|androidアプリ|\bapk\b|google play|play store)/i.test(text)) set.add('android');
+        else set.add('web');
+      }
+      const text=searchableText(tool);
+      if(CURATED_AI.has(titleKey(tool.title))||/(^|[^a-z])ai([^a-z]|$)|gpt|openai|claude|gemini|llm|whisper|生成ai|人工知能/i.test(text)) set.add('ai');
+      return [...set];
+    }
+
+    function genreMatch(tool,genre){return genre==='all'||inferCategory(tool)===genre;}
+    function platformMatch(tool,platforms){
+      if(!platforms.size) return true;
+      const toolPlatforms=inferPlatforms(tool);
+      return [...platforms].every(platform=>toolPlatforms.includes(platform));
+    }
+
+    function mediaHtml(tool,title){
+      const image=tool.image||'';
+      if(!image) return '<div class="media-placeholder">MASATO LAB</div>';
+      const fit=tool.imageFit==='cover'?'cover':'contain';
+      return `<div class="media">
+        <img class="media-bg" src="${escapeHtml(image)}" alt="" loading="lazy" aria-hidden="true">
+        <div class="media-overlay"></div>
+        <div class="media-fg-wrap"><img class="media-fg" style="object-fit:${fit}" src="${escapeHtml(image)}" alt="${title}" loading="lazy"></div>
+      </div>`;
+    }
+
+    function toolCard(tool){
+      const title=escapeHtml(tool.title||'Untitled');
+      const desc=escapeHtml(tool.description||'');
+      const category=inferCategory(tool);
+      const tags=normalizeTags(tool.tags).filter(tag=>!/^\s*(category|genre|platform)\s*:/i.test(tag));
+      const shownTags=tags.slice(0,3);
+      const extra=Math.max(0,tags.length-shownTags.length);
+      const tagHtml=shownTags.map(tag=>`<span class="tag">#${escapeHtml(tag)}</span>`).join('')+(extra?`<span class="tag more">+${extra}</span>`:'');
+      const detailSlug=tool.__detailSlug||slugify(tool.title||'item');
+      const detailLink=`<a class="btn" href="/tools/${encodeURIComponent(detailSlug)}">READ MORE</a>`;
+      const appLink=tool.appUrl?`<a class="btn primary" href="${escapeHtml(tool.appUrl)}" target="_blank" rel="noopener noreferrer">OPEN</a>`:'';
+      const repoLink=tool.repoUrl?`<a class="btn" href="${escapeHtml(tool.repoUrl)}" target="_blank" rel="noopener noreferrer">GITHUB</a>`:'';
+      return `<article class="card">
+        ${mediaHtml(tool,title)}
+        <div class="content">
+          <div class="category">${escapeHtml(CATEGORY_LABELS[category]||'ART・CONCEPT')}</div>
+          <h3 class="tool-title">${title}</h3>
+          ${desc?`<p class="desc">${desc}</p>`:'<p class="desc"></p>'}
+          <div class="meta">${tagHtml}</div>
+          <div class="links">${detailLink}${appLink}${repoLink}</div>
+        </div>
+      </article>`;
+    }
+
+    const state={items:[],genre:'all',platforms:new Set(),query:''};
+    const grid=document.getElementById('toolsGrid');
+    const searchInput=document.getElementById('searchInput');
+    const clearSearch=document.getElementById('clearSearch');
+    const resetBtn=document.getElementById('resetBtn');
+    const resultCount=document.getElementById('resultCount');
+    const projectCount=document.getElementById('projectCount');
+    const genreButtons=[...document.querySelectorAll('[data-genre]')];
+    const platformButtons=[...document.querySelectorAll('[data-platform]')];
+
+    function syncPlatformButtons(){
+      platformButtons.forEach(btn=>{
+        const platform=btn.dataset.platform||'all';
+        btn.classList.toggle('active',platform==='all'?state.platforms.size===0:state.platforms.has(platform));
+      });
+    }
+
+    function render(){
+      const query=state.query.trim().toLowerCase();
+      const visible=state.items.filter(tool=>genreMatch(tool,state.genre)&&platformMatch(tool,state.platforms)&&(!query||searchableText(tool).includes(query)));
+      grid.innerHTML=visible.length?visible.map(toolCard).join(''):'<div class="empty">該当するToolがありません。検索語またはフィルターを変更してください。</div>';
+      resultCount.textContent=`${visible.length} / ${state.items.length} tools`;
+      projectCount.textContent=`${state.items.length} PROJECTS`;
+      resetBtn.hidden=state.genre==='all'&&state.platforms.size===0&&!query;
+    }
+
+    function reset(){
+      state.genre='all';state.platforms.clear();state.query='';searchInput.value='';
+      genreButtons.forEach(btn=>btn.classList.toggle('active',btn.dataset.genre==='all'));
+      syncPlatformButtons();
+      render();
+    }
+
+    searchInput.addEventListener('input',()=>{state.query=searchInput.value;render();});
+    clearSearch.addEventListener('click',()=>{state.query='';searchInput.value='';searchInput.focus();render();});
+    resetBtn.addEventListener('click',reset);
+    genreButtons.forEach(btn=>btn.addEventListener('click',()=>{
+      state.genre=btn.dataset.genre||'all';
+      genreButtons.forEach(b=>b.classList.toggle('active',b===btn));
+      render();
+    }));
+    platformButtons.forEach(btn=>btn.addEventListener('click',()=>{
+      const platform=btn.dataset.platform||'all';
+      if(platform==='all'){
+        state.platforms.clear();
+      }else if(state.platforms.has(platform)){
+        state.platforms.delete(platform);
+      }else{
+        state.platforms.add(platform);
+      }
+      syncPlatformButtons();
+      render();
+    }));
+
+    async function main(){
+      try{
+        const data=await loadSiteData();
+        const site=normalizeSite(data.site||{});
+        document.getElementById('site-title').textContent=site.name;
+        document.getElementById('tools-eyebrow').textContent=site.tagline;
+        document.getElementById('tools-intro').textContent=otherPage ? 'これまでに制作したアプリや実験。' : '日常の道具から、言葉・データ・暗号の実験、ゲームまで。';
+        document.title=`${site.name} / ${otherPage ? "その他" : "Tools"}`;
+        const items=Array.isArray(data.tools)?data.tools:[];
+        const slugs=buildSlugs(items);
+        const allItems=items.map((tool,index)=>({...tool,__detailSlug:slugs[index]}));
+        state.items=allItems.filter(tool=>otherPage ? !isMainTool(tool) : isMainTool(tool));
+        if(!otherPage) state.items.sort((a,b)=>{
+          const rank=t=>selectedToolRank(t)<0?999:selectedToolRank(t);
+          return rank(a)-rank(b);
+        });
+        document.getElementById('otherToolsCount').textContent=`${allItems.filter(t=>!isMainTool(t)).length}件のアプリを見る →`;
+        render();
+      }catch(error){
+        console.error(error);
+        grid.innerHTML='<div class="empty">Tools の読み込みに失敗しました。/api/data または data.json を確認してください。</div>';
+        resultCount.textContent='';projectCount.textContent='';
+      }
+    }
+
+    main();
+  </script>
+</body>
+</html>

@@ -273,6 +273,7 @@
       <section class="section" id="section-tools">
         <div class="stack">
           <div class="field"><label>Title</label><input id="tools-title"></div>
+          <div class="field"><label for="tools-placement">掲載先</label><select id="tools-placement"><option value="other">その他</option><option value="main">TOOLS</option></select><div class="helper-note">TOOLSには主なアプリを掲載し、それ以外は「その他」ページにまとめます。</div></div>
           <div class="grid2">
             <div class="field">
               <label>Category</label>
@@ -394,7 +395,8 @@
   </div>
 </div>
 
-<script>
+<script type="module">
+import {isMainTool} from "/tools-selection.js";
 const siteDefaults = {
   name: 'MASATO NASU',
   tagline: 'Product Design · Computational Experiments · Personal Lab',
@@ -595,7 +597,7 @@ function renderList(){
       ? escapeHtml([item.secretRoom ? '🔒 SECRET ROOM' : '公開', item.year, item.role, item.noImageIndex ? 'image noindex' : '', item.noSnippet ? 'data-nosnippet' : ''].filter(Boolean).join(' / '))
       : state.currentType === 'memory'
       ? escapeHtml([item.date, item.url].filter(Boolean).join(' / '))
-      : escapeHtml([item.appUrl, item.repoUrl].filter(Boolean).join(' / '));
+      : escapeHtml([isMainTool(item) ? 'TOOLS' : 'その他', item.appUrl, item.repoUrl].filter(Boolean).join(' / '));
     return `<div class="item ${i===state.selectedIndex?'active':''}" data-index="${i}"><div class="item-title">${title}</div><div class="item-meta">${meta}</div></div>`;
   }).join('');
   list.querySelectorAll('.item[data-index]').forEach(el=>{
@@ -670,6 +672,7 @@ function renderForm(){
 
   const t = (state.currentType==='tools' && state.selectedIndex>=0) ? state.data.tools[state.selectedIndex] : getBlank('tools');
   $('tools-title').value = t.title || '';
+  $('tools-placement').value = isMainTool(t) ? 'main' : 'other';
   $('tools-category').value = t.category || '';
   $('tools-description').value = t.description || '';
   $('tools-image').value = t.image || '';
@@ -744,6 +747,7 @@ function collectTools(){
     platforms: [...document.querySelectorAll('input[name="tools-platform"]:checked')].map(input=>input.value),
     category: $('tools-category').value,
     title: $('tools-title').value.trim(),
+    toolsPlacement: $('tools-placement').value,
     description: $('tools-description').value,
     image: $('tools-image').value.trim(),
     imageRatio: $('tools-ratio').value,

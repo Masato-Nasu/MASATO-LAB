@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MASATO NASU – Tools</title>
   <style>
+    [hidden]{display:none!important}.other-entry{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:28px;padding:22px 24px;border:1px solid var(--line);border-radius:20px;background:#fff;font-size:18px;font-weight:700}.other-entry span{font-size:14px;color:var(--muted);font-weight:400}
     :root{--bg:#f5f5f3;--text:#111;--muted:#6b7280;--line:#d9d9d4;--card:#fff;--soft:#fafaf7}
     *{box-sizing:border-box}
     html{scroll-behavior:smooth}
@@ -74,7 +75,7 @@
     <div class="eyebrow" id="tools-eyebrow">Product Design · Computational Experiments · Personal Lab</div>
     <div class="page-head">
       <div>
-        <h2 class="page-title">Tools</h2>
+        <h2 class="page-title" id="pageTitle">Tools</h2>
         <p class="page-intro" id="tools-intro">Apps, prototypes, and utilities built for actual use.</p>
       </div>
       <div class="project-count" id="projectCount"></div>
@@ -117,9 +118,19 @@
       <button id="resetBtn" class="reset" type="button" hidden>Reset filters</button>
     </div>
     <div id="toolsGrid" class="grid"></div>
+    <a class="other-entry" id="otherToolsLink" href="/tools-other">その他 <span id="otherToolsCount">ほかのアプリを見る →</span></a>
+    <a class="other-entry" id="mainToolsLink" href="/tools" hidden>← TOOLSに戻る</a>
   </div>
 
-  <script>
+  <script type="module">
+    import { isMainTool, selectedToolRank } from '/tools-selection.js';
+    const otherPage = document.body.dataset.toolsPage === 'other';
+    document.querySelector('.toolbar').hidden = !otherPage;
+    document.querySelector('.status-row').hidden = !otherPage;
+    document.getElementById('otherToolsLink').hidden = otherPage;
+    document.getElementById('mainToolsLink').hidden = !otherPage;
+    document.getElementById('pageTitle').textContent = otherPage ? 'その他' : 'Tools';
+
     const CATEGORY_LABELS={
       'language-learning':'LANGUAGE・LEARNING',
       'photo-camera':'PHOTO・CAMERA',
@@ -437,11 +448,17 @@
         const site=normalizeSite(data.site||{});
         document.getElementById('site-title').textContent=site.name;
         document.getElementById('tools-eyebrow').textContent=site.tagline;
-        document.getElementById('tools-intro').textContent=site.toolsIntro;
-        document.title=`${site.name} / Tools`;
+        document.getElementById('tools-intro').textContent=otherPage ? 'これまでに制作したアプリや実験。' : '日常の道具から、言葉・データ・暗号の実験、ゲームまで。';
+        document.title=`${site.name} / ${otherPage ? "その他" : "Tools"}`;
         const items=Array.isArray(data.tools)?data.tools:[];
         const slugs=buildSlugs(items);
-        state.items=items.map((tool,index)=>({...tool,__detailSlug:slugs[index]}));
+        const allItems=items.map((tool,index)=>({...tool,__detailSlug:slugs[index]}));
+        state.items=allItems.filter(tool=>otherPage ? !isMainTool(tool) : isMainTool(tool));
+        if(!otherPage) state.items.sort((a,b)=>{
+          const rank=t=>selectedToolRank(t)<0?999:selectedToolRank(t);
+          return rank(a)-rank(b);
+        });
+        document.getElementById('otherToolsCount').textContent=`${allItems.filter(t=>!isMainTool(t)).length}件のアプリを見る →`;
         render();
       }catch(error){
         console.error(error);
