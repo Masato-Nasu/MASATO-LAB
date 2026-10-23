@@ -31,7 +31,8 @@ async function publicKeys(issuer, kid) {
   if (pending?.issuer === issuer) return pending.promise;
   const promise = (async()=>{
     const response = await fetch(`${issuer}/cdn-cgi/access/certs`, {
-      redirect:'error', signal:AbortSignal.timeout(5000),
+      // Workers supports manual/follow only; reject 3xx below without following.
+      redirect:'manual', signal:AbortSignal.timeout(5000),
       headers:{accept:'application/json'}
     });
     if (!response.ok) throw new Error('Access keys unavailable');

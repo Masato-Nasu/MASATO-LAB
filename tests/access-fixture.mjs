@@ -16,12 +16,13 @@ export async function accessFixture() {
   }
   const signer=await makeSigner('test-current');
   const originalFetch=globalThis.fetch;
-  let keys=[signer.jwk],calls=0,unavailable=false;
+  let keys=[signer.jwk],calls=0,unavailable=false,redirect=false;
   globalThis.fetch=async (url,options)=>{
     if(url!==`${DEFAULT_ADMIN_ISSUER}/cdn-cgi/access/certs`)throw new Error('Unexpected external call in offline test');
-    if(options?.redirect!=='error')throw new Error('Key fetch must reject redirects');
+    if(options?.redirect!=='manual')throw new Error('Key fetch must reject redirects');
     calls++;
+    if(redirect)return new Response(null,{status:302,headers:{location:'https://evil.example/keys'}});
     return unavailable ? new Response('Unavailable',{status:503}) : Response.json({keys});
   };
-  return {...signer,makeSigner,restore:()=>{globalThis.fetch=originalFetch;},setKeys:value=>{keys=value;},setUnavailable:value=>{unavailable=value;},get calls(){return calls;}};
+  return {...signer,makeSigner,restore:()=>{globalThis.fetch=originalFetch;},setKeys:value=>{keys=value;},setUnavailable:value=>{unavailable=value;},setRedirect:value=>{redirect=value;},get calls(){return calls;}};
 }

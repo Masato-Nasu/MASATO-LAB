@@ -64,3 +64,14 @@ test('JWKS cache supports rotation and denies access if refreshed keys are unava
     assert(await adminAuthenticated(request(await second.sign()),{}));
   } finally { Date.now=originalNow; }
 });
+
+
+test('key endpoint redirects are rejected without following or granting access',async()=>{
+  const originalNow=Date.now,base=originalNow();
+  try {
+    Date.now=()=>base+15*60*1000;
+    fixture.setRedirect(true);
+    const result=await inspectAdminAccess(request(await fixture.sign()),{});
+    assert.deepEqual(result,{authenticated:false,reason:'access_keys_unavailable'});
+  } finally { Date.now=originalNow; fixture.setRedirect(false); }
+});
