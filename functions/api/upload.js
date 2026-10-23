@@ -1,4 +1,5 @@
 
+import {requireAdmin} from '../_admin-access.js';
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -22,6 +23,8 @@ function sanitizeFilename(name = "image") {
 }
 
 export async function onRequestPost(context) {
+  const denied = await requireAdmin(context.request,context.env);
+  if (denied) return denied;
   try {
     const bucket = context.env.MEDIA;
     if (!bucket) {

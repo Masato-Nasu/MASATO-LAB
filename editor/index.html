@@ -546,7 +546,7 @@ function normalizeData(data = {}){
 }
 
 async function loadData(){
-  const candidates = ['/secret-room/editor-data'];
+  const candidates = ['/editor/data'];
   for (const url of candidates){
     try{
       const res = await fetch(url, { cache: 'no-store' });
@@ -558,7 +558,7 @@ async function loadData(){
       }
     }catch(e){}
   }
-  throw new Error('作品データを読み込めません。シークレットルームへログインしてから開き直してください。');
+  throw new Error('作品データを読み込めません。編集画面の管理者ログインを確認してから開き直してください。');
 }
 
 function currentCollection(){
@@ -848,12 +848,16 @@ async function saveSite(){
   }
 
   try{
-    const res = await fetch(state.currentType === 'about' ? '/editor/save' : '/api/save', {
+    const res = await fetch('/editor/save', {
       method:'POST',
       headers:{ 'content-type':'application/json' },
       body: JSON.stringify(state.data)
     });
     const json = await res.json().catch(()=>({ ok:false, error:'invalid_json' }));
+    if(res.status === 401 || res.status === 403 || res.redirected){
+      showMessage('管理者ログインの有効期限を確認してください。編集中の内容をJSONで保存してから、編集画面を開き直してください。', false);
+      return;
+    }
     if(!res.ok || !json.ok){
       showMessage('保存に失敗しました: ' + (json.error || ('HTTP ' + res.status)), false);
       return;
@@ -887,8 +891,12 @@ async function uploadImage(kind){
     fd.append('file', file);
     if(kind === 'memory') fd.append('kind', 'memory');
     try{
-      const res = await fetch('/api/upload', { method:'POST', body:fd });
+      const res = await fetch('/editor/assets', { method:'POST', body:fd });
       const json = await res.json().catch(()=>({ ok:false, error:'invalid_json' }));
+      if(res.status === 401 || res.status === 403 || res.redirected){
+        showMessage('管理者ログインの有効期限を確認してください。編集中の内容をJSONで保存してから、編集画面を開き直してください。', false);
+        return;
+      }
       const url = json.url || json.imageUrl || json.publicUrl || json.result?.url || '';
       if(!res.ok || !json.ok || !url){
         showMessage('画像アップロードに失敗しました: ' + (json.error || ('HTTP ' + res.status)), false);

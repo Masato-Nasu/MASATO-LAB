@@ -1,8 +1,11 @@
+import {requireAdmin} from '../_admin-access.js';
 function json(data, status = 200) {
   return Response.json(data, { status, headers: { 'cache-control': 'no-store' } });
 }
 
 export async function onRequestPost({ request, env }) {
+  const denied = await requireAdmin(request,env);
+  if (denied) return denied;
   if (!env.MEDIA) return json({ ok: false, error: '画像の保存先が設定されていません' }, 500);
   try {
     const form = await request.formData();

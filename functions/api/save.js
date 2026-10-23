@@ -1,3 +1,4 @@
+import {requireAdmin} from '../_admin-access.js';
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -17,6 +18,8 @@ export async function onRequestGet(context) {
 }
 
 export async function onRequestPost(context) {
+  const denied = await requireAdmin(context.request,context.env);
+  if (denied) return denied;
   try {
     if (!context.env || !context.env.SITE_DATA) {
       return json({ ok: false, error: "missing_kv_binding" }, 500);
