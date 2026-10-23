@@ -44,25 +44,14 @@
     .card:hover { transform:translateY(-2px); box-shadow:0 14px 34px rgba(0,0,0,.08); }
     .card-title { margin:0 0 10px; font-size:28px; line-height:1.02; letter-spacing:-.03em; }
     .card-text { margin:0; color:var(--muted); font-size:15px; }
-    .section { margin-top:22px; border:1px solid var(--line); border-radius:28px; background:var(--panel); box-shadow:var(--shadow); padding:24px; }
-    .section-head { display:flex; justify-content:space-between; gap:16px; align-items:end; flex-wrap:wrap; margin-bottom:18px; }
-    .section-kicker { margin:0 0 6px; color:var(--muted); font-size:12px; letter-spacing:.08em; text-transform:uppercase; }
-    .section-title { margin:0; font-size:clamp(24px,4vw,40px); line-height:1.02; letter-spacing:-.03em; }
-    .section-link { display:inline-flex; align-items:center; min-height:40px; padding:0 14px; border-radius:999px; border:1px solid var(--line); background:#fff; font-size:14px; }
-    .highlight-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
-    .highlight { border:1px solid var(--line); border-radius:22px; background:#fafaf8; padding:18px; display:grid; gap:10px; }
-    .highlight-type { margin:0; color:var(--muted); font-size:12px; letter-spacing:.08em; text-transform:uppercase; }
-    .highlight-title { margin:0; font-size:22px; line-height:1.08; letter-spacing:-.02em; }
-    .highlight-text { margin:0; color:#333; font-size:14px; line-height:1.7; }
-    .empty-note { color:var(--muted); font-size:14px; }
     @media (max-width: 900px) {
-      .grid, .highlight-grid { grid-template-columns:1fr; }
+      .grid { grid-template-columns:1fr; }
       .featured-work { grid-template-columns:1fr; gap:12px; }
       .featured-caption { gap:12px; }
       .stats { gap:8px; }
       .stat { padding:12px 10px; }
       .stat-label { font-size:10px; }
-      .hero, .section { padding:22px; }
+      .hero { padding:22px; }
     }
   </style>
 </head>
@@ -112,20 +101,9 @@
       </a>
     </section>
 
-    <section class="section" aria-labelledby="highlights-title">
-      <div class="section-head">
-        <div>
-          <p class="section-kicker">Highlights</p>
-          <h3 class="section-title" id="highlights-title">A quick way into the site</h3>
-        </div>
-        <a class="section-link" href="./about.html">About this site</a>
-      </div>
-      <div id="highlight-grid" class="highlight-grid"></div>
-    </section>
   </div>
 
   <script type="module">
-import {isMainTool, selectedToolRank} from "/tools-selection.js";
 
 function normalizeSite(site = {}) {
   return {
@@ -144,21 +122,6 @@ function normalizeSite(site = {}) {
   };
 }
 
-function escapeHtml(value = '') {
-  return String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function normalizeTags(tags) {
-  if (Array.isArray(tags)) return tags.filter(Boolean);
-  if (typeof tags === 'string') return tags.split(',').map(s => s.trim()).filter(Boolean);
-  return [];
-}
-
 async function loadSiteData() {
   const candidates = ['/api/data', './data.json', 'data.json'];
   let lastError = null;
@@ -174,40 +137,6 @@ async function loadSiteData() {
   throw lastError || new Error('Failed to load data');
 }
 
-
-    function slugify(value = '') {
-      return String(value || '')
-        .toLowerCase()
-        .normalize('NFKD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9\u3040-\u30ff\u3400-\u9fff]+/g, '-')
-        .replace(/^-+|-+$/g, '') || 'item';
-    }
-
-    function buildSlugs(items) {
-      const used = new Map();
-      return items.map((item, index) => {
-        const base = slugify(item.slug || item.title || `item-${index + 1}`);
-        const count = used.get(base) || 0;
-        used.set(base, count + 1);
-        return count ? `${base}-${count + 1}` : base;
-      });
-    }
-
-    function trimSummary(value = '', max = 120) {
-      const text = String(value || '').replace(/\s+/g, ' ').trim();
-      if (!text) return '';
-      return text.length > max ? text.slice(0, max - 1) + '…' : text;
-    }
-
-    function buildHighlight(type, title, text, href) {
-      return `
-        <a class="highlight" href="${escapeHtml(href)}">
-          <p class="highlight-type">${escapeHtml(type)}</p>
-          <h4 class="highlight-title">${escapeHtml(title)}</h4>
-          <p class="highlight-text">${escapeHtml(text)}</p>
-        </a>`;
-    }
 
     async function boot() {
       try {
@@ -230,16 +159,6 @@ async function loadSiteData() {
           <div class="stat"><p class="stat-label">Memory</p><p class="stat-value">${memory.length}</p></div>
           <div class="stat"><p class="stat-label">Tools</p><p class="stat-value">${tools.length}</p></div>`;
 
-        const highlights = [];
-        if (portfolio[0]) highlights.push(buildHighlight('Portfolio', portfolio[0].title || 'Portfolio', trimSummary(portfolio[0].description || site.homePortfolioText), './portfolio.html'));
-        if (memory[0]) highlights.push(buildHighlight('Peripheral Memory', memory[0].title || 'Peripheral Memory', trimSummary(memory[0].comment || site.homeMemoryText), './memory.html'));
-        const mainTool = tools.filter(isMainTool).sort((a,b)=>(selectedToolRank(a)<0?999:selectedToolRank(a))-(selectedToolRank(b)<0?999:selectedToolRank(b)))[0];
-        if (mainTool) {
-          const toolSlugs = buildSlugs(tools);
-          highlights.push(buildHighlight('Tools', mainTool.title || 'Tools', trimSummary(mainTool.description || site.homeToolsText), `/tools/${encodeURIComponent(toolSlugs[tools.indexOf(mainTool)])}`));
-        }
-        if (!highlights.length) highlights.push(`<div class="empty-note">Editor で項目を追加すると、ここに導線が表示されます。</div>`);
-        document.getElementById('highlight-grid').innerHTML = highlights.join('');
       } catch (error) {
         console.error(error);
       }
