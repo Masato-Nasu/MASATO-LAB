@@ -8,6 +8,7 @@
   });
 }
 
+import {requireAdmin} from '../_admin-access.js';
 async function saveToKv(context) {
   try {
     if (!context.env || !context.env.SITE_DATA) {
@@ -38,6 +39,8 @@ async function saveToKv(context) {
 }
 
 export async function onRequestPost(context) {
+  const denied = await requireAdmin(context.request,context.env);
+  if (denied) return denied;
   return saveToKv(context);
 }
 

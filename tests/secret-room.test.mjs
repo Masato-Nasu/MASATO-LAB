@@ -50,7 +50,7 @@ for(let i=0;i<fixture.portfolio.length;i++) {
 assert.equal((await call('/portfolio/%2568ypenyx-45')).response.status,400);
 assert.equal((await call('/secret-room/data')).response.status,401);
 assert.equal((await (await call('/secret-room/data',{auth:true})).response.json()).portfolio.length,17);
-assert.equal((await (await call('/secret-room/editor-data',{auth:true})).response.json()).portfolio.length,45);
+assert.equal((await call('/secret-room/editor-data',{auth:true})).response.status,403);
 assert(!isSecret({title:'HYPENYX.45',secretRoom:false}));
 assert(isSecret({title:'New work',secretRoom:true}));
 assert(isSecret({title:'New title',...{secretRoom:true}}));
@@ -68,15 +68,15 @@ const collectSource=editorHtml.slice(editorHtml.indexOf('function collectPortfol
 const fields=new Proxy({}, {get:(_,id)=>({value:id==='portfolio-title'?'Renamed work':'',checked:id==='portfolio-secretroom'})});
 const saved=vm.runInNewContext(collectSource+';collectPortfolio()', {state:{selectedIndex:0,data:{portfolio:[{slug:'existing-slug',secretRoom:true,custom:'keep'}]}},$:(id)=>fields[id],parseTags:()=>[]});
 assert.equal(saved.secretRoom,true);assert.equal(saved.slug,'existing-slug');assert.equal(saved.custom,'keep');assert.equal(saved.title,'Renamed work');
-const editorLogin=await (await call('/secret-room/login?next=%2Feditor%2F')).response.text();
-assert(editorLogin.includes('EDITOR LOGIN'));assert(editorLogin.includes('入力後、編集画面へ戻ります。'));
+const editorLogin=(await call('/secret-room/login?next=%2Feditor%2F')).response;
+assert.equal(editorLogin.status,303);assert.equal(editorLogin.headers.get('location'),'/editor/');
 
 assert((await (await call('/portfolio')).response.text()).includes('id="secret-room-entry"'));
 assert.equal((await call('/secret-room/login',{method:'POST',origin:'https://evil.example',body:'password=x'})).response.status,403);
 assert.equal((await call('/secret-room/login',{method:'POST',origin:'https://masato-lab.pages.dev',body:'password=wrong'})).response.status,401);
 const signedIn=await call('/secret-room/login',{method:'POST',origin:'https://masato-lab.pages.dev',body:'password='+env.SECRET_ROOM_PASSWORD});
 assert.equal(signedIn.response.status,303);assert.match(signedIn.response.headers.get('set-cookie'),/HttpOnly; Secure; SameSite=Strict/);
-assert.equal((await call('/editor/')).response.status,303);
-assert.equal((await call('/api/save',{method:'POST',body:'x'})).response.status,401);
+assert.equal((await call('/editor/')).response.status,403);
+assert.equal((await call('/api/save',{method:'POST',body:'x'})).response.status,403);
 assert.equal((await call('/api/save',{auth:true,method:'POST',body:'x',origin:'https://evil.example'})).response.status,403);
 console.log('PASS: 17 protected works; public API/data; every detail/image/proxy; stable links; login/session/expiry/CSRF; editor protection; gallery and entrance.');

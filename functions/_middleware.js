@@ -1,4 +1,5 @@
 import {isSecret, slugs, projectData, readData, assetPaths, token, authenticated, privateHeaders, json, safeNext, loginPage} from './_secret-room.js';
+import {adminAuthenticated, requireAdmin} from './_admin-access.js';
 const html = (body,status=200) => new Response(body,{status,headers:{...privateHeaders,'content-type':'text/html; charset=utf-8','content-security-policy':"frame-ancestors 'none'; form-action 'self'; base-uri 'self'"}});
 const redirect = (location,cookie) => new Response(null,{status:303,headers:{...privateHeaders,location,...(cookie?{'set-cookie':cookie}:{})}});
 const allowedOrigin = request => request.headers.get('origin') === new URL(request.url).origin;
@@ -8,10 +9,23 @@ export async function onRequest(context) {
   let path; try { path = decodeURIComponent(url.pathname).replace(/\/+$/,'') || '/'; } catch { return new Response('Bad request',{status:400}); }
   // Reject nested path encodings before a downstream router can decode them again.
   if (/%[0-9a-f]{2}/i.test(path)) return new Response('Bad request',{status:400});
-  const auth = await authenticated(request,env);
+  const adminRoute = path.startsWith('/editor') || ['/api/save','/api/upload','/secret-room/editor-data'].includes(path);
+  if (adminRoute) {
+    const denied = await requireAdmin(request,env);
+    if (denied) return denied;
+  }
+  const viewer = await authenticated(request,env);
+  // Administrators can inspect their private works after Access login without
+  // needing or distributing the separate viewer password.
+  const admin = adminRoute || (!viewer && await adminAuthenticated(request,env));
+  const auth = viewer || admin;
   const login = next => redirect(`/secret-room/login?next=${encodeURIComponent(safeNext(next))}`);
   if (path === '/secret-room/login') {
-    if (request.method === 'GET') return auth ? redirect(safeNext(url.searchParams.get('next'))) : html(loginPage(url.searchParams.get('next')));
+    if (request.method === 'GET') {
+      const next = safeNext(url.searchParams.get('next'));
+      if (/^\/editor(?:\/|\.|$)/.test(next)) return redirect(next);
+      return auth ? redirect(next) : html(loginPage(next));
+    }
     if (request.method !== 'POST') return new Response('Method not allowed',{status:405});
     if (!allowedOrigin(request)) return html(loginPage('/secret-room','ページを開き直してお試しください。'),403);
     if (!env.SECRET_ROOM_PASSWORD || env.SECRET_ROOM_PASSWORD.length < 12) return html(loginPage('/secret-room','現在準備中です。'),503);
@@ -34,9 +48,9 @@ export async function onRequest(context) {
     if (request.method !== 'POST' || !allowedOrigin(request)) return new Response('Forbidden',{status:403});
     return redirect('/portfolio','__Host-masato-room=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0');
   }
-  if (path.startsWith('/editor') || ['/api/save','/editor/save','/api/upload','/editor/upload'].includes(path)) {
-    if (!auth) return request.method === 'GET' ? login(url.pathname+url.search) : json({ok:false,error:'secret_room_login_required'},401);
-    if (request.method !== 'GET' && request.method !== 'HEAD' && !allowedOrigin(request)) return json({ok:false,error:'invalid_origin'},403);
+  if (path === '/secret-room/editor-data') {
+    try { return json(projectData(await readData(env),'editor')); }
+    catch { return json({error:'temporarily_unavailable'},503); }
   }
   const room = path === '/secret-room' || path.startsWith('/secret-room/');
   const dataRoute = path === '/api/data' || path === '/data.json';
@@ -48,7 +62,6 @@ export async function onRequest(context) {
   if (room) {
     if (!auth) return path.endsWith('/data') || path.endsWith('/editor-data') ? json({error:'authentication_required'},401) : login(url.pathname);
     if (path === '/secret-room/data') return json(projectData(data,'secret'));
-    if (path === '/secret-room/editor-data') return json(projectData(data,'editor'));
     if (path !== '/secret-room') return new Response('Not found',{status:404,headers:privateHeaders});
     const asset = await env.ASSETS.fetch(new URL('/portfolio',url));
     let body = await asset.text();
