@@ -123,7 +123,7 @@
   </div>
 
   <script type="module">
-    import { isMainTool, selectedToolRank } from '/tools-selection.js';
+    import { isMainTool } from '/tools-selection.js';
     const otherPage = document.body.dataset.toolsPage === 'other';
     document.querySelector('.toolbar').hidden = !otherPage;
     document.querySelector('.status-row').hidden = !otherPage;
@@ -454,10 +454,7 @@
         const slugs=buildSlugs(items);
         const allItems=items.map((tool,index)=>({...tool,__detailSlug:slugs[index]}));
         state.items=allItems.filter(tool=>otherPage ? !isMainTool(tool) : isMainTool(tool));
-        if(!otherPage) state.items.sort((a,b)=>{
-          const rank=t=>selectedToolRank(t)<0?999:selectedToolRank(t);
-          return rank(a)-rank(b);
-        });
+        // Preserve the order saved by the editor's move controls.
         document.getElementById('otherToolsCount').textContent=`${allItems.filter(t=>!isMainTool(t)).length}件のアプリを見る →`;
         render();
       }catch(error){
