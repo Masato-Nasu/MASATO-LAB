@@ -373,7 +373,7 @@
       const extra=Math.max(0,tags.length-shownTags.length);
       const tagHtml=shownTags.map(tag=>`<span class="tag">#${escapeHtml(tag)}</span>`).join('')+(extra?`<span class="tag more">+${extra}</span>`:'');
       const detailSlug=tool.__detailSlug||slugify(tool.title||'item');
-      const detailLink=`<a class="btn" href="/tools/${encodeURIComponent(detailSlug)}">READ MORE</a>`;
+      const detailLink=tool.__synthetic?'':`<a class="btn" href="/tools/${encodeURIComponent(detailSlug)}">READ MORE</a>`;
       const appLink=tool.appUrl?`<a class="btn primary" href="${escapeHtml(tool.appUrl)}" target="_blank" rel="noopener noreferrer">OPEN</a>`:'';
       const repoLink=tool.repoUrl?`<a class="btn" href="${escapeHtml(tool.repoUrl)}" target="_blank" rel="noopener noreferrer">GITHUB</a>`:'';
       return `<article class="card">
@@ -387,6 +387,24 @@
         </div>
       </article>`;
     }
+
+    // A new tool is presented at the original GS VISUALIZER card position.
+    // The public tool data may be stored in KV, so this fallback works
+    // without overwriting or duplicating entries in that dataset.
+    const isGsVisualizer=(tool)=>/^(gsvisualizer|grayscottvisualizer)/.test(titleKey(tool.title).replace(/[^a-z0-9]/g,''));
+    const isDubSiren=(tool)=>/^dubsiren/.test(titleKey(tool.title).replace(/[^a-z0-9]/g,''));
+    const featuredDubSiren={
+      title:'DUB SIREN',
+      description:'指の動きで音を操るダブ・サイレン。AIR HORN、THUNDER、TAPE DELAYを備え、音楽と重ねて録音もできるブラウザー楽器。',
+      image:'https://masato-nasu.github.io/DUB-SIREN/icon-512.png',
+      imageFit:'contain',
+      appUrl:'https://masato-nasu.github.io/DUB-SIREN/',
+      repoUrl:'https://github.com/Masato-Nasu/DUB-SIREN',
+      category:'music-sound',
+      platform:'web',
+      tags:['DUB','SOUND','PWA'],
+      __synthetic:true
+    };
 
     const state={items:[],genre:'all',platforms:new Set(),query:''};
     const grid=document.getElementById('toolsGrid');
@@ -453,8 +471,21 @@
         const items=Array.isArray(data.tools)?data.tools:[];
         const slugs=buildSlugs(items);
         const allItems=items.map((tool,index)=>({...tool,__detailSlug:slugs[index]}));
-        state.items=allItems.filter(tool=>otherPage ? !isMainTool(tool) : isMainTool(tool));
-        // Preserve the order saved by the editor's move controls.
+        const dubSiren=allItems.find(isDubSiren)||featuredDubSiren;
+        const mainItems=[];
+        let insertedDubSiren=false;
+        // Keep the editor's saved ordering; substitute DUB SIREN exactly at
+        // GS VISUALIZER's previous position and retain GS on the other page.
+        for(const tool of allItems){
+          if(isGsVisualizer(tool)){
+            if(!insertedDubSiren){mainItems.push(dubSiren);insertedDubSiren=true;}
+            continue;
+          }
+          if(isDubSiren(tool)) continue;
+          if(isMainTool(tool)) mainItems.push(tool);
+        }
+        if(!insertedDubSiren) mainItems.unshift(dubSiren);
+        state.items=otherPage ? allItems.filter(tool=>!isMainTool(tool)) : mainItems;
         document.getElementById('otherToolsCount').textContent=`${allItems.filter(t=>!isMainTool(t)).length}件のアプリを見る →`;
         render();
       }catch(error){
