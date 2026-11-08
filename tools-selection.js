@@ -7,11 +7,17 @@ export function selectedToolRank(tool) {
   return selected.indexOf(toolKey(tool.title));
 }
 export function isMainTool(tool) {
-  const key = toolKey(tool.title);
-  // Featured DUB SIREN replaces GS VISUALIZER on the main Tools page.
+  // An editor-saved placement always wins, including for featured tools.
+  // The marker keeps the old DUB SIREN / GS VISUALIZER defaults intact
+  // for entries which have not been edited since this fix.
+  if (tool?.toolsPlacementEdited === true) {
+    if (tool.toolsPlacement === 'main') return true;
+    if (tool.toolsPlacement === 'other') return false;
+  }
+  const key = toolKey(tool?.title);
   if (key.startsWith('gsvisualizer') || key.startsWith('grayscottvisualizer')) return false;
   if (key.startsWith('dubsiren')) return true;
-  if (tool.toolsPlacement === 'main') return true;
-  if (tool.toolsPlacement === 'other') return false;
+  if (tool?.toolsPlacement === 'main') return true;
+  if (tool?.toolsPlacement === 'other') return false;
   return selectedToolRank(tool) >= 0;
 }
