@@ -388,9 +388,7 @@
       </article>`;
     }
 
-    // A new tool is presented at the original GS VISUALIZER card position.
-    // The public tool data may be stored in KV, so this fallback works
-    // without overwriting or duplicating entries in that dataset.
+    // Keep the featured card available for older data without a DUB SIREN entry.
     const isGsVisualizer=(tool)=>/^(gsvisualizer|grayscottvisualizer)/.test(titleKey(tool.title).replace(/[^a-z0-9]/g,''));
     const isDubSiren=(tool)=>/^dubsiren/.test(titleKey(tool.title).replace(/[^a-z0-9]/g,''));
     const featuredDubSiren={
@@ -471,22 +469,15 @@
         const items=Array.isArray(data.tools)?data.tools:[];
         const slugs=buildSlugs(items);
         const allItems=items.map((tool,index)=>({...tool,__detailSlug:slugs[index]}));
-        const dubSiren=allItems.find(isDubSiren)||featuredDubSiren;
-        const mainItems=[];
-        let insertedDubSiren=false;
-        // Keep the editor's saved ordering; substitute DUB SIREN exactly at
-        // GS VISUALIZER's previous position and retain GS on the other page.
-        for(const tool of allItems){
-          if(isGsVisualizer(tool)){
-            if(!insertedDubSiren){mainItems.push(dubSiren);insertedDubSiren=true;}
-            continue;
-          }
-          if(isDubSiren(tool)) continue;
-          if(isMainTool(tool)) mainItems.push(tool);
+        const mainItems=allItems.filter(isMainTool);
+        const otherItems=allItems.filter(tool=>!isMainTool(tool));
+        if(!otherPage && !allItems.some(isDubSiren)){
+          const gsIndex=allItems.findIndex(isGsVisualizer);
+          const fallbackIndex=gsIndex<0 ? 0 : allItems.slice(0,gsIndex).filter(isMainTool).length;
+          mainItems.splice(fallbackIndex,0,featuredDubSiren);
         }
-        if(!insertedDubSiren) mainItems.unshift(dubSiren);
-        state.items=otherPage ? allItems.filter(tool=>!isMainTool(tool)) : mainItems;
-        document.getElementById('otherToolsCount').textContent=`${allItems.filter(t=>!isMainTool(t)).length}件のアプリを見る →`;
+        state.items=otherPage ? otherItems : mainItems;
+        document.getElementById('otherToolsCount').textContent=`${otherItems.length}件のアプリを見る →`;
         render();
       }catch(error){
         console.error(error);
