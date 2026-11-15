@@ -77,11 +77,17 @@ function applyFixedClassifications(data) {
       tool.category = 'art-concept';
     }
   }
+  // Keep the current release explanation visible even if KV still holds an old card.
+  for (const tool of data.tools) {
+    if (/^dub[\s_-]*riddim\b/i.test(String(tool?.title || ''))) {
+      tool.description = 'DUB RIDDIMは、ドラム、ベース、スカンク、バブルなど6パートの音をステップとピアノロールで編集し、パターンを組み合わせて一曲作れるDUB専用リズムマシーン。AIR HORN、DUB SPACE、REWIND、THUNDERを演奏中に操作でき、録音やWAV書き出しにも対応。';
+    }
+  }
   const exists = data.tools.some(tool => /^dub[\s_-]*riddim\b/i.test(String(tool?.title || '')));
   if (!exists) {
     data.tools.push({
       title: 'DUB RIDDIM',
-      description: '音符を配置してリズムとベースラインを組み立て、DUB SPACEパッドやREWINDを使ってリアルタイムにダブを演奏できる音楽制作アプリ。',
+      description: 'DUB RIDDIMは、ドラム、ベース、スカンク、バブルなど6パートの音をステップとピアノロールで編集し、パターンを組み合わせて一曲作れるDUB専用リズムマシーン。AIR HORN、DUB SPACE、REWIND、THUNDERを演奏中に操作でき、録音やWAV書き出しにも対応。',
       image: 'https://raw.githubusercontent.com/Masato-Nasu/DUB-RIDDIM/main/icon-512.png',
       imageRatio: '4:3',
       imageFit: 'contain',
