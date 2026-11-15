@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="DUB RIDDIM — 音符でリズムを組み、ライブでDUBエフェクトを操るブラウザ音楽制作アプリ。">
+  <meta name="theme-color" content="#f5f5f3">
+  <title>DUB RIDDIM / MASATO NASU</title>
+  <style>
+    :root{color-scheme:light;--bg:#f5f5f3;--ink:#151515;--dim:#666;--line:#dddcd5;--orange:#df6432}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 Helvetica,Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif}
+    a{color:inherit;text-decoration:none}
+    .wrap{max-width:1140px;margin:0 auto;padding:28px 20px 72px}
+    .brand{font-weight:800;font-size:clamp(38px,7vw,64px);line-height:1;letter-spacing:-.035em}
+    nav{display:flex;gap:22px;flex-wrap:wrap;margin:18px 0 26px;font-size:17px}
+    nav .active{font-weight:700}
+    .eyebrow{display:inline-block;padding:5px 12px;border:1px solid var(--line);border-radius:99px;color:var(--dim);font-size:11px;letter-spacing:.08em}
+    .back{display:block;margin:24px 0;font-size:13px;font-weight:bold;color:#444}
+    article{background:white;border:1px solid var(--line);border-radius:26px;padding:clamp(20px,5vw,44px)}
+    .kicker{font-size:12px;letter-spacing:.16em;color:var(--orange);font-weight:bold}
+    h1{font-size:clamp(43px,8vw,82px);letter-spacing:-.065em;line-height:.93;margin:12px 0 21px}
+    .lead{font-size:clamp(18px,2.4vw,23px);font-weight:650;line-height:1.5;margin:0 0 17px}
+    .hero{background:#161715;border-radius:16px;min-height:240px;padding:26px;display:flex;align-items:center;justify-content:center;margin:24px 0}
+    .hero img{height:min(50vw,260px);max-width:80%;object-fit:contain}
+    .description{color:#414141;max-width:750px}
+    .features{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 27px}
+    .features span{font:11px/1.5 monospace;letter-spacing:.03em;border:1px solid var(--line);border-radius:100px;padding:7px 12px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;justify-content:center;min-height:45px;padding:0 18px;font-size:13px;font-weight:bold;border:1px solid #ccc;border-radius:50px}
+    .btn.primary{background:#161715;color:white;border-color:#161715}
+    .footnote{font-size:13px;color:var(--dim);margin-top:20px}
+    @media(max-width:620px){.wrap{padding:18px 12px 45px}nav{gap:14px;font-size:15px}.hero{min-height:190px}.hero img{height:160px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">MASATO NASU</div>
+      <nav aria-label="Main navigation">
+        <a href="/">Home</a><a href="/portfolio.html">Portfolio</a>
+        <a href="/memory.html">Peripheral Memory</a><a class="active" href="/tools.html">Tools</a><a href="/about.html">About</a>
+      </nav>
+      <span class="eyebrow">Product Design · Computational Experiments · Personal Lab</span>
+    </header>
+    <a class="back" href="/tools.html">← BACK TO TOOLS</a>
+    <main>
+      <article>
+        <div class="kicker">TOOLS / MUSIC · SOUND</div>
+        <h1>DUB RIDDIM</h1>
+        <p class="lead">一曲作れる、DUB専用リズムマシーン。</p>
+        <p class="description">ドラム、ベース、スカンク、バブルを組み合わせ、ピアノロールで音符を編集。曲のセクションを構成しながら、DUB SPACEパッドやサイレン、REWINDをリアルタイムに操作できます。</p>
+        <div class="hero"><img src="https://raw.githubusercontent.com/Masato-Nasu/DUB-RIDDIM/main/icon-512.png" alt="DUB RIDDIM icon" loading="lazy"></div>
+        <div class="features"><span>PIANO ROLL</span><span>6-CHANNEL MIXER</span><span>DUB SPACE</span><span>REWIND</span><span>WAV EXPORT</span><span>PWA</span></div>
+        <div class="actions">
+          <a class="btn primary" href="https://dub-siren.sunny-seed-0354.chatgpt.site/" target="_blank" rel="noopener noreferrer">OPEN APP</a>
+          <a class="btn" href="https://github.com/Masato-Nasu/DUB-RIDDIM" target="_blank" rel="noopener noreferrer">GITHUB</a>
+          <a class="btn" href="/tools.html">BACK TO TOOLS</a>
+        </div>
+        <p class="footnote">Original compact DUB SIREN is maintained separately.</p>
+      </article>
+    </main>
+  </div>
+</body>
+</html>
