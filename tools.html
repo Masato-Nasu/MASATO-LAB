@@ -407,7 +407,7 @@
 
     const featuredDubRiddim={
       title:'DUB RIDDIM',
-      description:'音符を配置してドラム、ベース、コードを組み立てるDUB専用リズムマシーン。DUB SPACEパッド、REWIND、ミックス録音、WAV書き出しに対応。',
+      description:'DUB RIDDIMは、ドラム、ベース、スカンク、バブルなど6パートの音をステップとピアノロールで編集し、パターンを組み合わせて一曲作れるDUB専用リズムマシーン。AIR HORN、DUB SPACE、REWIND、THUNDERを演奏中に操作でき、録音やWAV書き出しにも対応。',
       image:'https://raw.githubusercontent.com/Masato-Nasu/DUB-RIDDIM/main/icon-512.png',
       imageFit:'contain',
       appUrl:'https://dub-siren.sunny-seed-0354.chatgpt.site/',
@@ -489,7 +489,7 @@
         const otherItems=allItems.filter(tool=>!isMainTool(tool)&&!isDubRiddim(tool));
         // Keep DUB RIDDIM visible even when the KV payload predates the release.
         const savedDubRiddim=allItems.find(isDubRiddim);
-        const dubRiddim={...featuredDubRiddim,...(savedDubRiddim||{})};
+        const dubRiddim={...featuredDubRiddim,...(savedDubRiddim||{}),description:featuredDubRiddim.description};
         for(const key of ['image','appUrl','repoUrl']) if(!dubRiddim[key]) dubRiddim[key]=featuredDubRiddim[key];
         mainItems.unshift(dubRiddim);
         if(!otherPage && !allItems.some(isDubSiren)){
