@@ -498,14 +498,12 @@
         // Only use the synthetic DUB RIDDIM card for legacy KV data where no
         // real editable entry exists. Once saved, its position is user-defined.
         if(!normalizedItems.some(isDubRiddim)){
-          normalizedItems.unshift({...featuredDubRiddim});
+          normalizedItems.push({...featuredDubRiddim});
         }
         const mainItems=normalizedItems.filter(isMainTool);
         const otherItems=normalizedItems.filter(tool=>!isMainTool(tool));
         if(!otherPage && !allItems.some(isDubSiren)){
-          const gsIndex=allItems.findIndex(isGsVisualizer);
-          const fallbackIndex=gsIndex<0 ? 0 : allItems.slice(0,gsIndex).filter(isMainTool).length;
-          mainItems.splice(fallbackIndex,0,featuredDubSiren);
+          mainItems.push(featuredDubSiren);
         }
         state.items=otherPage ? otherItems : mainItems;
         document.getElementById('otherToolsCount').textContent=`${otherItems.length}件のアプリを見る →`;
