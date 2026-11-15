@@ -1,6 +1,6 @@
 # DUB RIDDIM
 
-A note-based dub riddim workstation with live performance effects.
+**A complete DUB rhythm machine**: program six parts (kick, snare, hi-hat, bass, skank, bubble), edit notes in a piano roll, arrange four patterns into a song, and perform live dub effects.
 
 **Play the current version:** https://dub-siren.sunny-seed-0354.chatgpt.site/
 
