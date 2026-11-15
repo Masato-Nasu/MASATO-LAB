@@ -24,6 +24,14 @@
     .hero{background:#161715;border-radius:16px;min-height:240px;padding:26px;display:flex;align-items:center;justify-content:center;margin:24px 0}
     .hero img{height:min(50vw,260px);max-width:80%;object-fit:contain}
     .description{color:#414141;max-width:750px}
+    .effects{margin:30px 0 28px;padding-top:20px;border-top:1px solid var(--line)}
+    .effects h2{font-size:24px;line-height:1.25;margin:0 0 6px}
+    .effects-intro{font-size:14px;color:var(--dim);margin:0 0 18px}
+    .effect-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+    .effect{background:#fafaf8;border:1px solid var(--line);border-radius:14px;padding:17px 18px}
+    .effect h3{margin:0 0 7px;font-size:16px;letter-spacing:.025em}
+    .effect p{margin:0;font-size:14px;color:#424242;line-height:1.75}
+    @media(max-width:620px){.effect-grid{grid-template-columns:1fr}}
     .features{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 27px}
     .features span{font:11px/1.5 monospace;letter-spacing:.03em;border:1px solid var(--line);border-radius:100px;padding:7px 12px}
     .actions{display:flex;gap:10px;flex-wrap:wrap}
@@ -52,6 +60,17 @@
         <p class="description">ドラム、ベース、スカンク、バブルを組み合わせ、ピアノロールで音符を編集。曲のセクションを構成しながら、DUB SPACEパッドやサイレン、REWINDをリアルタイムに操作できます。</p>
         <div class="hero"><img src="https://raw.githubusercontent.com/Masato-Nasu/DUB-RIDDIM/main/icon-512.png" alt="DUB RIDDIM icon" loading="lazy"></div>
         <div class="features"><span>PIANO ROLL</span><span>6-CHANNEL MIXER</span><span>DUB SPACE</span><span>REWIND</span><span>WAV EXPORT</span><span>PWA</span></div>
+        <section class="effects" aria-labelledby="effects-title">
+          <h2 id="effects-title">LIVE DUB EFFECTS</h2>
+          <p class="effects-intro">ダブの演奏を彩る、4つのライブエフェクト。</p>
+          <div class="effect-grid">
+            <div class="effect"><h3>AIR HORN｜エアホーン</h3><p>「パーーッ！」と響く警笛音。レゲエのサウンドシステムでおなじみの、ドロップや盛り上がりを強調する効果音。</p></div>
+            <div class="effect"><h3>DUB SPACE｜ダブ・スペース</h3><p>XYパッドで音の明るさやエフェクトのかかり方を操作。音が遠ざかり、空間に漂うような変化をリアルタイムに演奏できます。</p></div>
+            <div class="effect"><h3>REWIND｜リワインド</h3><p>レコードを巻き戻すような「キュルルッ！」という効果音。サウンドシステムの「Pull Up」を思わせる演出です。曲そのものを巻き戻す機能ではありません。</p></div>
+            <div class="effect"><h3>THUNDER｜サンダー</h3><p>スプリングリバーブに衝撃を与えたような「バシャーン！」という金属的な雷鳴。クラシックDUBならではのアクセントです。</p></div>
+          </div>
+        </section>
+
         <div class="actions">
           <a class="btn primary" href="https://dub-siren.sunny-seed-0354.chatgpt.site/" target="_blank" rel="noopener noreferrer">OPEN APP</a>
           <a class="btn" href="https://github.com/Masato-Nasu/DUB-RIDDIM" target="_blank" rel="noopener noreferrer">GITHUB</a>
