@@ -126,6 +126,25 @@ export async function onRequestGet(context) {
   const slugs = buildSlugs(items);
   let requested = String(context.params.slug || '');
   try { requested = decodeURIComponent(requested); } catch (_) {}
+  // Give DUB RIDDIM a stable public detail URL even if a KV entry has a
+  // different slug, or if the request arrives with a trailing slash.
+  if (/^dub-riddim(?:\\/)?$/i.test(requested)) {
+    const dubRiddim = {
+      title: 'DUB RIDDIM',
+      description: '音符を配置してリズムとベースラインを組み立て、DUB SPACEパッドやREWINDを使ってリアルタイムにダブを演奏できる音楽制作アプリ。',
+      appUrl: 'https://dub-siren.sunny-seed-0354.chatgpt.site/',
+      repoUrl: 'https://github.com/Masato-Nasu/DUB-RIDDIM',
+      image: 'https://raw.githubusercontent.com/Masato-Nasu/DUB-RIDDIM/main/icon-512.png',
+      imageFit: 'contain',
+      category: 'music-sound',
+      platform: 'web',
+      toolsPlacement: 'main',
+      tags: ['DUB', 'MUSIC', 'PIANO ROLL', 'PWA']
+    };
+    return new Response(renderPage(data?.site || {}, dubRiddim), {
+      headers: {'content-type':'text/html; charset=utf-8','cache-control':'no-store'}
+    });
+  }
   const index = slugs.indexOf(requested);
 
   if (index < 0) {
