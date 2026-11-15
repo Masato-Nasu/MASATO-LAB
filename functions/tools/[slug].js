@@ -128,7 +128,7 @@ export async function onRequestGet(context) {
   try { requested = decodeURIComponent(requested); } catch (_) {}
   // Give DUB RIDDIM a stable public detail URL even if a KV entry has a
   // different slug, or if the request arrives with a trailing slash.
-  if (/^dub-riddim(?:\\/)?$/i.test(requested)) {
+  if (requested === 'dub-riddim' || requested === 'dub-riddim/') {
     const dubRiddim = {
       title: 'DUB RIDDIM',
       description: '音符を配置してリズムとベースラインを組み立て、DUB SPACEパッドやREWINDを使ってリアルタイムにダブを演奏できる音楽制作アプリ。',
