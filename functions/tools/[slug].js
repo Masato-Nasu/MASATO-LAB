@@ -47,7 +47,22 @@ function renderPage(site, item) {
   const siteName = escapeHtml(site?.name || 'MASATO NASU');
   const tagline = escapeHtml(site?.tagline || 'Product Design · Computational Experiments · Personal Lab');
   const title = escapeHtml(item.title || 'Untitled');
-  const description = escapeHtml(item.description || '');
+  // The CODE 904 GitHub app now uses BYOK instead of a shared passphrase.
+  // Keep legacy KV-authored descriptions accurate without rewriting unrelated tool entries.
+  let descriptionText = String(item.description || '');
+  if (/^CODE\s*904\b/i.test(String(item.title || ''))) {
+    descriptionText = descriptionText
+      .replace(/パスワード制限付きで安全に運用されています。/g, 'BYOK方式で公開しています。利用者が自分のOpenAI APIキーを入力して使用します。')
+      .replace(/パスワード制限アクセス/g, 'BYOK：利用者ごとのOpenAI APIキーで利用')
+      .replace(/OpenAI APIキーはサーバー側で安全管理/g, 'APIキーはCloudflare Functions経由でOpenAIへ中継。サーバー側には保存しません')
+      .replace(/Cloudflare Secrets \+ Password Auth/g, 'BYOK + HTTPS')
+      .replace(/パスワード入力/g, '自分のOpenAI APIキーを入力')
+      .replace(/限定共有用途を想定しています/g, '利用には各自のOpenAI APIキーが必要です');
+    if (!descriptionText.includes('BYOK')) {
+      descriptionText = 'BYOK対応：ご自身のOpenAI APIキーを入力して利用できます。\n\n' + descriptionText;
+    }
+  }
+  const description = escapeHtml(descriptionText);
   const image = resolveImage(item.image || '');
   const fit = item.imageFit === 'cover' ? 'cover' : 'contain';
   const tags = normalizeTags(item.tags).filter(tag => !/^\s*(category|genre|platform)\s*:/i.test(tag));
