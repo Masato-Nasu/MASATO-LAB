@@ -129,7 +129,8 @@ export async function onRequestGet(context) {
   // Give DUB RIDDIM a stable public detail URL even if a KV entry has a
   // different slug, or if the request arrives with a trailing slash.
   if (requested === 'dub-riddim' || requested === 'dub-riddim/') {
-    const dubRiddim = {
+    const storedDubRiddim = items.find(tool => /^dub[\s_-]*riddim\b/i.test(String(tool?.title || '')) || String(tool?.slug || '').toLowerCase() === 'dub-riddim' || /(?:^|\/)DUB-RIDDIM(?:\/|$)/i.test(String(tool?.repoUrl || '')));
+    const dubRiddim = storedDubRiddim || {
       title: 'DUB RIDDIM',
       description: 'DUB RIDDIMは、ドラム、ベース、スカンク、バブルなど6パートの音をステップとピアノロールで編集し、パターンを組み合わせて一曲作れるDUB専用リズムマシーン。AIR HORN、DUB SPACE、REWIND、THUNDERを演奏中に操作でき、録音やWAV書き出しにも対応。',
       appUrl: 'https://dub-siren.sunny-seed-0354.chatgpt.site/',
