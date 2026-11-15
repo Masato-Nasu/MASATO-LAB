@@ -605,6 +605,8 @@ function render(){
 
 function renderList(){
   const list = $('itemList');
+  // Rebuilding this scrollable list must not jump the viewport back to the top.
+  const previousScrollTop = list.scrollTop;
   if(state.currentType === 'about'){
     list.innerHTML = '<div class="item active"><div class="item-title">サイト基本情報</div><div class="item-meta">Home / About / 各ページ導入文</div></div>';
     return;
@@ -623,6 +625,15 @@ function renderList(){
       : escapeHtml([isMainTool(item) ? 'TOOLS' : 'その他', item.appUrl, item.repoUrl].filter(Boolean).join(' / '));
     return `<div class="item ${i===state.selectedIndex?'active':''}" data-index="${i}"><div class="item-title">${title}</div><div class="item-meta">${meta}</div></div>`;
   }).join('');
+  list.scrollTop = previousScrollTop;
+  // Keep the moved/selected item visibly in the scrollable sidebar.
+  const activeItem = list.querySelector('.item.active');
+  if(activeItem){
+    const listRect = list.getBoundingClientRect();
+    const activeRect = activeItem.getBoundingClientRect();
+    if(activeRect.top < listRect.top) list.scrollTop += activeRect.top - listRect.top - 8;
+    else if(activeRect.bottom > listRect.bottom) list.scrollTop += activeRect.bottom - listRect.bottom + 8;
+  }
   list.querySelectorAll('.item[data-index]').forEach(el=>{
     el.addEventListener('click', ()=>{
       state.selectedIndex = Number(el.dataset.index);
@@ -838,7 +849,7 @@ function moveSelected(delta){
   state.selectedIndex = to;
   markDirty(true);
   render();
-  showMessage(collectionLabels[state.currentType] + ' の順番を変更しました。続けて「サイトに保存」を押してください。', true);
+  showMessage(collectionLabels[state.currentType] + ' の順番を変更しました（現在 ' + (state.selectedIndex + 1) + ' 番目）。続けて「サイトに保存」を押してください。', true);
 }
 
 function moveSelectedTo(edge){
@@ -862,7 +873,7 @@ function moveSelectedTo(edge){
   state.selectedIndex = to;
   markDirty(true);
   render();
-  showMessage(collectionLabels[state.currentType] + ' の順番を変更しました。続けて「サイトに保存」を押してください。', true);
+  showMessage(collectionLabels[state.currentType] + ' の順番を変更しました（現在 ' + (state.selectedIndex + 1) + ' 番目）。続けて「サイトに保存」を押してください。', true);
 }
 
 function clearForm(type){
