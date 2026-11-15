@@ -489,9 +489,10 @@
         const otherItems=allItems.filter(tool=>!isMainTool(tool)&&!isDubRiddim(tool));
         // Keep DUB RIDDIM visible even when the KV payload predates the release.
         const savedDubRiddim=allItems.find(isDubRiddim);
-        const dubRiddim={...featuredDubRiddim,...(savedDubRiddim||{}),description:featuredDubRiddim.description};
+        const dubRiddim={...featuredDubRiddim,...(savedDubRiddim||{})};
         for(const key of ['image','appUrl','repoUrl']) if(!dubRiddim[key]) dubRiddim[key]=featuredDubRiddim[key];
-        mainItems.unshift(dubRiddim);
+        if(isMainTool(dubRiddim)) mainItems.unshift(dubRiddim);
+        else otherItems.unshift(dubRiddim);
         if(!otherPage && !allItems.some(isDubSiren)){
           const gsIndex=allItems.findIndex(isGsVisualizer);
           const fallbackIndex=gsIndex<0 ? 0 : allItems.slice(0,gsIndex).filter(isMainTool).length;
