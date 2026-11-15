@@ -67,6 +67,8 @@ const DEFAULT_DATA = {
   ]
 };
 
+// An always-visible launch card for the hosted DUB RIDDIM version.
+// Keep distinct from the original compact DUB SIREN.
 function applyFixedClassifications(data) {
   if (!data || !Array.isArray(data.tools)) return data;
   for (const tool of data.tools) {
@@ -74,6 +76,23 @@ function applyFixedClassifications(data) {
     if (title.includes('oulipo')) {
       tool.category = 'art-concept';
     }
+  }
+  const exists = data.tools.some(tool => /^dub[\\s_-]*riddim\\b/i.test(String(tool?.title || '')));
+  if (!exists) {
+    data.tools.push({
+      title: 'DUB RIDDIM',
+      description: '音符を配置してリズムとベースラインを組み立て、DUB SPACEパッドやREWINDを使ってリアルタイムにダブを演奏できる音楽制作アプリ。',
+      image: '',
+      imageRatio: '4:3',
+      imageFit: 'contain',
+      appUrl: '/tools/dub-riddim/',
+      repoUrl: 'https://github.com/Masato-Nasu/MASATO-LAB/tree/main/tools/dub-riddim',
+      category: 'music-sound',
+      platform: 'web',
+      platforms: ['web'],
+      toolsPlacement: 'main',
+      tags: ['DUB', 'MUSIC', 'PIANO ROLL', 'PWA']
+    });
   }
   return data;
 }
