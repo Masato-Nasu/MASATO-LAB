@@ -820,9 +820,17 @@ function moveSelected(delta){
     return;
   }
   const from = state.selectedIndex;
-  const to = Math.max(0, Math.min(arr.length - 1, from + delta));
-  if(from === to){
-    showMessage('これ以上は移動できません。', false);
+  // On the Tools tab, reorder within the selected item's visible page.
+  // Otherwise moving past "その他" items may appear to have no effect on TOOLS.
+  const inTools = state.currentType === 'tools';
+  const placement = inTools ? isMainTool(arr[from]) : null;
+  const step = delta < 0 ? -1 : 1;
+  let to = from + step;
+  if(inTools){
+    while(to >= 0 && to < arr.length && isMainTool(arr[to]) !== placement) to += step;
+  }
+  if(to < 0 || to >= arr.length){
+    showMessage('この掲載ページでは、これ以上は移動できません。', false);
     return;
   }
   const [item] = arr.splice(from, 1);
@@ -840,9 +848,13 @@ function moveSelectedTo(edge){
     return;
   }
   const from = state.selectedIndex;
-  const to = edge === 'top' ? 0 : arr.length - 1;
+  // "先頭/末尾" follows the item's public page (TOOLS or その他).
+  const visiblePositions = state.currentType === 'tools'
+    ? arr.map((tool, index) => isMainTool(tool) === isMainTool(arr[from]) ? index : -1).filter(index => index >= 0)
+    : arr.map((_, index) => index);
+  const to = edge === 'top' ? visiblePositions[0] : visiblePositions[visiblePositions.length - 1];
   if(from === to){
-    showMessage('すでにその位置です。', false);
+    showMessage('この掲載ページではすでにその位置です。', false);
     return;
   }
   const [item] = arr.splice(from, 1);
