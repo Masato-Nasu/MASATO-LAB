@@ -42,8 +42,9 @@ const dubRiddimTool = {
 };
 const isDubRiddimTool = tool => {
   const title = String(tool?.title || '').normalize('NFKC').toLowerCase().replace(/[^a-z0-9]/g, '');
-  return title.startsWith('dubriddim') || String(tool?.slug || '').toLowerCase() === 'dub-riddim' ||
-    /(?:^|\\/)DUB-RIDDIM(?:\\/|$)/i.test(String(tool?.repoUrl || ''));
+  const slug = String(tool?.slug || '').toLowerCase();
+  const repo = String(tool?.repoUrl || '').toLowerCase();
+  return title.startsWith('dubriddim') || slug === 'dub-riddim' || repo.includes('/dub-riddim');
 };
 export function projectData(data, mode = 'public') {
   const items = Array.isArray(data.portfolio) ? data.portfolio : [];
