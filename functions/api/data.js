@@ -77,7 +77,7 @@ function applyFixedClassifications(data) {
       tool.category = 'art-concept';
     }
   }
-  const exists = data.tools.some(tool => /^dub[\\s_-]*riddim\\b/i.test(String(tool?.title || '')));
+  const exists = data.tools.some(tool => /^dub[\s_-]*riddim\b/i.test(String(tool?.title || '')));
   if (!exists) {
     data.tools.push({
       title: 'DUB RIDDIM',
