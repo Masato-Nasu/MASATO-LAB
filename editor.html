@@ -534,15 +534,38 @@ function escapeHtml(s=''){
   return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
 }
 
+// DUB RIDDIM must be editable like a regular Tool, even if the saved KV
+// data was created before it was released.
+const dubRiddimTemplate = {
+  title: 'DUB RIDDIM',
+  description: 'ドラム、ベース、スカンク、バブルなどの音を組み合わせ、音符やパターンを編集して一曲作れるDUB専用リズムマシーン。AIR HORN、DUB SPACE、REWIND、THUNDERのライブエフェクト、録音、WAV書き出しにも対応。',
+  category: 'music-sound',
+  platform: 'web',
+  platforms: ['web'],
+  toolsPlacement: 'main',
+  toolsPlacementEdited: true,
+  image: 'https://raw.githubusercontent.com/Masato-Nasu/DUB-RIDDIM/main/icon-512.png',
+  imageRatio: '4:3',
+  imageFit: 'contain',
+  appUrl: 'https://dub-siren.sunny-seed-0354.chatgpt.site/',
+  repoUrl: 'https://github.com/Masato-Nasu/DUB-RIDDIM',
+  tags: ['DUB', 'MUSIC', 'PIANO ROLL', 'PWA']
+};
+function isDubRiddimItem(tool){
+  const title = String(tool?.title || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const repo = String(tool?.repoUrl || '').toLowerCase();
+  return title === 'dubriddim' || String(tool?.slug || '').toLowerCase() === 'dub-riddim' || repo.includes('/dub-riddim');
+}
 function normalizeData(data = {}){
-  const normalized = {
+  const savedTools = Array.isArray(data.tools) ? data.tools : [];
+  const tools = savedTools.some(isDubRiddimItem) ? savedTools : [ {...dubRiddimTemplate}, ...savedTools ];
+  return {
     ...data,
     site: normalizeSite(data.site),
     portfolio: Array.isArray(data.portfolio) ? data.portfolio : [],
     memory: Array.isArray(data.memory) ? data.memory : [],
-    tools: Array.isArray(data.tools) ? data.tools : []
+    tools
   };
-  return normalized;
 }
 
 async function loadData(){
