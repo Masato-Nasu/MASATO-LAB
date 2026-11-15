@@ -22,10 +22,37 @@ export function slugs(items) {
     return n ? `${base}-${n+1}` : base;
   });
 }
+// The public Tools list can include a DUB RIDDIM fallback even before a KV
+// entry exists. Expose the same item to the editor so it can be edited and saved.
+const dubRiddimTool = {
+  title: 'DUB RIDDIM',
+  slug: 'dub-riddim',
+  description: 'DUB RIDDIMは、ドラム、ベース、スカンク、バブルなど6パートの音をステップとピアノロールで編集し、パターンを組み合わせて一曲作れるDUB専用リズムマシーン。AIR HORN、DUB SPACE、REWIND、THUNDERを演奏中に操作でき、録音やWAV書き出しにも対応。',
+  category: 'music-sound',
+  platform: 'web',
+  platforms: ['web'],
+  toolsPlacement: 'main',
+  toolsPlacementEdited: true,
+  image: 'https://raw.githubusercontent.com/Masato-Nasu/DUB-RIDDIM/main/icon-512.png',
+  imageRatio: '4:3',
+  imageFit: 'contain',
+  appUrl: 'https://dub-siren.sunny-seed-0354.chatgpt.site/',
+  repoUrl: 'https://github.com/Masato-Nasu/DUB-RIDDIM',
+  tags: ['DUB', 'RIDDIM', 'PIANO ROLL', 'PWA']
+};
+const isDubRiddimTool = tool => {
+  const title = String(tool?.title || '').normalize('NFKC').toLowerCase().replace(/[^a-z0-9]/g, '');
+  return title.startsWith('dubriddim') || String(tool?.slug || '').toLowerCase() === 'dub-riddim' ||
+    /(?:^|\\/)DUB-RIDDIM(?:\\/|$)/i.test(String(tool?.repoUrl || ''));
+};
 export function projectData(data, mode = 'public') {
   const items = Array.isArray(data.portfolio) ? data.portfolio : [];
   const paths = slugs(items);
-  return {...data, portfolio: items.map((item,i) => ({...item, slug: paths[i], secretRoom: isSecret(item)})).filter(item => mode === 'editor' || (mode === 'secret' ? item.secretRoom : !item.secretRoom))};
+  const tools = Array.isArray(data.tools) ? data.tools : [];
+  const editorTools = mode === 'editor' && !tools.some(isDubRiddimTool)
+    ? [...tools, {...dubRiddimTool}]
+    : tools;
+  return {...data, tools: editorTools, portfolio: items.map((item,i) => ({...item, slug: paths[i], secretRoom: isSecret(item)})).filter(item => mode === 'editor' || (mode === 'secret' ? item.secretRoom : !item.secretRoom))};
 }
 export async function readData(env) {
   const raw = await env.SITE_DATA?.get('site-data');
