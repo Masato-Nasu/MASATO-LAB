@@ -12,7 +12,7 @@ A note-based dub riddim workstation with live performance effects.
 - Use the separate REWIND sound.
 - Save work and export WAV audio in the hosted app.
 
-This is the **DUB RIDDIM** project page and launch link, added to MASATO LAB on 2026-11-15. The current executable app remains hosted at the ChatGPT Sites URL above. **Its v0.6.x source has not yet been mirrored to this GitHub directory**; do not mistake this launcher for the sequencer source.
+This is the **DUB RIDDIM** project page and launch link, added to MASATO LAB on 2026-11-15. The current executable app remains hosted at the ChatGPT Sites URL above. The complete application source is maintained in the separate [DUB RIDDIM repository](https://github.com/Masato-Nasu/DUB-RIDDIM). This MASATO LAB directory is the public launch page.
 
 The original compact **DUB SIREN** remains separately available at https://github.com/Masato-Nasu/DUB-SIREN and https://masato-nasu.github.io/DUB-SIREN/.
 
