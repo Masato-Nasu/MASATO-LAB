@@ -82,11 +82,11 @@ function applyFixedClassifications(data) {
     data.tools.push({
       title: 'DUB RIDDIM',
       description: '音符を配置してリズムとベースラインを組み立て、DUB SPACEパッドやREWINDを使ってリアルタイムにダブを演奏できる音楽制作アプリ。',
-      image: '',
+      image: 'https://raw.githubusercontent.com/Masato-Nasu/DUB-RIDDIM/main/icon-512.png',
       imageRatio: '4:3',
       imageFit: 'contain',
       appUrl: 'https://dub-siren.sunny-seed-0354.chatgpt.site/',
-      repoUrl: 'https://github.com/Masato-Nasu/MASATO-LAB/tree/main/tools/dub-riddim',
+      repoUrl: 'https://github.com/Masato-Nasu/DUB-RIDDIM',
       category: 'music-sound',
       platform: 'web',
       platforms: ['web'],
