@@ -373,7 +373,7 @@
       const extra=Math.max(0,tags.length-shownTags.length);
       const tagHtml=shownTags.map(tag=>`<span class="tag">#${escapeHtml(tag)}</span>`).join('')+(extra?`<span class="tag more">+${extra}</span>`:'');
       const detailSlug=tool.__detailSlug||slugify(tool.title||'item');
-      const detailLink=tool.__synthetic?'':`<a class="btn" href="/tools/${encodeURIComponent(detailSlug)}">READ MORE</a>`;
+      const detailLink=isDubRiddim(tool)?'<a class="btn" href="/dub-riddim.html">READ MORE</a>':(tool.__synthetic?'':`<a class="btn" href="/tools/${encodeURIComponent(detailSlug)}">READ MORE</a>`);
       const appLink=tool.appUrl?`<a class="btn primary" href="${escapeHtml(tool.appUrl)}" target="_blank" rel="noopener noreferrer">OPEN</a>`:'';
       const repoLink=tool.repoUrl?`<a class="btn" href="${escapeHtml(tool.repoUrl)}" target="_blank" rel="noopener noreferrer">GITHUB</a>`:'';
       return `<article class="card">
@@ -391,6 +391,7 @@
     // Keep the featured card available for older data without a DUB SIREN entry.
     const isGsVisualizer=(tool)=>/^(gsvisualizer|grayscottvisualizer)/.test(titleKey(tool.title).replace(/[^a-z0-9]/g,''));
     const isDubSiren=(tool)=>/^dubsiren/.test(titleKey(tool.title).replace(/[^a-z0-9]/g,''));
+    const isDubRiddim=(tool)=>/^dubriddim/.test(titleKey(tool.title).replace(/[^a-z0-9]/g,''));
     const featuredDubSiren={
       title:'DUB SIREN',
       description:'指の動きで音を操るダブ・サイレン。AIR HORN、THUNDER、TAPE DELAYを備え、音楽と重ねて録音もできるブラウザー楽器。',
@@ -401,6 +402,21 @@
       category:'music-sound',
       platform:'web',
       tags:['DUB','SOUND','PWA'],
+      __synthetic:true
+    };
+
+    const featuredDubRiddim={
+      title:'DUB RIDDIM',
+      description:'音符を配置してドラム、ベース、コードを組み立てるDUB専用リズムマシーン。DUB SPACEパッド、REWIND、ミックス録音、WAV書き出しに対応。',
+      image:'https://raw.githubusercontent.com/Masato-Nasu/DUB-RIDDIM/main/icon-512.png',
+      imageFit:'contain',
+      appUrl:'https://dub-siren.sunny-seed-0354.chatgpt.site/',
+      repoUrl:'https://github.com/Masato-Nasu/DUB-RIDDIM',
+      category:'music-sound',
+      platform:'web',
+      platforms:['web'],
+      toolsPlacement:'main',
+      tags:['DUB','RIDDIM','PIANO ROLL','PWA'],
       __synthetic:true
     };
 
@@ -469,8 +485,13 @@
         const items=Array.isArray(data.tools)?data.tools:[];
         const slugs=buildSlugs(items);
         const allItems=items.map((tool,index)=>({...tool,__detailSlug:slugs[index]}));
-        const mainItems=allItems.filter(isMainTool);
-        const otherItems=allItems.filter(tool=>!isMainTool(tool));
+        const mainItems=allItems.filter(tool=>isMainTool(tool)&&!isDubRiddim(tool));
+        const otherItems=allItems.filter(tool=>!isMainTool(tool)&&!isDubRiddim(tool));
+        // Keep DUB RIDDIM visible even when the KV payload predates the release.
+        const savedDubRiddim=allItems.find(isDubRiddim);
+        const dubRiddim={...featuredDubRiddim,...(savedDubRiddim||{})};
+        for(const key of ['image','appUrl','repoUrl']) if(!dubRiddim[key]) dubRiddim[key]=featuredDubRiddim[key];
+        mainItems.unshift(dubRiddim);
         if(!otherPage && !allItems.some(isDubSiren)){
           const gsIndex=allItems.findIndex(isGsVisualizer);
           const fallbackIndex=gsIndex<0 ? 0 : allItems.slice(0,gsIndex).filter(isMainTool).length;
