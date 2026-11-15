@@ -51,7 +51,7 @@ export function projectData(data, mode = 'public') {
   const paths = slugs(items);
   const tools = Array.isArray(data.tools) ? data.tools : [];
   const editorTools = mode === 'editor' && !tools.some(isDubRiddimTool)
-    ? [...tools, {...dubRiddimTool}]
+    ? [{...dubRiddimTool}, ...tools]
     : tools;
   return {...data, tools: editorTools, portfolio: items.map((item,i) => ({...item, slug: paths[i], secretRoom: isSecret(item)})).filter(item => mode === 'editor' || (mode === 'secret' ? item.secretRoom : !item.secretRoom))};
 }
