@@ -1,4 +1,5 @@
 import {ensureTotoNippo} from './_toto-nippo.js';
+import {ensureFeaturedMemory} from './_featured-memory.js';
 // Classification is applied on the server, including before a first editor save.
 const titles = new Set([
   'ドリップバックが浸からないドリップバックスタンド',
@@ -48,7 +49,7 @@ const isDubRiddimTool = tool => {
   return title.startsWith('dubriddim') || slug === 'dub-riddim' || repo.includes('/dub-riddim');
 };
 export function projectData(data, mode = 'public') {
-  data = ensureTotoNippo(data);
+  data = ensureFeaturedMemory(ensureTotoNippo(data));
   const items = Array.isArray(data.portfolio) ? data.portfolio : [];
   const paths = slugs(items);
   const tools = Array.isArray(data.tools) ? data.tools : [];
