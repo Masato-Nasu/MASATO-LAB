@@ -17,8 +17,10 @@ export function ensureFeaturedMemory(data) {
   if (!data.site || typeof data.site !== "object") data.site = {};
   const key = "memoryEssaySeeded20261118";
   if (!data.site[key]) {
-    const exists = data.memory.some(item => item && (item.slug === featuredMemory.slug || item.title === featuredMemory.title));
-    if (!exists) data.memory.unshift({...featuredMemory});
+    const index = data.memory.findIndex(item => item && (item.slug === featuredMemory.slug || item.title === featuredMemory.title));
+    // Migrate an earlier, abbreviated automatic draft once; later editor saves remain authoritative.
+    if (index < 0) data.memory.unshift({...featuredMemory});
+    else data.memory[index] = {...data.memory[index], ...featuredMemory};
     data.site[key] = true;
   }
   return data;
