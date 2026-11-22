@@ -3,22 +3,37 @@ const harborDub={
  bass:[0,null,null,7,0,null,12,null],
  kicks:[4],skanks:[1,3,5,7],delay:3,feedback:.42
 };
+// Minor-key arrangements built around the one-drop and offbeat guitar/organ feel.
+const dubProgressions=[[0,0,5,7],[0,5,0,7],[0,0,8,7],[0,10,5,7]];
 const recordedDubs=[harborDub,{
- title:'潮の向こう',bpm:72,key:41,minor:false,chords:[0,5,7,5],
- bass:[0,null,5,null,null,7,null,12],
- kicks:[0,4],skanks:[1,5,7],delay:2,feedback:.53
+ title:'雨上がりの島',bpm:75,key:36,minor:true,chords:dubProgressions[1],
+ bass:[0,null,null,7,null,0,null,null],
+ kicks:[4],skanks:[1,3,7],delay:3,feedback:.48
+},{
+ title:'灯りの消えた桟橋',bpm:77,key:39,minor:true,chords:dubProgressions[2],
+ bass:[0,null,0,null,null,7,null,12],
+ kicks:[4],skanks:[1,3,5,7],delay:2,feedback:.46
 }];
 
 function validateDub(track){
  if(!track||typeof track.title!=='string'||!track.title.trim()||track.title.length>60)return false;
  const integer=(n,min,max)=>Number.isInteger(n)&&n>=min&&n<=max;
- const notes=(a,length,max)=>Array.isArray(a)&&a.length===length&&a.every(n=>integer(n,0,max));
- const hits=a=>Array.isArray(a)&&a.length>=1&&a.length<=8&&new Set(a).size===a.length&&a.every(n=>integer(n,0,7));
- return integer(track.bpm,62,96)&&integer(track.key,34,43)&&typeof track.minor==='boolean'&&
-  notes(track.chords,4,11)&&Array.isArray(track.bass)&&track.bass.length===8&&
-  track.bass.some(n=>n!==null)&&track.bass.every(n=>n===null||integer(n,0,12))&&
-  hits(track.kicks)&&hits(track.skanks)&&integer(track.delay,1,4)&&
-  typeof track.feedback==='number'&&track.feedback>=.2&&track.feedback<=.65;
+ const same=(a,b)=>Array.isArray(a)&&a.length===b.length&&a.every((n,i)=>n===b[i]);
+ const bass=track.bass;
+ const skanks=track.skanks;
+ if(!Array.isArray(bass)||bass.length!==8||bass[0]!==0)return false;
+ const attacks=bass.filter(n=>n!==null);
+ if(attacks.length<3||attacks.length>5||!attacks.every(n=>[0,7,12].includes(n)))return false;
+ if(!Array.isArray(skanks)||skanks.length<2||skanks.length>4||new Set(skanks).size!==skanks.length||
+    !skanks.every(n=>[1,3,5,7].includes(n)))return false;
+ return integer(track.bpm,73,80)&&integer(track.key,35,41)&&track.minor===true&&
+  dubProgressions.some(chords=>same(track.chords,chords))&&same(track.kicks,[4])&&
+  integer(track.delay,2,3)&&typeof track.feedback==='number'&&track.feedback>=.38&&track.feedback<=.53;
+}
+
+function sameDubGroove(track,previous){
+ return !!previous&&['chords','bass','skanks'].every(part=>
+  track[part].length===previous[part].length&&track[part].every((n,i)=>n===previous[part][i]));
 }
 
 async function generateDub(key,previous,signal){
@@ -27,13 +42,14 @@ async function generateDub(key,previous,signal){
   method:'POST',signal:signal?AbortSignal.any([deadline,signal]):deadline,
   headers:{Authorization:'Bearer '+key,'Content-Type':'application/json'},
   body:JSON.stringify({model:'gpt-4o-mini',response_format:{type:'json_object'},messages:[
-   {role:'system',content:'Arrange an original instrumental Jamaican dub track. Return JSON only, with title (short Japanese title), bpm (integer 62–96), key (MIDI integer 34–43), minor (boolean), chords (four root intervals in semitones 0–11 relative to key), bass (eight eighth-note slots, each null for no new attack or integer 0–12 semitones above the chord root), kicks and skanks (arrays of distinct eighth-note slot indices 0–7), delay (integer 1–4 eighth notes), feedback (0.2–0.65). Use a syncopated bass motif with space, skank chords mostly on offbeats, and a one-drop or steppers beat. No lyrics.'},
-   {role:'user',content:'Compose a fresh dub arrangement distinct from this previous one: '+JSON.stringify(previous)}
+   {role:'system',content:'Arrange an original instrumental sufferers reggae dub with island melancholy: dusk over a small island, restrained dynamics, deep bass, small offbeat chords and a long space between notes. Use the reference as a fixed musical direction. Return JSON only: title (short Japanese), bpm (73–80), key (MIDI 35–41), minor (true), chords (one of '+JSON.stringify(dubProgressions)+'), bass (8 eighth-note slots starting at 0, with 3–5 total attacks, each 0, 7, or 12, and null for rests), kicks ([4]), skanks (2–4 distinct picks from [1,3,5,7], ascending), delay (2 or 3), feedback (0.38–0.53). Keep the reggae one-drop and minor harmony. No vocals or lyrics.'},
+   {role:'user',content:'Fixed reference: '+JSON.stringify(harborDub)+'. Vary the bass rhythm, chord movement, or offbeats relative to the last track while retaining the same feel. Last track: '+JSON.stringify(previous)}
   ]})
  });
  if(!response.ok)throw Error('OpenAI HTTP '+response.status);
  const data=await response.json();
  const track=JSON.parse(data.choices[0].message.content);
- if(!validateDub(track))throw Error('編曲データの形式が合いません');
+ if(!validateDub(track))throw Error('編曲がマイナーDUBの範囲を外れました');
+ if(sameDubGroove(track,previous))throw Error('前の曲と同じ編曲になりました');
  return track
 }
