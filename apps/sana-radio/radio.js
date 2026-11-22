@@ -105,7 +105,7 @@ async function play(nextBulletin){
  const voices=await waitForEnglishVoices(station);
  let voiceIndex=0;
  if(current!==epoch)return;
- const worker=voiceWorker=new Worker('voice.js');
+ const worker=station===1?null:(voiceWorker=new Worker('voice.js'));
  let queuedBulletin;
  if(station<3&&apiKey){
   const controller=nextProgramController=new AbortController();
@@ -198,18 +198,23 @@ async function play(nextBulletin){
     if(!document.hidden)voiceIndex++;
     speakLine()
    });
+  }else if(worker){
+   message('朗読音声 · 内蔵'+(station===3?'女性':'')+'サンプル音声');
+   worker.postMessage({station,line:lines[n]})
   }else{
-   const voiceStation=station===1?3:station;
-   message('朗読音声 · 内蔵'+(voiceStation===3?'女性':'')+'サンプル音声');
-   worker.postMessage({station:voiceStation,line:lines[n]})
+   const line=lines[n];
+   message('WEATHER · 利用できる英語音声がありません。音声・API設定からAI男性ボイスを選べます。');
+   showLine(line);
+   glyph('');
+   setTimeout(advance,Math.max(4500,line.ja.length*140))
   }
  }
- worker.onerror=()=>{
+ if(worker)worker.onerror=()=>{
   if(epoch!==current)return;
   caption('音声を準備できませんでした。');
   message('POWERを入れ直してください。')
  };
- worker.onmessage=({data})=>{
+ if(worker)worker.onmessage=({data})=>{
   if(current!==epoch)return;
   const buffer=audio.createBuffer(1,data.pcm.length,16000);
   buffer.copyToChannel(data.pcm,0);

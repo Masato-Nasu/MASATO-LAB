@@ -2,30 +2,34 @@
 const nativeSpeech=window.speechSynthesis;
 let activeNarration=null;
 nativeSpeech?.getVoices();
+const nameOf=voice=>voice.name.replace(/[_-]/g,' ');
+const male=/\b(male|alex|daniel|fred|arthur|oliver|tom|reed|ralph|jorge|gordon|mark|david|guy|ryan|eric|christopher|brian|andrew|steffan|aaron|evan|nathan|lee|malcolm)\b/i;
+const female=/\b(female|samantha|zira|jenny|aria|libby|sonia|victoria|karen|moira|ava|allison|serena)\b/i;
+const basicVoice=/\b(fred|compact|robotic|espeak|whisper|zarvox|bubbles|trinoids)\b/i;
+function voiceGender(voice){
+ const name=nameOf(voice);
+ return female.test(name)?3:male.test(name)?1:0
+}
 function englishVoices(station){
  const voices=nativeSpeech?.getVoices().filter(voice=>/^en([-_]|$)/i.test(voice.lang))||[];
- const nameOf=voice=>voice.name.replace(/[_-]/g,' ');
- const male=/\b(male|alex|daniel|fred|arthur|oliver|tom|reed|ralph|jorge|gordon|mark|david|guy|ryan|eric|christopher|brian|andrew|steffan|aaron|evan|nathan|lee|malcolm)\b/i;
- const female=/\b(female|samantha|zira|jenny|aria|libby|sonia|victoria|karen|moira|ava|allison|serena)\b/i;
  function rank(voice){
   const name=nameOf(voice);
-  const gender=male.test(name)&&!female.test(name)?1:female.test(name)?3:0;
+  const gender=voiceGender(voice);
   const preferred=station===1||station===3?station:0;
-  const preference=preferred?(gender===preferred?(station===1?64:32):gender===0?16:0):0;
+  const preference=station===1?(gender===1?128:gender===3?64:0)
+   :preferred?(gender===preferred?32:gender===0?16:0):0;
   const accent=voice.lang.replace('_','-').toLowerCase()===voiceAccent.toLowerCase()?16:0;
   const quality=/natural|neural|enhanced|premium/i.test(name)?12:0;
-  const basic=/\b(fred|compact|robotic|espeak)\b/i.test(name)?-24:0;
+  const basic=basicVoice.test(name)?-24:0;
   return preference+accent+quality+basic+(/google/i.test(name)?6:0)+(voice.localService?2:0)
  }
- const eligible=station===1?voices.filter(voice=>{
-  const name=nameOf(voice);
-  return male.test(name)||female.test(name)
- }):voices;
+ const eligible=station===1?voices.filter(voice=>!basicVoice.test(nameOf(voice))):voices;
  return eligible.sort((a,b)=>rank(b)-rank(a))
 }
 function waitForEnglishVoices(station){
  const ready=englishVoices(station);
- if(ready.length||!nativeSpeech?.addEventListener)return Promise.resolve(ready);
+ const hasPreferred=voices=>station===1?voices.some(voice=>voiceGender(voice)===1):voices.length>0;
+ if(hasPreferred(ready)||!nativeSpeech?.addEventListener)return Promise.resolve(ready);
  return new Promise(resolve=>{
   const timer=setTimeout(finish,1200);
   function finish(){
@@ -33,7 +37,7 @@ function waitForEnglishVoices(station){
    nativeSpeech.removeEventListener('voiceschanged',voicesChanged);
    resolve(englishVoices(station))
   }
-  function voicesChanged(){if(englishVoices(station).length)finish()}
+  function voicesChanged(){if(hasPreferred(englishVoices(station)))finish()}
   nativeSpeech.addEventListener('voiceschanged',voicesChanged)
  })
 }
