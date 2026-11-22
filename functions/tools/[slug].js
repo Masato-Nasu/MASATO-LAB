@@ -1,3 +1,4 @@
+import {ensureSanaRadio} from '../_sana-radio.js';
 import {ensureTotoNippo} from '../_toto-nippo.js';
 import {isMainTool} from '../../tools-selection.js';
 function escapeHtml(value = '') {
@@ -123,7 +124,7 @@ export async function onRequestGet(context) {
     }
   }
 
-  data = ensureTotoNippo(data);
+  data = ensureSanaRadio(ensureTotoNippo(data));
   const items = Array.isArray(data?.tools) ? data.tools : [];
   // The public listing appends the hosted DUB RIDDIM launch item on API reads.
   // Add it here as well, since detail pages normally load KV directly.

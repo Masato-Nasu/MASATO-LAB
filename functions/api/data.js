@@ -1,3 +1,4 @@
+import {ensureSanaRadio} from '../_sana-radio.js';
 import {ensureTotoNippo} from '../_toto-nippo.js';
 import {ensureFeaturedMemory} from '../_featured-memory.js';
 const DEFAULT_DATA = {
@@ -72,7 +73,7 @@ const DEFAULT_DATA = {
 // An always-visible launch card for the hosted DUB RIDDIM version.
 // Keep distinct from the original compact DUB SIREN.
 function applyFixedClassifications(data) {
-  data = ensureFeaturedMemory(ensureTotoNippo(data));
+  data = ensureFeaturedMemory(ensureSanaRadio(ensureTotoNippo(data)));
   if (!data || !Array.isArray(data.tools)) return data;
   for (const tool of data.tools) {
     const title = String(tool?.title || '').normalize('NFKC').toLowerCase();
