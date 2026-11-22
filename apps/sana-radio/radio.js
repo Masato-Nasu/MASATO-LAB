@@ -104,7 +104,7 @@ async function play(nextBulletin){
  const voices=await waitForEnglishVoices(station);
  let voiceIndex=0;
  if(current!==epoch)return;
- const worker=voiceWorker=new Worker('voice.js');
+ const worker=station===1?null:(voiceWorker=new Worker('voice.js'));
  let queuedBulletin;
  if(station<3&&apiKey){
   const controller=nextProgramController=new AbortController();
@@ -197,18 +197,33 @@ async function play(nextBulletin){
     if(!document.hidden)voiceIndex++;
     speakLine()
    });
-  }else{
-   message('朗読音声 · 内蔵'+(station===1?'男性':station===3?'女性':'')+'サンプル音声');
+  }else if(worker){
+   message('朗読音声 · 内蔵'+(station===3?'女性':'')+'サンプル音声');
    worker.postMessage({station,line:lines[n]})
+  }else{
+   const line=lines[n];
+   message(weatherAiUnavailable
+    ?'AI音声に接続できないため、字幕で放送中です。'
+    :'利用できる男性音声がないため、字幕で放送中です。');
+   showLine(line);
+   glyph('');
+   setTimeout(advance,Math.max(4500,line.ja.length*140))
   }
  }
- worker.onerror=()=>{if(epoch===current){caption('音声を準備できませんでした。');message('POWERを入れ直してください。')}};
- worker.onmessage=({data})=>{
-  if(current!==epoch)return;
-  const buffer=audio.createBuffer(1,data.pcm.length,16000);
-  buffer.copyToChannel(data.pcm,0);
-  playSentence(buffer,data.cues,lines[n])
- };speakLine()
+ if(worker){
+  worker.onerror=()=>{
+   if(epoch!==current)return;
+   caption('音声を準備できませんでした。');
+   message('POWERを入れ直してください。')
+  };
+  worker.onmessage=({data})=>{
+   if(current!==epoch)return;
+   const buffer=audio.createBuffer(1,data.pcm.length,16000);
+   buffer.copyToChannel(data.pcm,0);
+   playSentence(buffer,data.cues,lines[n])
+  }
+ }
+ speakLine()
 
  }catch{if(current===epoch)caption('受信できませんでした。');if(current===epoch)message('放送データを読み込めません。再読み込みしてください。')}
 }
