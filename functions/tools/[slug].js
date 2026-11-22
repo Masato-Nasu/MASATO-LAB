@@ -64,6 +64,14 @@ function renderPage(site, item) {
       descriptionText = 'BYOK対応：ご自身のOpenAI APIキーを入力して利用できます。\n\n' + descriptionText;
     }
   }
+  if (item.appUrl?.replace(/\/$/, '') === 'https://masato-nasu.github.io/horoscope-100pct' &&
+      descriptionText.includes('今日をつくっている4つの要素')) {
+    descriptionText = `生まれた日の星と、今日の星。その位置関係から、恋愛運・仕事運・金運・対人運をそれぞれ％で表示します。数字の下には、その日を過ごすヒントを一言ずつ添えました。「星の理由」を開くと、今日のひと言に影響した天体と角度が分かります。
+
+初回は生年月日と出生地を選ぶだけ。出生時刻も分かれば入力できます。時刻が分からないときは、生まれた土地の一日を約1時間刻みで調べ、どの時点にも共通する星の配置を使います。
+
+％は星の配置をもとに計算した運勢のスコアです。同じ条件で占えば、同じ結果になります。入力内容はブラウザに保存され、次からは開くだけで今日の占いが読めます。`;
+  }
   const description = escapeHtml(descriptionText);
   const image = resolveImage(item.image || '');
   const fit = item.imageFit === 'cover' ? 'cover' : 'contain';
