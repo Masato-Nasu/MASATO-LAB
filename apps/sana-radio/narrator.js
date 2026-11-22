@@ -59,22 +59,29 @@ function narrate(line,station,voice,advance,recover){
   if(activeNarration!==state)return;
   endNarration();recover()
  }
+ let wordIndex=0,anchorIndex=0,anchorTime=0;
+ const msPerChar=72/u.rate;
+ function displayThrough(position){
+  while(wordIndex+1<words.length&&words[wordIndex+1].index<=position){
+   wordIndex++;
+  }
+  if(words[wordIndex])glyph(words[wordIndex][0])
+ }
  u.onstart=()=>{
   if(activeNarration!==state)return;
-  clearTimeout(state.timer);showLine(line);glyph(words[0]?.[0]||'');
-  // Some network voices expose start/end but omit word-boundary events.
-  const start=performance.now(),secondsPerChar=.072/u.rate;
+  clearTimeout(state.timer);showLine(line);displayThrough(0);
+  anchorTime=performance.now();
   state.progress=setInterval(()=>{
-   const position=(performance.now()-start)/1000/secondsPerChar;
-   const w=words.findLast(w=>w.index<=position);if(w)glyph(w[0])
+   if(activeNarration!==state)return;
+   displayThrough(anchorIndex+(performance.now()-anchorTime)/msPerChar)
   },75);
   state.timer=setTimeout(failed,Math.max(15000,text.length*350))
  };
  u.onboundary=e=>{
-  if(activeNarration!==state)return;
-  if(e.name!=='word')return;clearInterval(state.progress);
-  const w=words.findLast(w=>w.index<=e.charIndex);
-  if(w)glyph(w[0])
+  if(activeNarration!==state||e.name!=='word'||!Number.isFinite(e.charIndex))return;
+  if(e.charIndex<=anchorIndex)return;
+  anchorIndex=e.charIndex;anchorTime=performance.now();
+  displayThrough(anchorIndex)
  };
  u.onerror=failed;
  u.onend=()=>{if(activeNarration!==state)return;clearTimeout(state.timer);clearInterval(state.progress);activeNarration=null;advance()};
