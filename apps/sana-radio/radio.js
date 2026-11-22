@@ -16,7 +16,7 @@ const lastEditions=[-1,-1,-1,-1,-1];
 try{
  apiKey=localStorage.getItem('sana-radio-key')||'';
  voiceAccent=localStorage.getItem('sana-radio-voice-accent')==='en-US'?'en-US':'en-GB';
- weatherAiVoice=localStorage.getItem('sana-radio-weather-ai-voice')==='1';
+
  const saved=JSON.parse(localStorage.getItem('sana-radio-last-editions')||'[]');
  for(const index of [0,1,2,4]){
   if(Number.isSafeInteger(saved?.[index])&&saved[index]>=0&&saved[index]<10000)lastEditions[index]=saved[index]
@@ -203,7 +203,7 @@ async function play(nextBulletin){
    worker.postMessage({station,line:lines[n]})
   }else{
    const line=lines[n];
-   message('WEATHER · 利用できる英語音声がありません。音声・API設定からAI男性ボイスを選べます。');
+   message('WEATHER · 利用できる英語音声がありません。字幕で放送中です。');
    showLine(line);
    glyph('');
    setTimeout(advance,Math.max(4500,line.ja.length*140))
@@ -271,7 +271,7 @@ $('volume').oninput=volume;$('subtitle').onclick=()=>{sub=!sub;$('subtitle').set
 $('settings').onclick=()=>{
  $('key').value=apiKey;
  $('voiceAccent').value=voiceAccent;
- $('weatherAiVoice').checked=weatherAiVoice;
+
  try{$('remember').checked=!!localStorage.getItem('sana-radio-key')}catch{}
  $('dialog').showModal()
 };
@@ -281,11 +281,11 @@ $('keyForm').onsubmit=e=>{
  const oldKey=apiKey,oldAccent=voiceAccent,oldWeatherAi=weatherAiVoice;
  apiKey=$('key').value.trim();
  voiceAccent=$('voiceAccent').value;
- weatherAiVoice=$('weatherAiVoice').checked;
+
  weatherAiUnavailable=false;
  try{
   localStorage.setItem('sana-radio-voice-accent',voiceAccent);
-  localStorage.setItem('sana-radio-weather-ai-voice',weatherAiVoice?'1':'0');
+
   if(apiKey&&$('remember').checked)localStorage.setItem('sana-radio-key',apiKey);
   else localStorage.removeItem('sana-radio-key');
   message('設定を適用しました。')
