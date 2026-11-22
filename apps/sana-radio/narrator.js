@@ -2,28 +2,31 @@
 const nativeSpeech=window.speechSynthesis;
 let activeNarration=null;
 nativeSpeech?.getVoices();
-function englishVoice(station){
- const voices=nativeSpeech?.getVoices().filter(v=>/^en([-_]|$)/i.test(v.lang))||[];
- const score=v=>(/google/i.test(v.name)?8:0)+(/natural|neural|enhanced|premium/i.test(v.name)?4:0)+(/^en[-_]US/i.test(v.lang)?2:0);
- if(station===1){
-  const male=/\b(male|alex|daniel|fred|arthur|oliver|tom|reed|ralph|jorge|gordon|mark|david|guy|ryan|eric|christopher|brian|andrew|steffan)\b/i;
-  return voices.filter(v=>male.test(v.name)&&!/\bfemale\b/i.test(v.name)).sort((a,b)=>score(b)-score(a))[0]
+function englishVoices(station){
+ const voices=nativeSpeech?.getVoices().filter(voice=>/^en([-_]|$)/i.test(voice.lang))||[];
+ const nameOf=voice=>voice.name.replace(/[_-]/g,' ');
+ const male=/\b(male|alex|daniel|fred|arthur|oliver|tom|reed|ralph|jorge|gordon|mark|david|guy|ryan|eric|christopher|brian|andrew|steffan)\b/i;
+ const female=/\b(female|samantha|zira|jenny|aria|libby|sonia|victoria|karen|moira|ava|allison|serena)\b/i;
+ function rank(voice){
+  const name=nameOf(voice);
+  const gender=male.test(name)&&!female.test(name)?1:female.test(name)?3:0;
+  const preference=station===1||station===3?(gender===station?32:gender===0?16:0):0;
+  return preference+(/google/i.test(name)?8:0)+(/natural|neural|enhanced|premium/i.test(name)?4:0)+(voice.localService?2:0)+(/^en[-_]US/i.test(voice.lang)?1:0)
  }
- if(station===3)return voices.filter(v=>/female|samantha|zira|jenny|aria|libby|sonia|victoria|karen|moira|ava|allison|serena/i.test(v.name)&&!/male\b/i.test(v.name.replace(/female/ig,''))).sort((a,b)=>score(b)-score(a))[0];
-
- return voices.sort((a,b)=>score(b)-score(a))[0]
+ return voices.sort((a,b)=>rank(b)-rank(a))
 }
-function waitForEnglishVoice(station){
- const ready=englishVoice(station);
- if(ready||!nativeSpeech?.addEventListener||nativeSpeech.getVoices().length)return Promise.resolve(ready);
+function waitForEnglishVoices(station){
+ const ready=englishVoices(station);
+ if(ready.length||!nativeSpeech?.addEventListener)return Promise.resolve(ready);
  return new Promise(resolve=>{
-  const timer=setTimeout(finish,800);
+  const timer=setTimeout(finish,1200);
   function finish(){
    clearTimeout(timer);
-   nativeSpeech.removeEventListener('voiceschanged',finish);
-   resolve(englishVoice(station))
+   nativeSpeech.removeEventListener('voiceschanged',voicesChanged);
+   resolve(englishVoices(station))
   }
-  nativeSpeech.addEventListener('voiceschanged',finish)
+  function voicesChanged(){if(englishVoices(station).length)finish()}
+  nativeSpeech.addEventListener('voiceschanged',voicesChanged)
  })
 }
 function endNarration(){
@@ -64,5 +67,5 @@ function narrate(line,station,voice,advance,recover){
  u.onerror=failed;
  u.onend=()=>{if(activeNarration!==state)return;clearTimeout(state.timer);clearInterval(state.progress);activeNarration=null;advance()};
  state.timer=setTimeout(failed,3500);
- nativeSpeech.speak(u)
+ try{nativeSpeech.speak(u)}catch{failed()}
 }

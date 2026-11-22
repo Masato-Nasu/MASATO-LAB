@@ -98,7 +98,8 @@ async function play(nextBulletin){
  else if(p.editionIndex!==undefined)rememberEdition(station,p.editionIndex);
  const lines=p.lines;setSubtitleLines(lines);const origin=document.createElement(p.url?'a':'span');origin.textContent=p.label+(p.date?' · '+new Date(p.date).toLocaleString('ja-JP',{timeZone:'Asia/Tokyo'})+' JST':'');if(p.url){origin.href=p.url;origin.target='_blank';origin.rel='noopener'}$('origin').append(origin);
  let n=0;
- let voice=await waitForEnglishVoice(station);
+ const voices=await waitForEnglishVoices(station);
+ let voiceIndex=0;
  if(current!==epoch)return;
  const worker=voiceWorker=new Worker('voice.js');
  let queuedBulletin;
@@ -126,6 +127,7 @@ async function play(nextBulletin){
   if(!/[a-z0-9]/i.test(lines[n].sana)){
    showLine(lines[n]);glyph('');setTimeout(advance,600);return
   }
+  const voice=voices[voiceIndex];
   if(voice){
    restartNativeSpeech=speakLine;
    message('朗読音声 · '+voice.name);
@@ -134,11 +136,11 @@ async function play(nextBulletin){
     advance()
    },()=>{
     restartNativeSpeech=null;
-    if(!document.hidden)voice=null;
+    if(!document.hidden)voiceIndex++;
     speakLine()
    });
   }else{
-   message(station===1?'朗読音声 · 男性':station===3?'朗読音声 · 女性':'朗読音声 · 内蔵サンプル音声');
+   message('朗読音声 · 内蔵'+(station===1?'男性':station===3?'女性':'')+'サンプル音声');
    worker.postMessage({station,line:lines[n]})
   }
  }
