@@ -38,15 +38,60 @@ function memorySpeech(sana){
   return token
  }).filter(Boolean).join(' ').replace(/\s+([.,!?])/g,'$1')
 }
+const midnightParts=[
+ [
+  ['東の丘から手紙が届きました。','A letter has arrived from the eastern hill.'],
+  ['今夜は港の窓を開けて放送しています。','Tonight the studio window is open to the harbor.'],
+  ['南の島では、まだ明かりが見えます。','There are still lights on the southern island.'],
+  ['こんばんは。雨が止むまで、ここで話しましょう。','Good evening. Let us talk here until the rain stops.'],
+  ['さっき、最後の船が出ていきました。','The last boat left a little while ago.']
+ ],[
+  ['机の上に白い石が一つあります。','There is a single white stone on the desk.'],
+  ['古い時計が一度だけ鳴りました。','An old clock rang just once.'],
+  ['夜の風が紙の端を揺らしています。','The night breeze is lifting the edge of the paper.'],
+  ['お茶を入れたのに、飲むのを忘れていました。','I made tea and forgot to drink it.'],
+  ['誰もいない道を、猫が横切りました。','A cat crossed the empty road.']
+ ],[
+  ['静かになると、小さな音が近くなりますね。','When it grows quiet, small sounds seem nearer.'],
+  ['昼間なら、気づかずにいたと思います。','In daylight I think I would have missed it.'],
+  ['こんな夜には、昔の友達を思い出します。','On nights like this I remember an old friend.'],
+  ['少し黙って、一緒に耳を澄ませてみましょう。','Let us pause a moment and listen together.'],
+  ['そちらでは今、何が聞こえますか。','What can you hear where you are?']
+ ],[
+  ['このあとは、波が引くまで起きています。','I will stay up until the tide goes out.'],
+  ['眠れない方は、もう少しお付き合いください。','If sleep has not come, keep me company a little longer.'],
+  ['明日の朝、この夜を少しだけ覚えていたいですね。','I hope we remember a little of this night in the morning.'],
+  ['窓の向こうの皆さんに、おやすみを。','Good night to all of you beyond the window.'],
+  ['手紙の続きは、次の夜に読みましょう。','Let us read the rest of the letter another night.']
+ ]
+];
+let midnightSequence;
+function nextMidnightLines(){
+ if(midnightSequence===undefined){
+  let stored=null;
+  try{stored=localStorage.getItem('sana-midnight-sequence')}catch{}
+  midnightSequence=stored!==null&&/^\d+$/.test(stored)?Number(stored)%625:Math.floor(Math.random()*625)
+ }
+ // Walk every combination once. The stride is coprime to 5^4.
+ midnightSequence=(midnightSequence+183)%625;
+ try{localStorage.setItem('sana-midnight-sequence',String(midnightSequence))}catch{}
+ let index=midnightSequence;
+ return midnightParts.map(group=>{
+  const pair=group[index%group.length];
+  index=Math.floor(index/group.length);
+  return pair
+ })
+}
+async function midnightProgram(){
+ const pairs=nextMidnightLines();
+ const lines=await translate(pairs.map(([ja])=>ja));
+ return {label:'真夜中の通信室',lines:lines.map((line,i)=>({...line,sana:memorySpeech(line.sana),en:pairs[i][1]}))}
+}
 async function program(s,nextBulletin){
  if(s<3&&nextBulletin)return {label:['架空ニュース · 新着','架空気象情報 · 新着','真夜中の通信室'][s],lines:nextBulletin};
  if(s===0)return fictionalProgram(newsEditions,indices[0],'架空ニュース · ');
  if(s===1)return fictionalProgram(weatherEditions,indices[1],'架空気象情報 · ');
- if(s===2){
-  const editions=(await demo)[s];
-  const editionIndex=indices[s]%editions.length;
-  return {label:'真夜中の通信室',editionIndex,lines:editions[editionIndex]}
- }
+ if(s===2)return midnightProgram();
  const articles=await (await read('memory.json')).json();
  const {article,played}=nextArticle(articles);
  const spokenJapanese=article.lines.map(line=>line
@@ -85,6 +130,7 @@ async function generateBulletin(station,key,previous,signal){
    !items.every(item=>typeof item?.ja==='string'&&item.ja.trim()&&item.ja.length<=70&&typeof item.en==='string'&&item.en.trim()&&item.en.length<=240)){
    throw Error('原稿の形式が合いません')
   }
+  if(station===2&&previous&&items.some(item=>previous.some(line=>line.ja===item.ja.trim())))continue;
   const translated=await translate(items.map(item=>item.ja.trim()));
   const failed=translated.filter(line=>!line.sana||/\b(?:jpx|khx|kpx|lit)-|[\u3040-\u30ff\u3400-\u9fff]/i.test(line.sana));
   if(!failed.length)return translated.map((line,i)=>({...line,en:items[i].en.trim()}));

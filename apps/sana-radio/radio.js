@@ -29,7 +29,6 @@ function rememberEdition(station,index){
  lastEditions[station]=index;
  try{localStorage.setItem('sana-radio-last-editions',JSON.stringify(lastEditions))}catch{}
 }
-const demo=fetch('demos.json').then(r=>{if(!r.ok)throw Error();return r.json()});
 function message(s){$('message').textContent=s}
 function glyph(s){if(s!==lastGlyph){renderSeg($('glyphs'),s);lastGlyph=s}}
 function caption(s){lastCaption=s;$('caption').textContent=sub?s:'字幕はオフです。'}
