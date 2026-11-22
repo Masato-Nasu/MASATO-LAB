@@ -3,7 +3,11 @@ const harborDub={
  bass:[0,null,null,7,0,null,12,null],
  kicks:[4],skanks:[1,3,5,7],delay:3,feedback:.42
 };
-let currentDub=harborDub;
+const recordedDubs=[harborDub,{
+ title:'潮の向こう',bpm:72,key:41,minor:false,chords:[0,5,7,5],
+ bass:[0,null,5,null,null,7,null,12],
+ kicks:[0,4],skanks:[1,5,7],delay:2,feedback:.53
+}];
 
 function validateDub(track){
  if(!track||typeof track.title!=='string'||!track.title.trim()||track.title.length>60)return false;

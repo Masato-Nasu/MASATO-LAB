@@ -1,8 +1,9 @@
 async function read(url){const r=await fetch(url,{signal:AbortSignal.timeout(9500)});if(!r.ok)throw Error();return r}
 async function fictionalProgram(editions,index,prefix){
- const edition=editions[index%editions.length];
+ const editionIndex=index%editions.length;
+ const edition=editions[editionIndex];
  const lines=await translate(edition.items.map(([ja])=>ja));
- return {label:prefix+edition.label,lines:lines.map((line,i)=>({...line,en:edition.items[i][1]}))}
+ return {label:prefix+edition.label,editionIndex,lines:lines.map((line,i)=>({...line,en:edition.items[i][1]}))}
 }
 // Exhaust a shuffled article list before repeating one, including across visits.
 let memoryHistory={};
@@ -24,7 +25,12 @@ async function program(s){
  if(s<2&&programs[s])return {label:s===0?'架空ニュース · 新着':'架空気象情報 · 新着',lines:programs[s]};
  if(s===0)return fictionalProgram(newsEditions,indices[0],'架空ニュース · ');
  if(s===1)return fictionalProgram(weatherEditions,indices[1],'架空気象情報 · ');
- if(s===2)return {label:'真夜中の通信室',lines:programs[s]||(await demo)[s][indices[s]]};
+ if(s===2){
+  if(programs[s])return {label:'真夜中の通信室',lines:programs[s]};
+  const editions=(await demo)[s];
+  const editionIndex=indices[s]%editions.length;
+  return {label:'真夜中の通信室',editionIndex,lines:editions[editionIndex]}
+ }
  const articles=await (await read('memory.json')).json();
  const {article,played}=nextArticle(articles);
  return {...article,played,lines:await translate(article.lines)}

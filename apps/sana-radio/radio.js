@@ -8,8 +8,22 @@ const stations=[
  {name:'SANA MUSIC',f:7020,icon:'<path d="M8 17V6l11-3v11M8 9l11-3"/><circle cx="6" cy="17" r="2"/><circle cx="17" cy="14" r="2"/>'}];
 let freq=6100,station=0,on=false,sub=true,audio,master,meter,hiss,hissGain,filter,source,epoch=0,voiceWorker,frameInfo,wordIndex=-1,engine,apiKey='',generating=false;
 let nextDubController=null;
-let indices=[0,0,0,0,0],programs=[],lastCaption='',lastGlyph='';
-try{apiKey=localStorage.getItem('sana-radio-key')||''}catch{}
+let programs=[],lastCaption='',lastGlyph='';
+const lastEditions=[-1,-1,-1,-1,-1];
+try{
+ apiKey=localStorage.getItem('sana-radio-key')||'';
+ const saved=JSON.parse(localStorage.getItem('sana-radio-last-editions')||'[]');
+ for(const index of [0,1,2,4]){
+  if(Number.isSafeInteger(saved?.[index])&&saved[index]>=0&&saved[index]<10000)lastEditions[index]=saved[index]
+ }
+}catch{}
+const indices=lastEditions.map(index=>index+1);
+let currentDub=recordedDubs[indices[4]%recordedDubs.length];
+
+function rememberEdition(station,index){
+ lastEditions[station]=index;
+ try{localStorage.setItem('sana-radio-last-editions',JSON.stringify(lastEditions))}catch{}
+}
 const demo=fetch('demos.json').then(r=>{if(!r.ok)throw Error();return r.json()});
 function message(s){$('message').textContent=s}
 function glyph(s){if(s!==lastGlyph){renderSeg($('glyphs'),s);lastGlyph=s}}
@@ -29,21 +43,22 @@ async function initAudio(){
 }
 function volume(){if(master)master.gain.setTargetAtTime((+$('volume').value/100)**1.6*.94,audio.currentTime,.025)}
 function radioNoise(){if(!hissGain)return;filter.frequency.setTargetAtTime([2000,3600,1150][station]||2600,audio.currentTime,.07);hissGain.gain.setTargetAtTime(on&&station<0?.055:0,audio.currentTime,.04)}
-function queueNextDub(current,playing){
+function queueNextDub(current,playing,track){
+ let nextTrack;
+ playing.onended=()=>{
+  if(current!==epoch)return;
+  currentDub=nextTrack||recordedDubs[indices[4]%recordedDubs.length];
+  play()
+ };
  if(!apiKey)return;
  const controller=nextDubController=new AbortController();
  message('次のDUBを編曲中…');
- generateDub(apiKey,currentDub,controller.signal).then(track=>{
+ generateDub(apiKey,track,controller.signal).then(result=>{
   if(current!==epoch||source!==playing)return;
-  message('次の曲 · '+track.title);
-  playing.onended=()=>{
-   if(current!==epoch)return;
-   currentDub=track;
-   play()
-  };
-  playing.loop=false
+  nextTrack=result;
+  message('次の曲 · '+result.title);
  }).catch(error=>{
-  if(current===epoch)message('次のDUBを生成できませんでした（'+error.message+'）。現在の曲を再生します。')
+  if(current===epoch)message('次は収録済みのDUBを流します（'+error.message+'）。')
  }).finally(()=>{if(nextDubController===controller)nextDubController=null})
 }
 function playDub(current){
@@ -59,12 +74,16 @@ function playDub(current){
   buffer.copyToChannel(pcm,0);
   source=audio.createBufferSource();
   source.buffer=buffer;
-  source.loop=true;
   source.connect(meter);
   source.start();
   worker.terminate();
   voiceWorker=null;
-  queueNextDub(current,source)
+  const recordedIndex=recordedDubs.indexOf(track);
+  if(recordedIndex>=0){
+   rememberEdition(4,recordedIndex);
+   indices[4]=recordedIndex+1
+  }
+  queueNextDub(current,source,track)
  };
  worker.postMessage(track)
 }
@@ -74,15 +93,23 @@ async function play(){
  if(station<0){glyph('');caption('局間ノイズ');return}
  glyph('');caption('受信中…');
  try{if(station===4){playDub(current);return}
- const p=await program(station);if(epoch!==current)return;if(station===3)rememberArticle(p.url,p.played);const lines=p.lines;setSubtitleLines(lines);const origin=document.createElement(p.url?'a':'span');origin.textContent=p.label+(p.date?' · '+new Date(p.date).toLocaleString('ja-JP',{timeZone:'Asia/Tokyo'})+' JST':'');if(p.url){origin.href=p.url;origin.target='_blank';origin.rel='noopener'}$('origin').append(origin);
+ const p=await program(station);if(epoch!==current)return;if(station===3)rememberArticle(p.url,p.played);
+ else if(!programs[station])rememberEdition(station,p.editionIndex);
+ const lines=p.lines;setSubtitleLines(lines);const origin=document.createElement(p.url?'a':'span');origin.textContent=p.label+(p.date?' · '+new Date(p.date).toLocaleString('ja-JP',{timeZone:'Asia/Tokyo'})+' JST':'');if(p.url){origin.href=p.url;origin.target='_blank';origin.rel='noopener'}$('origin').append(origin);
  let n=0;
  let voice=englishVoice(station);
  const worker=voiceWorker=new Worker('voice.js');
  function advance(){
   if(current!==epoch)return;
-  n=(n+1)%lines.length;
+  n++;
+  if(n===lines.length){
+   if(station<3){
+    if(programs[station])programs[station]=null;
+    else indices[station]=p.editionIndex+1
+   }
+   play();return
+  }
   if(n%4===0)prepareEnglish();
-  if(n===0&&station===3){play();return}
   speakLine()
  }
  function speakLine(){
