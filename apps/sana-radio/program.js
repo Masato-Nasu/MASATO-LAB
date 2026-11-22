@@ -49,8 +49,13 @@ async function program(s,nextBulletin){
  }
  const articles=await (await read('memory.json')).json();
  const {article,played}=nextArticle(articles);
- const lines=await translate(article.lines);
- return {...article,played,lines:lines.map(line=>({...line,sana:memorySpeech(line.sana)}))};
+ const spokenJapanese=article.lines.map(line=>line
+  .replace(/State of Mind/gi,'心の状態')
+  .replace(/Ouroboros Mobius Ring/gi,'ウロボロスメビウスリング')
+  .replace(/ネオ・ダダ/g,'ネオダダ')
+  .replace(/ハイレッド・センター/g,'ハイレッドセンター'));
+ const lines=await translate(spokenJapanese);
+ return {...article,played,lines:lines.map((line,i)=>({...line,ja:article.lines[i],sana:memorySpeech(line.sana)}))};
 }
 
 async function generateBulletin(station,key,previous,signal){
