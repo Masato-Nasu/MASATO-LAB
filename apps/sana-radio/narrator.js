@@ -13,6 +13,19 @@ function englishVoice(station){
 
  return voices.sort((a,b)=>score(b)-score(a))[0]
 }
+function waitForEnglishVoice(station){
+ const ready=englishVoice(station);
+ if(ready||!nativeSpeech?.addEventListener||nativeSpeech.getVoices().length)return Promise.resolve(ready);
+ return new Promise(resolve=>{
+  const timer=setTimeout(finish,800);
+  function finish(){
+   clearTimeout(timer);
+   nativeSpeech.removeEventListener('voiceschanged',finish);
+   resolve(englishVoice(station))
+  }
+  nativeSpeech.addEventListener('voiceschanged',finish)
+ })
+}
 function endNarration(){
  if(!activeNarration)return;
  const {utterance,timer}=activeNarration;
@@ -24,8 +37,8 @@ function narrate(line,station,voice,advance,recover){
  const text=line.sana.replace(/-/g,' ');
  const words=[...line.sana.matchAll(/[a-z0-9-]+/gi)];
  const u=new SpeechSynthesisUtterance(text);
- u.voice=voice;u.lang=voice.lang;u.rate=[.88,.87,.79,.86][station];
- u.pitch=[1,1.04,.92,.98][station];u.volume=(+$('volume').value/100)**1.4;
+ u.voice=voice;u.lang=voice.lang;u.rate=[.88,.92,.79,.86][station];
+ u.pitch=[1,1,.92,.98][station];u.volume=(+$('volume').value/100)**1.4;
  const state=activeNarration={utterance:u,timer:null,progress:null};
  function failed(){
   if(activeNarration!==state)return;

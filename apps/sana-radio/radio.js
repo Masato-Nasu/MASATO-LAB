@@ -8,6 +8,7 @@ const stations=[
  {name:'SANA MUSIC',f:7020,icon:'<path d="M8 17V6l11-3v11M8 9l11-3"/><circle cx="6" cy="17" r="2"/><circle cx="17" cy="14" r="2"/>'}];
 let freq=6100,station=0,on=false,sub=true,audio,master,meter,hiss,hissGain,filter,source,epoch=0,voiceWorker,frameInfo,wordIndex=-1,engine,apiKey='';
 let nextProgramController=null;
+let resumeSpeech=null, restartNativeSpeech=null;
 let lastCaption='',lastGlyph='';
 const lastEditions=[-1,-1,-1,-1,-1];
 try{
@@ -32,7 +33,7 @@ function presetUI(){
  $('presets').innerHTML=stations.map((s,i)=>'<button class="sta" aria-pressed="'+(station===i)+'"><i><svg viewBox="0 0 24 24" aria-hidden="true">'+s.icon+'</svg></i><span><b>'+s.name+'</b><small>'+(s.f/1000).toFixed(3)+' MHz</small></span></button>').join('');
  [...$('presets').children].forEach((b,i)=>b.onclick=()=>tuning(stations[i].f))
 }
-function stopVoice(){epoch++;nextProgramController?.abort();nextProgramController=null;endNarration();voiceWorker?.terminate();voiceWorker=null;if(source){source.onended=null;try{source.stop()}catch{}source.disconnect();source=null}frameInfo=null;wordIndex=-1}
+function stopVoice(){epoch++;resumeSpeech=null;restartNativeSpeech=null;nextProgramController?.abort();nextProgramController=null;endNarration();voiceWorker?.terminate();voiceWorker=null;if(source){source.onended=null;try{source.stop()}catch{}source.disconnect();source=null}frameInfo=null;wordIndex=-1}
 async function initAudio(){
  if(!audio){
  audio=new AudioContext(); master=audio.createGain();meter=audio.createAnalyser();meter.fftSize=512;master.connect(audio.destination);meter.connect(master);
@@ -97,7 +98,8 @@ async function play(nextBulletin){
  else if(p.editionIndex!==undefined)rememberEdition(station,p.editionIndex);
  const lines=p.lines;setSubtitleLines(lines);const origin=document.createElement(p.url?'a':'span');origin.textContent=p.label+(p.date?' · '+new Date(p.date).toLocaleString('ja-JP',{timeZone:'Asia/Tokyo'})+' JST':'');if(p.url){origin.href=p.url;origin.target='_blank';origin.rel='noopener'}$('origin').append(origin);
  let n=0;
- let voice=englishVoice(station);
+ let voice=await waitForEnglishVoice(station);
+ if(current!==epoch)return;
  const worker=voiceWorker=new Worker('voice.js');
  let queuedBulletin;
  if(station<3&&apiKey){
@@ -120,23 +122,65 @@ async function play(nextBulletin){
  }
  function speakLine(){
   if(current!==epoch)return;
+  if(document.hidden){resumeSpeech=speakLine;return}
+  if(!/[a-z0-9]/i.test(lines[n].sana)){
+   showLine(lines[n]);glyph('');setTimeout(advance,600);return
+  }
   if(voice){
+   restartNativeSpeech=speakLine;
    message('朗読音声 · '+voice.name);
-   narrate(lines[n],station,voice,advance,()=>{voice=null;speakLine()});
+   narrate(lines[n],station,voice,()=>{
+    restartNativeSpeech=null;
+    advance()
+   },()=>{
+    restartNativeSpeech=null;
+    if(!document.hidden)voice=null;
+    speakLine()
+   });
   }else{
    message(station===1?'朗読音声 · 男性':station===3?'朗読音声 · 女性':'朗読音声 · 内蔵サンプル音声');
    worker.postMessage({station,line:lines[n]})
   }
  }
  worker.onerror=()=>{if(epoch===current){caption('音声を準備できませんでした。');message('POWERを入れ直してください。')}};
- worker.onmessage=({data})=>{if(current!==epoch)return;
- const line=lines[n];const buffer=audio.createBuffer(1,data.pcm.length,16000);buffer.copyToChannel(data.pcm,0);source=audio.createBufferSource();source.buffer=buffer;source.connect(meter);
- const start=audio.currentTime+.045;wordIndex=-1;frameInfo={start,cues:data.cues,line};
- source.onended=()=>{if(current!==epoch)return;source.disconnect();source=null;advance()};source.start(start)
+ worker.onmessage=({data})=>{
+  function playSentence(){
+   if(current!==epoch)return;
+   const line=lines[n];
+   const buffer=audio.createBuffer(1,data.pcm.length,16000);
+   buffer.copyToChannel(data.pcm,0);
+   source=audio.createBufferSource();
+   source.buffer=buffer;
+   source.connect(meter);
+   const start=audio.currentTime+.045;
+   wordIndex=-1;
+   frameInfo={start,cues:data.cues,line};
+   source.onended=()=>{if(current!==epoch)return;source.disconnect();source=null;advance()};
+   source.start(start)
+  }
+  if(current!==epoch)return;
+  if(document.hidden)resumeSpeech=playSentence;
+  else playSentence()
  };speakLine()
 
  }catch{if(current===epoch)caption('受信できませんでした。');if(current===epoch)message('放送データを読み込めません。再読み込みしてください。')}
 }
+document.addEventListener('visibilitychange',()=>{
+ if(!on||station<0||station===4)return;
+ if(document.hidden){
+  if(restartNativeSpeech){
+   resumeSpeech=restartNativeSpeech;
+   restartNativeSpeech=null;
+   endNarration()
+  }
+  if(source)audio.suspend().catch(()=>{});
+  return
+ }
+ if(audio.state==='suspended')audio.resume().catch(()=>{});
+ const resume=resumeSpeech;
+ resumeSpeech=null;
+ resume?.()
+});
 function tuneUI(){
  $('freq').textContent=(freq/1000).toFixed(3);$('tune').value=freq;$('tune').setAttribute('aria-valuetext',(freq/1000).toFixed(3)+' MHz');let u=(freq-6000)/4000;$('knob').style.transform='rotate('+(-135+270*u)+'deg)';$('needle').style.left=u*100+'%';
  $('screenStation').textContent=stations[station]?.name||'BAND SCAN';$('air').textContent=on?(station<0?'◌  SEARCH':'●  ON AIR'):'●  STANDBY';presetUI();

@@ -21,6 +21,23 @@ function rememberArticle(url,played){
  memoryHistory={last:url,played:[...played,url]};
  try{localStorage.setItem('sana-memory-rotation',JSON.stringify(memoryHistory))}catch{}
 }
+// Pronounce lexical chunks and kana readings, omitting reversible encoding markers.
+function memorySpeech(sana){
+ return sana.split(/\s+/).map(token=>{
+  const [,word,punctuation]=token.match(/^([^.,!?]*)([.,!?]*)$/)||['',token,''];
+  if(/^kkx-/i.test(word)){
+   const reading=word.slice(4).split('-').map(unit=>unit==='long'||unit==='xtu'?'':unit.replace(/^x(?=[yauioe])/,'')).join('');
+   return reading+punctuation
+  }
+  if(/^kh-|^kk-/i.test(word))return word.slice(3).replaceAll('-','')+punctuation;
+  if(/^lit-(?:[a-f0-9]{2})+$/i.test(word)){
+   const literal=String.fromCharCode(...word.slice(4).match(/../g).map(hex=>parseInt(hex,16)));
+   return (/^[A-Za-z0-9]+$/.test(literal)?literal:'')+punctuation
+  }
+  if(/^(?:jpx|khx|kpx)-|^(?:sp|fwsp|nl|choon|middot|ndashuaro|emdash|hbar|ellipsis|j[qd]?q(?:open|close)|[a-z]*paren(?:open|close))$/i.test(word))return punctuation;
+  return token
+ }).filter(Boolean).join(' ').replace(/\s+([.,!?])/g,'$1')
+}
 async function program(s,nextBulletin){
  if(s<3&&nextBulletin)return {label:['架空ニュース · 新着','架空気象情報 · 新着','真夜中の通信室'][s],lines:nextBulletin};
  if(s===0)return fictionalProgram(newsEditions,indices[0],'架空ニュース · ');
@@ -32,7 +49,8 @@ async function program(s,nextBulletin){
  }
  const articles=await (await read('memory.json')).json();
  const {article,played}=nextArticle(articles);
- return {...article,played,lines:await translate(article.lines)}
+ const lines=await translate(article.lines);
+ return {...article,played,lines:lines.map(line=>({...line,sana:memorySpeech(line.sana)}))};
 }
 
 async function generateBulletin(station,key,previous,signal){
