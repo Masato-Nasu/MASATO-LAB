@@ -54,3 +54,25 @@ async function generateDub(key,previous,signal){
  // Keep the same original SANA chorus available in some new arrangements.
  return {...track,vocal:!previous?.vocal&&Math.random()<.35}
 }
+
+function composeLocalDub(previous){
+ const pick=choices=>choices[Math.floor(Math.random()*choices.length)];
+ const bass=Array(8).fill(null);
+ bass[0]=0;
+ const slots=[1,2,3,4,5,6,7];
+ for(let count=pick([2,3,4]);count>0;count--){
+  const index=Math.floor(Math.random()*slots.length);
+  bass[slots.splice(index,1)[0]]=pick([0,7,12])
+ }
+ const places=['桟橋','入江','灯台','浜辺','水平線','波止場'];
+ const moods=['夜明けの','月影の','雨に煙る','夕暮れの','遠い','風待ちの'];
+ const titles=moods.flatMap(mood=>places.map(place=>mood+place)).filter(title=>title!==previous.title);
+ return {
+  title:pick(titles),bpm:pick([73,74,75,76,77,78,79,80]),minor:true,
+  key:pick([35,36,37,38,39,40,41]),bass,kicks:[4],
+  chords:pick(dubProgressions.filter(chords=>String(chords)!==String(previous.chords))),
+  skanks:pick([[1,3,5,7],[1,5,7],[3,5,7],[1,3,7]]),
+  delay:pick([2,3]),feedback:pick([.4,.43,.46,.49,.52]),
+  vocal:!previous.vocal&&Math.random()<.35
+ }
+}

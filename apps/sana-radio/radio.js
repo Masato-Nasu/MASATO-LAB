@@ -49,10 +49,10 @@ async function initAudio(){
 function volume(){if(master)master.gain.setTargetAtTime((+$('volume').value/100)**1.6*.94,audio.currentTime,.025)}
 function radioNoise(){if(!hissGain)return;filter.frequency.setTargetAtTime([2000,3600,1150][station]||2600,audio.currentTime,.07);hissGain.gain.setTargetAtTime(on&&station<0?.055:0,audio.currentTime,.04)}
 function queueNextDub(current,playing,track){
- let nextTrack;
+ let nextTrack=composeLocalDub(track);
  playing.onended=()=>{
   if(current!==epoch)return;
-  currentDub=nextTrack||recordedDubs[indices[4]%recordedDubs.length];
+  currentDub=nextTrack;
   play()
  };
  if(!apiKey)return;
@@ -62,8 +62,8 @@ function queueNextDub(current,playing,track){
   if(current!==epoch||source!==playing)return;
   nextTrack=result;
   message('次の曲 · '+result.title);
- }).catch(error=>{
-  if(current===epoch)message('次は収録済みのDUBを流します（'+error.message+'）。')
+ }).catch(()=>{
+  if(current===epoch)message('次の曲 · '+nextTrack.title+'（端末で編曲）')
  }).finally(()=>{if(nextProgramController===controller)nextProgramController=null})
 }
 function playDub(current){
