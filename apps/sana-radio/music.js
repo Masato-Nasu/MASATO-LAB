@@ -8,6 +8,11 @@ function renderDub(track){
  const framesPerStep=Math.round(stepSeconds*SR);
  const frames=framesPerStep*8*16;
  const out=new Float32Array(frames);
+ let vocal;
+ if(track.vocal){
+  if(typeof renderIslandChorus==='undefined')importScripts('singing.js');
+  vocal=renderIslandChorus(track,framesPerStep,frames,SR)
+ }
  const delay=new Float32Array(framesPerStep*track.delay);
  const kicks=new Set(track.kicks),skanks=new Set(track.skanks);
  let seed=13917,previousNoise=0,delayFiltered=0;
@@ -47,9 +52,10 @@ function renderDub(track){
 
     const index=frame%delay.length;
     delayFiltered+=.24*(delay[index]-delayFiltered);
-    delay[index]=keys*.75+snare*.48+delayFiltered*track.feedback;
+    const singer=vocal?vocal[frame]:0;
+    delay[index]=keys*.75+snare*.48+singer*.6+delayFiltered*track.feedback;
     const edge=Math.min(1,frame/(SR*.025),(frames-frame)/(SR*.16));
-    out[frame]=Math.tanh((bass+drum+hat+snare+keys+delayFiltered*.78)*1.35)*edge
+    out[frame]=Math.tanh((bass+drum+hat+snare+keys+singer+delayFiltered*.78)*1.35)*edge
    }
   }
  }

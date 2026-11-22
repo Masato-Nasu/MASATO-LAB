@@ -10,7 +10,7 @@ const recordedDubs=[harborDub,{
  bass:[0,null,null,7,null,0,null,null],
  kicks:[4],skanks:[1,3,7],delay:3,feedback:.48
 },{
- title:'灯りの消えた桟橋',bpm:77,key:39,minor:true,chords:dubProgressions[2],
+ title:'島の夜、海の風',vocal:true,bpm:77,key:39,minor:true,chords:dubProgressions[2],
  bass:[0,null,0,null,null,7,null,12],
  kicks:[4],skanks:[1,3,5,7],delay:2,feedback:.46
 }];
@@ -51,5 +51,6 @@ async function generateDub(key,previous,signal){
  const track=JSON.parse(data.choices[0].message.content);
  if(!validateDub(track))throw Error('編曲がマイナーDUBの範囲を外れました');
  if(sameDubGroove(track,previous))throw Error('前の曲と同じ編曲になりました');
- return track
+ // Keep the same original SANA chorus available in some new arrangements.
+ return {...track,vocal:!previous?.vocal&&Math.random()<.35}
 }

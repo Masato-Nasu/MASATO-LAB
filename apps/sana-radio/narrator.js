@@ -5,7 +5,7 @@ nativeSpeech?.getVoices();
 function englishVoices(station){
  const voices=nativeSpeech?.getVoices().filter(voice=>/^en([-_]|$)/i.test(voice.lang))||[];
  const nameOf=voice=>voice.name.replace(/[_-]/g,' ');
- const male=/\b(male|alex|daniel|fred|arthur|oliver|tom|reed|ralph|jorge|gordon|mark|david|guy|ryan|eric|christopher|brian|andrew|steffan)\b/i;
+ const male=/\b(male|alex|daniel|fred|arthur|oliver|tom|reed|ralph|jorge|gordon|mark|david|guy|ryan|eric|christopher|brian|andrew|steffan|aaron|evan|nathan|lee|malcolm)\b/i;
  const female=/\b(female|samantha|zira|jenny|aria|libby|sonia|victoria|karen|moira|ava|allison|serena)\b/i;
  function rank(voice){
   const name=nameOf(voice);
@@ -13,7 +13,11 @@ function englishVoices(station){
   const preference=station===1||station===3?(gender===station?32:gender===0?16:0):0;
   return preference+(/google/i.test(name)?8:0)+(/natural|neural|enhanced|premium/i.test(name)?4:0)+(voice.localService?2:0)+(/^en[-_]US/i.test(voice.lang)?1:0)
  }
- return voices.sort((a,b)=>rank(b)-rank(a))
+ const eligible=station===1?voices.filter(voice=>{
+  const name=nameOf(voice);
+  return male.test(name)&&!female.test(name)
+ }):voices;
+ return eligible.sort((a,b)=>rank(b)-rank(a))
 }
 function waitForEnglishVoices(station){
  const ready=englishVoices(station);

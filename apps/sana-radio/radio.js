@@ -65,8 +65,8 @@ function queueNextDub(current,playing,track){
 function playDub(current){
  const track=currentDub;
  $('origin').textContent=track.title+' · DUB';
- caption('♪');
- message(track.bpm+' BPM · インストゥルメンタル');
+ caption(track.vocal?'♪ 島の夜。海の風。':'♪');
+ message(track.bpm+' BPM · '+(track.vocal?'SANA語ボーカル':'インストゥルメンタル'));
  const worker=voiceWorker=new Worker('music.js');
  worker.onerror=()=>{if(current===epoch)message('DUBの音声を作れませんでした。選局し直してください。')};
  worker.onmessage=({data:{pcm,sampleRate}})=>{
