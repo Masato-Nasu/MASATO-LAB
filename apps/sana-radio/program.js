@@ -21,12 +21,11 @@ function rememberArticle(url,played){
  memoryHistory={last:url,played:[...played,url]};
  try{localStorage.setItem('sana-memory-rotation',JSON.stringify(memoryHistory))}catch{}
 }
-async function program(s){
- if(s<2&&programs[s])return {label:s===0?'架空ニュース · 新着':'架空気象情報 · 新着',lines:programs[s]};
+async function program(s,nextBulletin){
+ if(s<3&&nextBulletin)return {label:['架空ニュース · 新着','架空気象情報 · 新着','真夜中の通信室'][s],lines:nextBulletin};
  if(s===0)return fictionalProgram(newsEditions,indices[0],'架空ニュース · ');
  if(s===1)return fictionalProgram(weatherEditions,indices[1],'架空気象情報 · ');
  if(s===2){
-  if(programs[s])return {label:'真夜中の通信室',lines:programs[s]};
   const editions=(await demo)[s];
   const editionIndex=indices[s]%editions.length;
   return {label:'真夜中の通信室',editionIndex,lines:editions[editionIndex]}
@@ -36,18 +35,22 @@ async function program(s){
  return {...article,played,lines:await translate(article.lines)}
 }
 
-async function generateBulletin(station,key,previous){
+async function generateBulletin(station,key,previous,signal){
  const weather=station===1;
  const format=weather
   ? '北の港、東の丘、南の島の順に、一文ずつ天気を伝える。朝、昼、夕方、夜から時間を選び、天気や風や波を平易な言葉で述べる。'
-  : '北の港、東の丘、南の島のいずれかで起きた新しい出来事を、短いニュースとして三〜五文で伝える。港や島の人の暮らしに目を向ける。';
+  : station===2
+   ? '夜の静かな独白や不思議な手紙を、深夜ラジオのように三〜五文で語る。'
+   : '北の港、東の丘、南の島のいずれかで起きた新しい出来事を、短いニュースとして三〜五文で伝える。港や島の人の暮らしに目を向ける。';
  const messages=[
   {role:'system',content:'架空世界の放送原稿を書く。'+format+' 日本語原稿は一文五十字以内。英数字、現実の固有名詞、新しい地名、専門用語を避ける。JSONオブジェクトの items 配列を返す。各要素は日本語の ja と、その文を英訳した en の二つの文字列を持つ。'},
   {role:'user',content:'新しい放送を作ってください。'+(previous?' 前回の原稿と出来事や天気を変えてください。前回の原稿: '+JSON.stringify(previous.map(line=>line.ja)):'')}
  ];
  for(let attempt=0;attempt<2;attempt++){
+  signal?.throwIfAborted();
+  const deadline=AbortSignal.timeout(30000);
   const response=await fetch('https://api.openai.com/v1/chat/completions',{
-   method:'POST',signal:AbortSignal.timeout(30000),
+   method:'POST',signal:signal?AbortSignal.any([signal,deadline]):deadline,
    headers:{Authorization:'Bearer '+key,'Content-Type':'application/json'},
    body:JSON.stringify({model:'gpt-4o-mini',response_format:{type:'json_object'},messages})
   });

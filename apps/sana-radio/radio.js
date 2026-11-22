@@ -6,9 +6,9 @@ const stations=[
  {name:'SANA MIDNIGHT',f:9640,icon:'<path d="M18.8 16.9A8 8 0 0 1 8 5a8.6 8.6 0 1 0 10.8 11.9Z"/><path d="M17 3v5m-2.5-2.5h5"/>',format:'夜の静かな独白、奇妙な手紙、素朴な哲学の問い'},
  {name:'PERIPHERAL MEMORY',f:8610,icon:'<path d="M3 5q5-2 9 1 5-3 9-1v14q-6-2-9 1-4-3-9-1zM12 6v14"/>'},
  {name:'SANA MUSIC',f:7020,icon:'<path d="M8 17V6l11-3v11M8 9l11-3"/><circle cx="6" cy="17" r="2"/><circle cx="17" cy="14" r="2"/>'}];
-let freq=6100,station=0,on=false,sub=true,audio,master,meter,hiss,hissGain,filter,source,epoch=0,voiceWorker,frameInfo,wordIndex=-1,engine,apiKey='',generating=false;
-let nextDubController=null;
-let programs=[],lastCaption='',lastGlyph='';
+let freq=6100,station=0,on=false,sub=true,audio,master,meter,hiss,hissGain,filter,source,epoch=0,voiceWorker,frameInfo,wordIndex=-1,engine,apiKey='';
+let nextProgramController=null;
+let lastCaption='',lastGlyph='';
 const lastEditions=[-1,-1,-1,-1,-1];
 try{
  apiKey=localStorage.getItem('sana-radio-key')||'';
@@ -32,7 +32,7 @@ function presetUI(){
  $('presets').innerHTML=stations.map((s,i)=>'<button class="sta" aria-pressed="'+(station===i)+'"><i><svg viewBox="0 0 24 24" aria-hidden="true">'+s.icon+'</svg></i><span><b>'+s.name+'</b><small>'+(s.f/1000).toFixed(3)+' MHz</small></span></button>').join('');
  [...$('presets').children].forEach((b,i)=>b.onclick=()=>tuning(stations[i].f))
 }
-function stopVoice(){epoch++;nextDubController?.abort();nextDubController=null;endNarration();voiceWorker?.terminate();voiceWorker=null;if(source){source.onended=null;try{source.stop()}catch{}source.disconnect();source=null}frameInfo=null;wordIndex=-1}
+function stopVoice(){epoch++;nextProgramController?.abort();nextProgramController=null;endNarration();voiceWorker?.terminate();voiceWorker=null;if(source){source.onended=null;try{source.stop()}catch{}source.disconnect();source=null}frameInfo=null;wordIndex=-1}
 async function initAudio(){
  if(!audio){
  audio=new AudioContext(); master=audio.createGain();meter=audio.createAnalyser();meter.fftSize=512;master.connect(audio.destination);meter.connect(master);
@@ -51,7 +51,7 @@ function queueNextDub(current,playing,track){
   play()
  };
  if(!apiKey)return;
- const controller=nextDubController=new AbortController();
+ const controller=nextProgramController=new AbortController();
  message('次のDUBを編曲中…');
  generateDub(apiKey,track,controller.signal).then(result=>{
   if(current!==epoch||source!==playing)return;
@@ -59,7 +59,7 @@ function queueNextDub(current,playing,track){
   message('次の曲 · '+result.title);
  }).catch(error=>{
   if(current===epoch)message('次は収録済みのDUBを流します（'+error.message+'）。')
- }).finally(()=>{if(nextDubController===controller)nextDubController=null})
+ }).finally(()=>{if(nextProgramController===controller)nextProgramController=null})
 }
 function playDub(current){
  const track=currentDub;
@@ -87,27 +87,33 @@ function playDub(current){
  };
  worker.postMessage(track)
 }
-async function play(){
+async function play(nextBulletin){
  stopVoice();setSubtitleLines([]);$('origin').replaceChildren();const current=epoch;radioNoise();
  if(!on){glyph('sana');caption('POWERを入れると放送が始まります。');return}
  if(station<0){glyph('');caption('局間ノイズ');return}
  glyph('');caption('受信中…');
  try{if(station===4){playDub(current);return}
- const p=await program(station);if(epoch!==current)return;if(station===3)rememberArticle(p.url,p.played);
- else if(!programs[station])rememberEdition(station,p.editionIndex);
+ const p=await program(station,nextBulletin);if(epoch!==current)return;if(station===3)rememberArticle(p.url,p.played);
+ else if(p.editionIndex!==undefined)rememberEdition(station,p.editionIndex);
  const lines=p.lines;setSubtitleLines(lines);const origin=document.createElement(p.url?'a':'span');origin.textContent=p.label+(p.date?' · '+new Date(p.date).toLocaleString('ja-JP',{timeZone:'Asia/Tokyo'})+' JST':'');if(p.url){origin.href=p.url;origin.target='_blank';origin.rel='noopener'}$('origin').append(origin);
  let n=0;
  let voice=englishVoice(station);
  const worker=voiceWorker=new Worker('voice.js');
+ let queuedBulletin;
+ if(station<3&&apiKey){
+  const controller=nextProgramController=new AbortController();
+  generateBulletin(station,apiKey,lines,controller.signal).then(next=>{
+   if(current===epoch)queuedBulletin=next
+  }).catch(()=>{}).finally(()=>{
+   if(nextProgramController===controller)nextProgramController=null
+  })
+ }
  function advance(){
   if(current!==epoch)return;
   n++;
   if(n===lines.length){
-   if(station<3){
-    if(programs[station])programs[station]=null;
-    else indices[station]=p.editionIndex+1
-   }
-   play();return
+   if(p.editionIndex!==undefined)indices[station]=p.editionIndex+1;
+   play(queuedBulletin);return
   }
   if(n%4===0)prepareEnglish();
   speakLine()
@@ -134,9 +140,7 @@ async function play(){
 function tuneUI(){
  $('freq').textContent=(freq/1000).toFixed(3);$('tune').value=freq;$('tune').setAttribute('aria-valuetext',(freq/1000).toFixed(3)+' MHz');let u=(freq-6000)/4000;$('knob').style.transform='rotate('+(-135+270*u)+'deg)';$('needle').style.left=u*100+'%';
  $('screenStation').textContent=stations[station]?.name||'BAND SCAN';$('air').textContent=on?(station<0?'◌  SEARCH':'●  ON AIR'):'●  STANDBY';presetUI();
- const generate=$('generate');
- generate.hidden=station===4;
- generate.textContent=[apiKey?'ニュースを生成':'次のニュース',apiKey?'予報を生成':'次の予報','NEW BROADCAST','次の記事'][station]||'NEW BROADCAST'
+
 }
 function tuning(f){freq=Math.min(10000,Math.max(6000,Math.round(f/5)*5));let prev=station;station=stations.findIndex(s=>Math.abs(s.f-freq)<=65);tuneUI();radioNoise();if(station!==prev)play()}
 $('tune').oninput=e=>tuning(+e.target.value);
@@ -145,19 +149,9 @@ $('power').onclick=async()=>{const btn=$('power');btn.disabled=true;try{if(!on)a
 $('volume').oninput=volume;$('subtitle').onclick=()=>{sub=!sub;$('subtitle').setAttribute('aria-pressed',sub);caption(lastCaption)};
 $('settings').onclick=()=>{$('key').value=apiKey;try{$('remember').checked=!!localStorage.getItem('sana-radio-key')}catch{}$('dialog').showModal()};
 $('cancel').onclick=()=>$('dialog').close();
-$('keyForm').onsubmit=e=>{e.preventDefault();const oldKey=apiKey;apiKey=$('key').value.trim();try{if(apiKey&&$('remember').checked)localStorage.setItem('sana-radio-key',apiKey);else localStorage.removeItem('sana-radio-key');message(apiKey?'APIキーの設定を適用しました。':'デモ放送モードです。')}catch{message('キーは今回のセッションで使用します。')}$('key').value='';$('dialog').close();tuneUI();if(on&&station===4&&oldKey!==apiKey)play();prepareEnglish()};
+$('keyForm').onsubmit=e=>{e.preventDefault();const oldKey=apiKey;apiKey=$('key').value.trim();try{if(apiKey&&$('remember').checked)localStorage.setItem('sana-radio-key',apiKey);else localStorage.removeItem('sana-radio-key');message(apiKey?'APIキーの設定を適用しました。':'デモ放送モードです。')}catch{message('キーは今回のセッションで使用します。')}$('key').value='';$('dialog').close();tuneUI();if(on&&station>=0&&station!==3&&oldKey!==apiKey)play();prepareEnglish()};
 async function translate(lines){const w=new Worker('engine.js');return new Promise((resolve,reject)=>{w.onerror=()=>{w.terminate();reject(Error('変換失敗'))};w.onmessage=e=>{w.terminate();if(e.data.error)reject(Error(e.data.error));else resolve(e.data.lines)};w.postMessage({lines})})}
 
-$('generate').onclick=async()=>{if(generating)return;let s=station;if(s<0){message('放送局を選んでください。');return}
- if(s===4)return
- generating=true;$('generate').disabled=true;
- try{if(s<2&&apiKey){message(stations[s].name+' の原稿を生成中…');
- programs[s]=await generateBulletin(s,apiKey,programs[s]);
- }else if(s!==2){if(s<2)programs[s]=null;indices[s]++;message(s===0?'次のニュースを選びました。':s===1?'次の予報を選びました。':'次の記事を選びました。')}else if(!apiKey){const bank=await demo;indices[s]=(indices[s]+1)%bank[s].length;programs[s]=null;message('次のデモ放送を選びました。API設定から新規生成もできます。')}
- else{message(stations[s].name+' の原稿を生成中…');const response=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{Authorization:'Bearer '+apiKey,'Content-Type':'application/json'},signal:AbortSignal.timeout(60000),body:JSON.stringify({model:'gpt-4o-mini',response_format:{type:'json_object'},messages:[{role:'system',content:'日本語で架空のラジオ原稿を書く。世界設定は北の港・東の丘・南の島、港と島は連絡船で結ばれる。現実の地名や英数字、話者ラベルは使わない。平易な言葉で一文ずつ、各四十字以内、四〜六文。JSONオブジェクトのlines配列だけを返す。'},{role:'user',content:stations[s].format+'。新しい放送をひとつ。'}]})});
- if(!response.ok)throw Error('OpenAI HTTP '+response.status);const result=await response.json(),lines=JSON.parse(result.choices[0].message.content).lines;if(!Array.isArray(lines)||!lines.length||lines.length>12||!lines.every(x=>typeof x==='string'&&x.trim()&&x.length<=120))throw Error('原稿形式エラー');const next=await translate(lines);programs[s]=next;message(stations[s].name+' の新しい放送を受信しました。')}
- if(s===station&&on)play()
- }catch(e){if(e.name!=='AbortError')message('生成できませんでした（'+(e.message||'通信エラー')+'）。選局中の番組を引き続き再生できます。')}finally{generating=false;$('generate').disabled=false}};
 const canvas=$('scope'),ctx=canvas.getContext('2d'),bins=new Uint8Array(256);
 function draw(){let w=canvas.clientWidth,h=canvas.clientHeight,dpr=Math.min(devicePixelRatio||1,2);if(canvas.width!==Math.round(w*dpr)||canvas.height!==Math.round(h*dpr)){canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr)}ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
  if(on&&meter)meter.getByteFrequencyData(bins);ctx.fillStyle='#dfa04f';
