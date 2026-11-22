@@ -11,7 +11,10 @@ function englishVoices(station){
   const name=nameOf(voice);
   const gender=male.test(name)&&!female.test(name)?1:female.test(name)?3:0;
   const preference=station===1||station===3?(gender===station?32:gender===0?16:0):0;
-  return preference+(/google/i.test(name)?8:0)+(/natural|neural|enhanced|premium/i.test(name)?4:0)+(voice.localService?2:0)+(/^en[-_]US/i.test(voice.lang)?1:0)
+  const accent=voice.lang.replace('_','-').toLowerCase()===voiceAccent.toLowerCase()?16:0;
+  const quality=/natural|neural|enhanced|premium/i.test(name)?12:0;
+  const basic=/\b(fred|compact|robotic|espeak)\b/i.test(name)?-24:0;
+  return preference+accent+quality+basic+(/google/i.test(name)?6:0)+(voice.localService?2:0)
  }
  const eligible=station===1?voices.filter(voice=>{
   const name=nameOf(voice);
@@ -44,7 +47,7 @@ function narrate(line,station,voice,advance,recover){
  const text=line.sana.replace(/-/g,' ');
  const words=[...line.sana.matchAll(/[a-z0-9-]+/gi)];
  const u=new SpeechSynthesisUtterance(text);
- u.voice=voice;u.lang=voice.lang;u.rate=[.88,.92,.79,.86][station];
+ u.voice=voice;u.lang=voice.lang;u.rate=[.88,.96,.79,.86][station];
  u.pitch=[1,1,.92,.98][station];u.volume=(+$('volume').value/100)**1.4;
  const state=activeNarration={utterance:u,timer:null,progress:null};
  function failed(){
@@ -72,4 +75,20 @@ function narrate(line,station,voice,advance,recover){
  u.onend=()=>{if(activeNarration!==state)return;clearTimeout(state.timer);clearInterval(state.progress);activeNarration=null;advance()};
  state.timer=setTimeout(failed,3500);
  try{nativeSpeech.speak(u)}catch{failed()}
+}
+
+async function synthesizeWeather(line,key,accent,signal){
+ const dialect=accent==='en-GB'?'British English':'American English';
+ const response=await fetch('https://api.openai.com/v1/audio/speech',{
+  method:'POST',
+  signal:AbortSignal.any([signal,AbortSignal.timeout(12000)]),
+  headers:{Authorization:'Bearer '+key,'Content-Type':'application/json'},
+  body:JSON.stringify({
+   model:'gpt-4o-mini-tts',voice:'onyx',response_format:'mp3',
+   input:line.sana,
+   instructions:'Read the supplied SANA words without translating, adding or spelling out letters. Use the rhythm of a calm male radio weather presenter speaking '+dialect+'. Pronounce the vowels consistently and clearly, use light stress, and connect parts joined by hyphens. Brief pauses at commas; finish the sentence naturally.'
+  })
+ });
+ if(!response.ok)throw Error('Audio HTTP '+response.status);
+ return response.arrayBuffer()
 }

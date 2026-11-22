@@ -7,12 +7,15 @@ const stations=[
  {name:'PERIPHERAL MEMORY',f:8610,icon:'<path d="M3 5q5-2 9 1 5-3 9-1v14q-6-2-9 1-4-3-9-1zM12 6v14"/>'},
  {name:'SANA MUSIC',f:7020,icon:'<path d="M8 17V6l11-3v11M8 9l11-3"/><circle cx="6" cy="17" r="2"/><circle cx="17" cy="14" r="2"/>'}];
 let freq=6100,station=0,on=false,sub=true,audio,master,meter,hiss,hissGain,filter,source,epoch=0,voiceWorker,frameInfo,wordIndex=-1,engine,apiKey='';
-let nextProgramController=null;
+let nextProgramController=null,weatherVoiceController=null;
+let voiceAccent='en-GB',weatherAiVoice=false,weatherAiUnavailable=false;
 let resumeSpeech=null, restartNativeSpeech=null;
 let lastCaption='',lastGlyph='';
 const lastEditions=[-1,-1,-1,-1,-1];
 try{
  apiKey=localStorage.getItem('sana-radio-key')||'';
+ voiceAccent=localStorage.getItem('sana-radio-voice-accent')==='en-US'?'en-US':'en-GB';
+ weatherAiVoice=localStorage.getItem('sana-radio-weather-ai-voice')==='1';
  const saved=JSON.parse(localStorage.getItem('sana-radio-last-editions')||'[]');
  for(const index of [0,1,2,4]){
   if(Number.isSafeInteger(saved?.[index])&&saved[index]>=0&&saved[index]<10000)lastEditions[index]=saved[index]
@@ -33,7 +36,7 @@ function presetUI(){
  $('presets').innerHTML=stations.map((s,i)=>'<button class="sta" aria-pressed="'+(station===i)+'"><i><svg viewBox="0 0 24 24" aria-hidden="true">'+s.icon+'</svg></i><span><b>'+s.name+'</b><small>'+(s.f/1000).toFixed(3)+' MHz</small></span></button>').join('');
  [...$('presets').children].forEach((b,i)=>b.onclick=()=>tuning(stations[i].f))
 }
-function stopVoice(){epoch++;resumeSpeech=null;restartNativeSpeech=null;nextProgramController?.abort();nextProgramController=null;endNarration();voiceWorker?.terminate();voiceWorker=null;if(source){source.onended=null;try{source.stop()}catch{}source.disconnect();source=null}frameInfo=null;wordIndex=-1}
+function stopVoice(){epoch++;resumeSpeech=null;restartNativeSpeech=null;nextProgramController?.abort();nextProgramController=null;weatherVoiceController?.abort();weatherVoiceController=null;endNarration();voiceWorker?.terminate();voiceWorker=null;if(source){source.onended=null;try{source.stop()}catch{}source.disconnect();source=null}frameInfo=null;wordIndex=-1}
 async function initAudio(){
  if(!audio){
  audio=new AudioContext(); master=audio.createGain();meter=audio.createAnalyser();meter.fftSize=512;master.connect(audio.destination);meter.connect(master);
@@ -121,11 +124,66 @@ async function play(nextBulletin){
   if(n%4===0)prepareEnglish();
   speakLine()
  }
+ const weatherController=station===1&&apiKey&&weatherAiVoice&&!weatherAiUnavailable
+  ?(weatherVoiceController=new AbortController()):null;
+ const weatherAudio=new Map();
+ function prepareWeatherAudio(index){
+  if(!weatherAudio.has(index)){
+   const promise=synthesizeWeather(lines[index],apiKey,voiceAccent,weatherController.signal)
+    .then(bytes=>audio.decodeAudioData(bytes)).catch(()=>null);
+   weatherAudio.set(index,promise)
+  }
+  return weatherAudio.get(index)
+ }
+ function playSentence(buffer,cues,line){
+  function startSentence(){
+   if(current!==epoch)return;
+   const playing=source=audio.createBufferSource();
+   playing.buffer=buffer;
+   playing.connect(meter);
+   const start=audio.currentTime+.045;
+   wordIndex=-1;
+   frameInfo={start,cues,line};
+   playing.onended=()=>{
+    if(current!==epoch)return;
+    playing.disconnect();source=null;frameInfo=null;advance()
+   };
+   playing.start(start)
+  }
+  if(document.hidden)resumeSpeech=startSentence;
+  else startSentence()
+ }
  function speakLine(){
   if(current!==epoch)return;
   if(document.hidden){resumeSpeech=speakLine;return}
   if(!/[a-z0-9]/i.test(lines[n].sana)){
    showLine(lines[n]);glyph('');setTimeout(advance,600);return
+  }
+  if(weatherController&&!weatherAiUnavailable){
+   const index=n,line=lines[index];
+   message('WEATHER · AI音声を準備中…');
+   prepareWeatherAudio(index).then(buffer=>{
+    if(current!==epoch)return;
+    weatherAudio.delete(index);
+    if(!buffer){
+     weatherAiUnavailable=true;
+     weatherController.abort();
+     speakLine();
+     return
+    }
+    message('WEATHER · AI合成音声');
+    if(index+1<lines.length&&!document.hidden)prepareWeatherAudio(index+1);
+    const words=line.sana.match(/[a-z0-9-]+/gi)||[];
+    const total=words.reduce((sum,word)=>sum+word.length+2,0);
+    let elapsed=0;
+    const cues=words.map(word=>{
+     const cue={word,at:elapsed/total*buffer.duration};
+     elapsed+=word.length+2;
+     return cue
+    });
+    playSentence(buffer,cues,line)
+   });
+   return
   }
   const voice=voices[voiceIndex];
   if(voice){
@@ -146,23 +204,10 @@ async function play(nextBulletin){
  }
  worker.onerror=()=>{if(epoch===current){caption('音声を準備できませんでした。');message('POWERを入れ直してください。')}};
  worker.onmessage=({data})=>{
-  function playSentence(){
-   if(current!==epoch)return;
-   const line=lines[n];
-   const buffer=audio.createBuffer(1,data.pcm.length,16000);
-   buffer.copyToChannel(data.pcm,0);
-   source=audio.createBufferSource();
-   source.buffer=buffer;
-   source.connect(meter);
-   const start=audio.currentTime+.045;
-   wordIndex=-1;
-   frameInfo={start,cues:data.cues,line};
-   source.onended=()=>{if(current!==epoch)return;source.disconnect();source=null;advance()};
-   source.start(start)
-  }
   if(current!==epoch)return;
-  if(document.hidden)resumeSpeech=playSentence;
-  else playSentence()
+  const buffer=audio.createBuffer(1,data.pcm.length,16000);
+  buffer.copyToChannel(data.pcm,0);
+  playSentence(buffer,data.cues,lines[n])
  };speakLine()
 
  }catch{if(current===epoch)caption('受信できませんでした。');if(current===epoch)message('放送データを読み込めません。再読み込みしてください。')}
@@ -191,11 +236,39 @@ function tuneUI(){
 function tuning(f){freq=Math.min(10000,Math.max(6000,Math.round(f/5)*5));let prev=station;station=stations.findIndex(s=>Math.abs(s.f-freq)<=65);tuneUI();radioNoise();if(station!==prev)play()}
 $('tune').oninput=e=>tuning(+e.target.value);
 let drag=null;const knob=$('tune');knob.onpointerdown=e=>{e.preventDefault();knob.focus();knob.setPointerCapture(e.pointerId);drag={x:e.clientX,y:e.clientY,f:freq}};knob.onpointermove=e=>{if(drag)tuning(drag.f+(e.clientX-drag.x+drag.y-e.clientY)*10)};knob.onlostpointercapture=()=>drag=null;
-$('power').onclick=async()=>{const btn=$('power');btn.disabled=true;try{if(!on)await initAudio();on=!on;btn.setAttribute('aria-pressed',on);tuneUI();play();if(!on)await audio.suspend()}catch{message('このブラウザでは音声を開始できませんでした。')}finally{btn.disabled=false}};
+$('power').onclick=async()=>{const btn=$('power');btn.disabled=true;try{if(!on){weatherAiUnavailable=false;await initAudio()}on=!on;btn.setAttribute('aria-pressed',on);tuneUI();play();if(!on)await audio.suspend()}catch{message('このブラウザでは音声を開始できませんでした。')}finally{btn.disabled=false}};
 $('volume').oninput=volume;$('subtitle').onclick=()=>{sub=!sub;$('subtitle').setAttribute('aria-pressed',sub);caption(lastCaption)};
-$('settings').onclick=()=>{$('key').value=apiKey;try{$('remember').checked=!!localStorage.getItem('sana-radio-key')}catch{}$('dialog').showModal()};
+$('settings').onclick=()=>{
+ $('key').value=apiKey;
+ $('voiceAccent').value=voiceAccent;
+ $('weatherAiVoice').checked=weatherAiVoice;
+ try{$('remember').checked=!!localStorage.getItem('sana-radio-key')}catch{}
+ $('dialog').showModal()
+};
 $('cancel').onclick=()=>$('dialog').close();
-$('keyForm').onsubmit=e=>{e.preventDefault();const oldKey=apiKey;apiKey=$('key').value.trim();try{if(apiKey&&$('remember').checked)localStorage.setItem('sana-radio-key',apiKey);else localStorage.removeItem('sana-radio-key');message(apiKey?'APIキーの設定を適用しました。':'デモ放送モードです。')}catch{message('キーは今回のセッションで使用します。')}$('key').value='';$('dialog').close();tuneUI();if(on&&station>=0&&station!==3&&oldKey!==apiKey)play();prepareEnglish()};
+$('keyForm').onsubmit=e=>{
+ e.preventDefault();
+ const oldKey=apiKey,oldAccent=voiceAccent,oldWeatherAi=weatherAiVoice;
+ apiKey=$('key').value.trim();
+ voiceAccent=$('voiceAccent').value;
+ weatherAiVoice=$('weatherAiVoice').checked;
+ weatherAiUnavailable=false;
+ try{
+  localStorage.setItem('sana-radio-voice-accent',voiceAccent);
+  localStorage.setItem('sana-radio-weather-ai-voice',weatherAiVoice?'1':'0');
+  if(apiKey&&$('remember').checked)localStorage.setItem('sana-radio-key',apiKey);
+  else localStorage.removeItem('sana-radio-key');
+  message('設定を適用しました。')
+ }catch{message('設定は今回のセッションで使用します。')}
+ $('key').value='';
+ $('dialog').close();
+ tuneUI();
+ const restartVoice=station>=0&&station<4&&oldAccent!==voiceAccent;
+ const restartWeather=station===1&&oldWeatherAi!==weatherAiVoice;
+ const restartApi=station>=0&&station!==3&&oldKey!==apiKey;
+ if(on&&(restartVoice||restartWeather||restartApi))play();
+ prepareEnglish()
+};
 async function translate(lines){const w=new Worker('engine.js');return new Promise((resolve,reject)=>{w.onerror=()=>{w.terminate();reject(Error('変換失敗'))};w.onmessage=e=>{w.terminate();if(e.data.error)reject(Error(e.data.error));else resolve(e.data.lines)};w.postMessage({lines})})}
 
 const canvas=$('scope'),ctx=canvas.getContext('2d'),bins=new Uint8Array(256);
