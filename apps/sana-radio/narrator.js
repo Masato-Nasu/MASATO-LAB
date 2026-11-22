@@ -10,7 +10,8 @@ function englishVoices(station){
  function rank(voice){
   const name=nameOf(voice);
   const gender=male.test(name)&&!female.test(name)?1:female.test(name)?3:0;
-  const preference=station===1||station===3?(gender===station?32:gender===0?16:0):0;
+  const preferred=station===1||station===3?station:0;
+  const preference=preferred?(gender===preferred?(station===1?64:32):gender===0?16:0):0;
   const accent=voice.lang.replace('_','-').toLowerCase()===voiceAccent.toLowerCase()?16:0;
   const quality=/natural|neural|enhanced|premium/i.test(name)?12:0;
   const basic=/\b(fred|compact|robotic|espeak)\b/i.test(name)?-24:0;
@@ -18,7 +19,7 @@ function englishVoices(station){
  }
  const eligible=station===1?voices.filter(voice=>{
   const name=nameOf(voice);
-  return male.test(name)&&!female.test(name)
+  return male.test(name)||female.test(name)
  }):voices;
  return eligible.sort((a,b)=>rank(b)-rank(a))
 }

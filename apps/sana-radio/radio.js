@@ -10,6 +10,7 @@ let freq=6100,station=0,on=false,sub=true,audio,master,meter,hiss,hissGain,filte
 let nextProgramController=null,weatherVoiceController=null;
 let voiceAccent='en-GB',weatherAiVoice=false,weatherAiUnavailable=false;
 let resumeSpeech=null, restartNativeSpeech=null;
+let screenLock=null, screenLockPending=false;
 let lastCaption='',lastGlyph='';
 const lastEditions=[-1,-1,-1,-1,-1];
 try{
@@ -104,7 +105,7 @@ async function play(nextBulletin){
  const voices=await waitForEnglishVoices(station);
  let voiceIndex=0;
  if(current!==epoch)return;
- const worker=station===1?null:(voiceWorker=new Worker('voice.js'));
+ const worker=voiceWorker=new Worker('voice.js');
  let queuedBulletin;
  if(station<3&&apiKey){
   const controller=nextProgramController=new AbortController();
@@ -197,37 +198,46 @@ async function play(nextBulletin){
     if(!document.hidden)voiceIndex++;
     speakLine()
    });
-  }else if(worker){
-   message('朗読音声 · 内蔵'+(station===3?'女性':'')+'サンプル音声');
-   worker.postMessage({station,line:lines[n]})
   }else{
-   const line=lines[n];
-   message(weatherAiUnavailable
-    ?'AI音声に接続できないため、字幕で放送中です。'
-    :'利用できる男性音声がないため、字幕で放送中です。');
-   showLine(line);
-   glyph('');
-   setTimeout(advance,Math.max(4500,line.ja.length*140))
+   const voiceStation=station===1?3:station;
+   message('朗読音声 · 内蔵'+(voiceStation===3?'女性':'')+'サンプル音声');
+   worker.postMessage({station:voiceStation,line:lines[n]})
   }
  }
- if(worker){
-  worker.onerror=()=>{
-   if(epoch!==current)return;
-   caption('音声を準備できませんでした。');
-   message('POWERを入れ直してください。')
-  };
-  worker.onmessage=({data})=>{
-   if(current!==epoch)return;
-   const buffer=audio.createBuffer(1,data.pcm.length,16000);
-   buffer.copyToChannel(data.pcm,0);
-   playSentence(buffer,data.cues,lines[n])
-  }
- }
+ worker.onerror=()=>{
+  if(epoch!==current)return;
+  caption('音声を準備できませんでした。');
+  message('POWERを入れ直してください。')
+ };
+ worker.onmessage=({data})=>{
+  if(current!==epoch)return;
+  const buffer=audio.createBuffer(1,data.pcm.length,16000);
+  buffer.copyToChannel(data.pcm,0);
+  playSentence(buffer,data.cues,lines[n])
+ };
  speakLine()
 
  }catch{if(current===epoch)caption('受信できませんでした。');if(current===epoch)message('放送データを読み込めません。再読み込みしてください。')}
 }
+async function syncScreenLock(){
+ if(!on||document.hidden){
+  const currentLock=screenLock;
+  screenLock=null;
+  if(currentLock&&!currentLock.released)await currentLock.release().catch(()=>{});
+  return
+ }
+ if(!navigator.wakeLock||screenLockPending||(screenLock&&!screenLock.released))return;
+ screenLockPending=true;
+ try{
+  const lock=await navigator.wakeLock.request('screen');
+  if(on&&!document.hidden)screenLock=lock;
+  else await lock.release()
+ }catch{
+  // Playback remains available if the device declines to keep the screen awake.
+ }finally{screenLockPending=false}
+}
 document.addEventListener('visibilitychange',()=>{
+ void syncScreenLock();
  if(!on||station<0||station===4)return;
  if(document.hidden){
   if(restartNativeSpeech){
@@ -251,7 +261,7 @@ function tuneUI(){
 function tuning(f){freq=Math.min(10000,Math.max(6000,Math.round(f/5)*5));let prev=station;station=stations.findIndex(s=>Math.abs(s.f-freq)<=65);tuneUI();radioNoise();if(station!==prev)play()}
 $('tune').oninput=e=>tuning(+e.target.value);
 let drag=null;const knob=$('tune');knob.onpointerdown=e=>{e.preventDefault();knob.focus();knob.setPointerCapture(e.pointerId);drag={x:e.clientX,y:e.clientY,f:freq}};knob.onpointermove=e=>{if(drag)tuning(drag.f+(e.clientX-drag.x+drag.y-e.clientY)*10)};knob.onlostpointercapture=()=>drag=null;
-$('power').onclick=async()=>{const btn=$('power');btn.disabled=true;try{if(!on){weatherAiUnavailable=false;await initAudio()}on=!on;btn.setAttribute('aria-pressed',on);tuneUI();play();if(!on)await audio.suspend()}catch{message('このブラウザでは音声を開始できませんでした。')}finally{btn.disabled=false}};
+$('power').onclick=async()=>{const btn=$('power');btn.disabled=true;try{if(!on){weatherAiUnavailable=false;await initAudio()}on=!on;void syncScreenLock();btn.setAttribute('aria-pressed',on);tuneUI();play();if(!on)await audio.suspend()}catch{message('このブラウザでは音声を開始できませんでした。')}finally{btn.disabled=false}};
 $('volume').oninput=volume;$('subtitle').onclick=()=>{sub=!sub;$('subtitle').setAttribute('aria-pressed',sub);caption(lastCaption)};
 $('settings').onclick=()=>{
  $('key').value=apiKey;
