@@ -26,3 +26,7 @@
 .hero-visual img{background:transparent;object-fit:contain;filter:none}
 .leader-image img{object-fit:cover;object-position:50% 50%}
 @media(max-width:720px){.brand img{width:132px;height:auto}}
+
+/* Executive name romanization, displayed beneath Japanese name in both languages */
+.leader-meta .leader-reading{font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:.17em;line-height:1.4;font-weight:700;color:#627586;margin:6px 0 12px}
+@media(max-width:650px){.leader-meta .leader-reading{font-size:10px;letter-spacing:.11em;margin:5px 0 10px}}
