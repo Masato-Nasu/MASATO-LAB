@@ -98,7 +98,7 @@ function playDub(current){
  worker.postMessage(track)
 }
 async function play(nextBulletin){
- stopVoice();setSubtitleLines([]);$('origin').replaceChildren();const current=epoch;radioNoise();
+ stopVoice();message('');setSubtitleLines([]);$('origin').replaceChildren();const current=epoch;radioNoise();
  if(!on){glyph('sana');caption('POWERを入れると放送が始まります。');return}
  if(station<0){glyph('');caption('局間ノイズ');return}
  glyph('');caption('受信中…');
@@ -204,7 +204,6 @@ async function play(nextBulletin){
   const voice=voices[voiceIndex];
   if(voice){
    restartNativeSpeech=speakLine;
-   message('朗読音声 · '+voice.name);
    narrate(lines[n],station,voice,()=>{
     restartNativeSpeech=null;
     advance()
@@ -214,7 +213,6 @@ async function play(nextBulletin){
     speakLine()
    });
   }else if(worker){
-   message('朗読音声 · 内蔵'+(station===3?'女性':'')+'サンプル音声');
    worker.postMessage({station,line:lines[n]})
   }else{
    const line=lines[n];
