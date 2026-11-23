@@ -85,3 +85,6 @@
 /* v0.8 executive portrait crop alignment */
 .leadership-grid .leader-card:first-child .leader-image img{object-position:50% 52%}
 .leadership-grid .leader-card:nth-child(2) .leader-image img{object-position:50% 25%}
+
+/* Preserve the intended two-line Japanese hero copy on desktop; let mobile wrap naturally. */
+@media(max-width:720px){.hero-desktop-break{display:none}}
