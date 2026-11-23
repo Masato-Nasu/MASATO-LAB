@@ -37,22 +37,33 @@ function sameDubGroove(track,previous){
 }
 
 async function generateDub(key,previous,signal){
- const deadline=AbortSignal.timeout(45000);
+ const options=Array.from({length:8},()=>composeLocalDub(previous));
+ const controller=new AbortController();
+ const abort=()=>controller.abort();
+ if(signal?.aborted)abort();
+ signal?.addEventListener('abort',abort,{once:true});
+ const timer=setTimeout(abort,45000);
+ try{
  const response=await fetch('https://api.openai.com/v1/chat/completions',{
-  method:'POST',signal:signal?AbortSignal.any([deadline,signal]):deadline,
+  method:'POST',signal:controller.signal,
   headers:{Authorization:'Bearer '+key,'Content-Type':'application/json'},
   body:JSON.stringify({model:'gpt-4o-mini',response_format:{type:'json_object'},messages:[
-   {role:'system',content:'Arrange an original instrumental sufferers reggae dub with island melancholy: dusk over a small island, restrained dynamics, deep bass, small offbeat chords and a long space between notes. Use the reference as a fixed musical direction. Return JSON only: title (short Japanese), bpm (73–80), key (MIDI 35–41), minor (true), chords (one of '+JSON.stringify(dubProgressions)+'), bass (8 eighth-note slots starting at 0, with 3–5 total attacks, each 0, 7, or 12, and null for rests), kicks ([4]), skanks (2–4 distinct picks from [1,3,5,7], ascending), delay (2 or 3), feedback (0.38–0.53). Keep the reggae one-drop and minor harmony. No vocals or lyrics.'},
-   {role:'user',content:'Fixed reference: '+JSON.stringify(harborDub)+'. Vary the bass rhythm, chord movement, or offbeats relative to the last track while retaining the same feel. Last track: '+JSON.stringify(previous)}
+   {role:'system',content:'Arrange an island reggae dub by mixing parts from the numbered options. Return a JSON object with title (original short Japanese title), rhythm (zero-based option index for bass and skanks), harmony (option index for chords and key), and mix (option index for tempo and echo).'},
+   {role:'user',content:JSON.stringify({previous,options})}
   ]})
  });
  if(!response.ok)throw Error('OpenAI HTTP '+response.status);
  const data=await response.json();
- const track=JSON.parse(data.choices[0].message.content);
- if(!validateDub(track))throw Error('編曲がマイナーDUBの範囲を外れました');
- if(sameDubGroove(track,previous))throw Error('前の曲と同じ編曲になりました');
- // Keep the same original SANA chorus available in some new arrangements.
- return {...track,vocal:!previous?.vocal&&Math.random()<.35}
+ const {title,rhythm,harmony,mix}=JSON.parse(data.choices[0].message.content);
+ if(![rhythm,harmony,mix].every(i=>Number.isInteger(i)&&options[i]))throw Error('編曲データを読み取れませんでした');
+ const track={...options[mix],title,bass:options[rhythm].bass,skanks:options[rhythm].skanks,
+  chords:options[harmony].chords,key:options[harmony].key};
+ if(!validateDub(track))throw Error('編曲データを読み取れませんでした');
+ return {...track,vocal:Math.random()<.5}
+ }finally{
+  clearTimeout(timer);
+  signal?.removeEventListener('abort',abort)
+ }
 }
 
 function composeLocalDub(previous){
@@ -73,6 +84,6 @@ function composeLocalDub(previous){
   chords:pick(dubProgressions.filter(chords=>String(chords)!==String(previous.chords))),
   skanks:pick([[1,3,5,7],[1,5,7],[3,5,7],[1,3,7]]),
   delay:pick([2,3]),feedback:pick([.4,.43,.46,.49,.52]),
-  vocal:!previous.vocal&&Math.random()<.35
+  vocal:Math.random()<.5
  }
 }

@@ -23,7 +23,11 @@ try{
  }
 }catch{}
 const indices=lastEditions.map(index=>index+1);
-let currentDub=recordedDubs[indices[4]%recordedDubs.length];
+let currentDub=composeLocalDub(harborDub);
+try{
+ const queued=JSON.parse(localStorage.getItem('sana-radio-next-dub'));
+ if(validateDub(queued))currentDub=queued
+}catch{}
 
 function rememberEdition(station,index){
  lastEditions[station]=index;
@@ -60,9 +64,10 @@ function queueNextDub(current,playing,track){
  generateDub(apiKey,track,controller.signal).then(result=>{
   if(current!==epoch||source!==playing)return;
   nextTrack=result;
-  message('次の曲 · '+result.title);
- }).catch(()=>{
-  if(current===epoch)message('次の曲 · '+nextTrack.title+'（端末で編曲）')
+  try{localStorage.setItem('sana-radio-next-dub',JSON.stringify(result))}catch{}
+  message('次の曲 · '+result.title+'（AI編曲）');
+ }).catch(error=>{
+  if(current===epoch)message('端末で次曲を編曲 · '+error.message)
  }).finally(()=>{if(nextProgramController===controller)nextProgramController=null})
 }
 function playDub(current){
@@ -82,6 +87,7 @@ function playDub(current){
   source.start();
   worker.terminate();
   voiceWorker=null;
+  try{localStorage.removeItem('sana-radio-next-dub')}catch{}
   const recordedIndex=recordedDubs.indexOf(track);
   if(recordedIndex>=0){
    rememberEdition(4,recordedIndex);
