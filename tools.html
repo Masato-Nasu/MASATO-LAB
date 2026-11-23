@@ -43,6 +43,10 @@
     .media-overlay{position:absolute;inset:0;background:rgba(255,255,255,.11);pointer-events:none}
     .media-fg-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:14px}
     .media-fg{max-width:100%;max-height:100%;width:auto;height:auto;display:block;position:relative;z-index:2;border-radius:10px;box-shadow:0 2px 14px rgba(0,0,0,.08)}
+    /* Fictional-company wordmark: white backdrop and no blur/shadow (all other cards unchanged). */
+    .media.media-white{background:#fff}
+    .media.media-white .media-fg-wrap{background:#fff;padding:20px}
+    .media.media-white .media-fg{border-radius:0;box-shadow:none;max-width:100%;max-height:100%}
     .media-placeholder{display:flex;align-items:flex-end;width:100%;aspect-ratio:16/10;padding:16px;background:linear-gradient(145deg,#ecece8,#f8f8f5);border-bottom:1px solid var(--line);color:#9a9a94;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
     .content{padding:15px 15px 16px}
     .category{font-size:10px;line-height:1.2;color:var(--muted);font-weight:750;letter-spacing:.075em;text-transform:uppercase;margin:0 0 6px}
@@ -357,6 +361,12 @@
       const image=tool.image||'';
       if(!image) return '<div class="media-placeholder">MASATO LAB</div>';
       const fit=tool.imageFit==='cover'?'cover':'contain';
+      // ADMIRAL logo is a transparent wordmark: show it on clean white, without the usual blurred duplicate.
+      if(String(tool.title||'').trim().toUpperCase()==='ADMIRAL INDUSTRIES'){
+        return `<div class="media media-white">
+          <div class="media-fg-wrap"><img class="media-fg" style="object-fit:contain" src="${escapeHtml(image)}" alt="${title}" loading="lazy"></div>
+        </div>`;
+      }
       return `<div class="media">
         <img class="media-bg" src="${escapeHtml(image)}" alt="" loading="lazy" aria-hidden="true">
         <div class="media-overlay"></div>
