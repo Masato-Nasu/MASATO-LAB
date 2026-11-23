@@ -38,6 +38,11 @@ function sameDubGroove(track,previous){
 
 async function generateDub(key,previous,signal){
  const options=Array.from({length:8},()=>composeLocalDub(previous));
+ const indexSchema={type:'integer',enum:options.map((_,i)=>i)};
+ const format={type:'json_schema',json_schema:{name:'dub_arrangement',strict:true,schema:{
+  type:'object',additionalProperties:false,required:['title','rhythm','harmony','mix'],
+  properties:{title:{type:'string'},rhythm:indexSchema,harmony:indexSchema,mix:indexSchema}
+ }}};
  const controller=new AbortController();
  const abort=()=>controller.abort();
  if(signal?.aborted)abort();
@@ -47,16 +52,18 @@ async function generateDub(key,previous,signal){
  const response=await fetch('https://api.openai.com/v1/chat/completions',{
   method:'POST',signal:controller.signal,
   headers:{Authorization:'Bearer '+key,'Content-Type':'application/json'},
-  body:JSON.stringify({model:'gpt-4o-mini',response_format:{type:'json_object'},messages:[
+  body:JSON.stringify({model:'gpt-4o-mini',response_format:format,messages:[
    {role:'system',content:'Arrange an island reggae dub by mixing parts from the numbered options. Return a JSON object with title (original short Japanese title), rhythm (zero-based option index for bass and skanks), harmony (option index for chords and key), and mix (option index for tempo and echo).'},
-   {role:'user',content:JSON.stringify({previous,options})}
+   {role:'user',content:JSON.stringify({previous,options:options.map((track,index)=>({index,...track}))})}
   ]})
  });
  if(!response.ok)throw Error('OpenAI HTTP '+response.status);
  const data=await response.json();
- const {title,rhythm,harmony,mix}=JSON.parse(data.choices[0].message.content);
- if(![rhythm,harmony,mix].every(i=>Number.isInteger(i)&&options[i]))throw Error('編曲データを読み取れませんでした');
- const track={...options[mix],title,bass:options[rhythm].bass,skanks:options[rhythm].skanks,
+ const choice=data.choices?.[0];
+ if(choice?.finish_reason!=='stop'||!choice.message?.content)throw Error('AIから編曲の回答が届きませんでした');
+ const {title,rhythm,harmony,mix}=JSON.parse(choice.message.content);
+ if(![rhythm,harmony,mix].every(i=>Number.isInteger(i)&&options[i]))throw Error('AIの編曲番号が範囲外です');
+ const track={...options[mix],title:title.trim().slice(0,60)||options[mix].title,bass:options[rhythm].bass,skanks:options[rhythm].skanks,
   chords:options[harmony].chords,key:options[harmony].key};
  if(!validateDub(track))throw Error('編曲データを読み取れませんでした');
  return {...track,vocal:Math.random()<.5}
