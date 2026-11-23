@@ -106,6 +106,16 @@ async function play(nextBulletin){
  const p=await program(station,nextBulletin);if(epoch!==current)return;if(station===3)rememberArticle(p.url,p.played);
  else if(p.editionIndex!==undefined)rememberEdition(station,p.editionIndex);
  const lines=p.lines;setSubtitleLines(lines);const origin=document.createElement(p.url?'a':'span');origin.textContent=p.label+(p.date?' · '+new Date(p.date).toLocaleString('ja-JP',{timeZone:'Asia/Tokyo'})+' JST':'');if(p.url){origin.href=p.url;origin.target='_blank';origin.rel='noopener'}$('origin').append(origin);
+ if(station===3&&p.url){
+  const translation=document.createElement('a');
+  const url=new URL('https://translate.google.com/translate');
+  url.search=new URLSearchParams({sl:'ja',tl:'en',u:p.url});
+  translation.href=url.href;
+  translation.target='_blank';
+  translation.rel='noopener noreferrer';
+  translation.textContent='Read in English';
+  $('origin').append(' · ',translation)
+ }
  let n=0;
  const voices=await waitForEnglishVoices(station);
  let voiceIndex=0;
