@@ -20,3 +20,9 @@
 .president-note>p{font-size:14px;color:#596b7b;line-height:1.9;margin:0 0 10px}
 .president-note>.subcaption{font-size:11px;color:var(--muted);margin-top:15px}
 @media(max-width:650px){.leadership-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.leader-image{height:clamp(180px,48vw,280px)}.leader-meta{padding:13px 13px 17px}.leader-meta h3{font-size:23px}.leader-meta>p:last-child{font-size:11px}.leader-meta .smallcaps{font-size:9px}.president-note{margin-top:30px}}
+
+/* ADMIRAL v0.5: transparent wordmark, correctly centered executive photos */
+.brand img{width:155px;height:auto;max-height:58px;object-fit:contain}
+.hero-visual img{background:transparent;object-fit:contain;filter:none}
+.leader-image img{object-fit:cover;object-position:50% 50%}
+@media(max-width:720px){.brand img{width:132px;height:auto}}
