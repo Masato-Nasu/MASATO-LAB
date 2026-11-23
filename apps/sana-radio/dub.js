@@ -37,11 +37,13 @@ function sameDubGroove(track,previous){
 }
 
 async function generateDub(key,previous,signal){
- const options=Array.from({length:8},()=>composeLocalDub(previous));
- const indexSchema={type:'integer',enum:options.map((_,i)=>i)};
- const format={type:'json_schema',json_schema:{name:'dub_arrangement',strict:true,schema:{
-  type:'object',additionalProperties:false,required:['title','rhythm','harmony','mix'],
-  properties:{title:{type:'string'},rhythm:indexSchema,harmony:indexSchema,mix:indexSchema}
+ const pitch={type:'integer',enum:[-1,0,2,3,5,7,10,12]};
+ const phrase={type:'object',additionalProperties:false,
+  required:['a','b','c','d','e','f','g','h'],
+  properties:Object.fromEntries('abcdefgh'.split('').map(slot=>[slot,pitch]))};
+ const format={type:'json_schema',json_schema:{name:'dub_score',strict:true,schema:{
+  type:'object',additionalProperties:false,required:['title','bass','call','answer'],
+  properties:{title:{type:'string'},bass:phrase,call:phrase,answer:phrase}
  }}};
  const controller=new AbortController();
  const abort=()=>controller.abort();
@@ -53,20 +55,24 @@ async function generateDub(key,previous,signal){
   method:'POST',signal:controller.signal,
   headers:{Authorization:'Bearer '+key,'Content-Type':'application/json'},
   body:JSON.stringify({model:'gpt-4o-mini',response_format:format,messages:[
-   {role:'system',content:'Arrange an island reggae dub by mixing parts from the numbered options. Return a JSON object with title (original short Japanese title), rhythm (zero-based option index for bass and skanks), harmony (option index for chords and key), and mix (option index for tempo and echo).'},
-   {role:'user',content:JSON.stringify({previous,options:options.map((track,index)=>({index,...track}))})}
+   {role:'system',content:'Compose original island reggae dub. Write a Japanese title and three eighth-note scores (a..h in order): a bass riff, a melodic call and its contrasting answer. Each number is a semitone above the root, -1 is rest. Start bass on 0, use rests and at least three distinct sounding pitches in each melody. Make a distinctly different hook and rhythm from the previous tune.'},
+   {role:'user',content:JSON.stringify({previousTitle:previous.title,previousBass:previous.scoreBass||previous.bass,previousMelody:previous.melody||[],sessionVariation:Math.random()})}
   ]})
  });
  if(!response.ok)throw Error('OpenAI HTTP '+response.status);
  const data=await response.json();
  const choice=data.choices?.[0];
  if(choice?.finish_reason!=='stop'||!choice.message?.content)throw Error('AIから編曲の回答が届きませんでした');
- const {title,rhythm,harmony,mix}=JSON.parse(choice.message.content);
- if(![rhythm,harmony,mix].every(i=>Number.isInteger(i)&&options[i]))throw Error('AIの編曲番号が範囲外です');
- const track={...options[mix],title:title.trim().slice(0,60)||options[mix].title,bass:options[rhythm].bass,skanks:options[rhythm].skanks,
-  chords:options[harmony].chords,key:options[harmony].key};
- if(!validateDub(track))throw Error('編曲データを読み取れませんでした');
- return {...track,vocal:Math.random()<.5}
+ const score=JSON.parse(choice.message.content);
+ const notes=part=>'abcdefgh'.split('').map(slot=>part?.[slot]);
+ const scoreBass=notes(score.bass),melody=[...notes(score.call),...notes(score.answer)];
+ if(![scoreBass,melody].every(part=>part.some(n=>n>=0)&&part.every(n=>pitch.enum.includes(n))))
+  throw Error('AIから有効な楽譜が届きませんでした');
+ const track=composeLocalDub(previous);
+ track.scoreBass=scoreBass;
+ track.melody=melody;
+ track.title=score.title.trim().slice(0,60)||track.title;
+ return track
  }finally{
   clearTimeout(timer);
   signal?.removeEventListener('abort',abort)

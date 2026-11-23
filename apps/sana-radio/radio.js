@@ -65,7 +65,7 @@ function queueNextDub(current,playing,track){
   if(current!==epoch||source!==playing)return;
   nextTrack=result;
   try{localStorage.setItem('sana-radio-next-dub',JSON.stringify(result))}catch{}
-  message('次の曲 · '+result.title+'（AI編曲）');
+  message('次の曲 · '+result.title+'（AI作曲）');
  }).catch(error=>{
   if(current===epoch)message('端末で次曲を編曲 · '+error.message)
  }).finally(()=>{if(nextProgramController===controller)nextProgramController=null})
@@ -73,7 +73,7 @@ function queueNextDub(current,playing,track){
 function playDub(current){
  const track=currentDub;
  $('origin').textContent=track.title+' · DUB';
- caption(track.vocal?'♪ 島の夜。海の風。':'♪');
+ caption(track.vocal?(track.melody?'♪ SANA語ボーカル':'♪ 島の夜。海の風。'):'♪');
  message(track.bpm+' BPM · '+(track.vocal?'SANA語ボーカル':'インストゥルメンタル'));
  const worker=voiceWorker=new Worker('music.js');
  worker.onerror=()=>{if(current===epoch)message('DUBの音声を作れませんでした。選局し直してください。')};

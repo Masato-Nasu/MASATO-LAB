@@ -24,8 +24,10 @@ function renderDub(track){
   const organ=[0,third,7].map(n=>frequency(root+24+n));
   const drop=bar===7||bar===15;
   for(let step=0;step<8;step++){
-   const note=track.bass[step];
-   if(note!==null){bassAge=0;bassHz=frequency(root+note)}
+   const note=(track.scoreBass||track.bass)[step];
+   if(note!==null&&note>=0){bassAge=0;bassHz=frequency(root+note)}
+   const degree=track.melody?.[(bar%2)*8+step];
+   const leadHz=degree>=0?frequency(track.key+24+degree):0;
    const kick=kicks.has(step)&&!(drop&&step>=6);
    const rim=step===4&&!drop;
    const skank=skanks.has(step)&&!(bar>=8&&bar<12&&step===3)&&!(drop&&step>=5);
@@ -50,12 +52,14 @@ function renderDub(track){
      keys*=.061*attack*Math.exp(-t*(bar>=8?11:20))
     }
 
+    const lead=leadHz&&(!vocal||bar<4||bar>=12)
+     ?.14*Math.sin(tau*leadHz*t)*attack*Math.exp(-5*t):0;
     const index=frame%delay.length;
     delayFiltered+=.24*(delay[index]-delayFiltered);
     const singer=vocal?vocal[frame]:0;
-    delay[index]=keys*.75+snare*.48+singer*.6+delayFiltered*track.feedback;
+    delay[index]=lead*.45+keys*.75+snare*.48+singer*.6+delayFiltered*track.feedback;
     const edge=Math.min(1,frame/(SR*.025),(frames-frame)/(SR*.16));
-    out[frame]=Math.tanh((bass+drum+hat+snare+keys+singer+delayFiltered*.78)*1.35)*edge
+    out[frame]=Math.tanh((bass+drum+hat+snare+keys+lead+singer+delayFiltered*.78)*1.35)*edge
    }
   }
  }

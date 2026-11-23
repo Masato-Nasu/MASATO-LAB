@@ -87,8 +87,11 @@ function renderIslandChorus(track,framesPerStep,frames,sampleRate){
  const vocal=new Float32Array(frames);
  const clips=new Map();
  // 島の夜。海の風。 / mashiro no ruyoro. miuro no zekaro.
+ const chorus=track.melody
+  ?track.melody.flatMap((degree,i)=>degree<0?[]:[[i*2,islandChorus[i%islandChorus.length][1],degree,2]])
+  :islandChorus;
  for(const firstBar of [4,8]){
-  for(const [step,syllable,degree,length=1] of islandChorus){
+  for(const [step,syllable,degree,length=1] of chorus){
    if(!clips.has(syllable)){
     const clip=voiceClip(syllable in sltUnits?syllable:syllable.at(-1));
     clips.set(syllable,{clip,marks:analyseVoice(clip)})
