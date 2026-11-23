@@ -100,7 +100,7 @@ async function program(s,nextBulletin){
   .replace(/ネオ・ダダ/g,'ネオダダ')
   .replace(/ハイレッド・センター/g,'ハイレッドセンター'));
  const lines=await translate(spokenJapanese);
- return {...article,played,lines:lines.map((line,i)=>({...line,ja:article.lines[i],sana:memorySpeech(line.sana)}))};
+ return {...article,played,lines:lines.map((line,i)=>({...line,ja:article.lines[i],en:article.en?.[i],sana:memorySpeech(line.sana)}))};
 }
 
 async function generateBulletin(station,key,previous,signal){
