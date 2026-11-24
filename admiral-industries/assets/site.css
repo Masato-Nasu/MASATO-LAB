@@ -88,3 +88,7 @@
 
 /* Preserve the intended two-line Japanese hero copy on desktop; let mobile wrap naturally. */
 @media(max-width:720px){.hero-desktop-break{display:none}}
+
+/* Zero-price product offer */
+.product-price{font-size:32px;font-weight:700;line-height:1.2;letter-spacing:-.035em;color:var(--navy);margin:22px 0 0;font-variant-numeric:tabular-nums}
+.product-price+.detail-actions{margin-top:12px}
