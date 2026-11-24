@@ -95,3 +95,9 @@
 
 /* Philosophy typography: language spans inherit their heading and body styles. */
 #vision .section-lead p{font-size:18px;line-height:1.85;max-width:480px}
+
+/* Natural Japanese phrase wrapping and unbroken English words. */
+html[lang=ja] main,html[lang=ja] footer{line-break:strict;word-break:normal;overflow-wrap:normal}
+@supports (word-break:auto-phrase){html[lang=ja] main,html[lang=ja] footer{word-break:auto-phrase}}
+html[lang=en] main,html[lang=en] footer{word-break:normal;overflow-wrap:normal;hyphens:none}
+.word-lock{white-space:nowrap}
