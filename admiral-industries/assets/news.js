@@ -20,7 +20,7 @@ const news=[
     "ロゴの輪郭や文字の組版を調整し、製品画像に重なっていた番号ラベルを削除しました。",
     "We refined the logo and typography and removed number labels that obscured product images.",
     "",
-    ""
+    "site-design"
   ],
   [
     "2026-11-23",
@@ -68,7 +68,7 @@ const archive=root.dataset.newsList==='archive';const base=archive?'../':'./';
 const el=(tag,cls,txt)=>{const node=document.createElement(tag);if(cls)node.className=cls;if(txt!==undefined)node.textContent=txt;return node;};
 const bilingual=(node,ja,en)=>{node.append(el('span','ja',ja),el('span','en',en));return node;};
 news.slice().sort((a,b)=>b[0].localeCompare(a[0])).slice(0,archive?news.length:5).forEach((entry,i)=>{
- const [date,category,ja,en,bodyJa,bodyEn,url]=entry;const id='news-'+date+'-'+(i+1);const item=el('article','news-row');item.id=id;
+ const [date,category,ja,en,bodyJa,bodyEn,url,slug]=entry;const id='news-'+date+'-'+slug;const item=el('article','news-row');item.id=id;
  const time=el('time','news-date',date.replaceAll('-','.'));time.dateTime=date;item.append(time,el('span','news-category',category));
  const content=el('div','news-content');const title=el(archive?'h2':'a','news-title');if(!archive)title.href='news/#'+id;bilingual(title,ja,en);content.append(title);
  if(archive){content.append(bilingual(el('p','news-description'),bodyJa,bodyEn));if(url){const link=el('a','news-related');link.href=base+url;bilingual(link,'関連ページを見る ↗','Related page ↗');content.append(link);}}
