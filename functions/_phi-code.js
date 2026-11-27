@@ -6,7 +6,7 @@ const phiCode = {
   "imageRatio": "4:3",
   "imageFit": "contain",
   "appUrl": "https://phi-code.pages.dev/",
-  "repoUrl": "https://github.com/Masato-Nasu/MASATO-LAB/tree/main/apps/phi-code",
+  "repoUrl": "https://github.com/Masato-Nasu/MASATO-LAB/blob/main/apps/phi-code/README.md",
   "category": "cipher-security",
   "platform": "web",
   "platforms": [
@@ -27,6 +27,6 @@ export function ensurePhiCode(data) {
   const tools = Array.isArray(data.tools) ? data.tools : [];
   const matches = t => t?.slug === phiCode.slug || String(t?.title || '').normalize('NFKC').trim().toUpperCase() === phiCode.title || String(t?.appUrl || '').replace(/\/$/, '') === phiCode.appUrl.replace(/\/$/, '');
   if (!tools.some(matches)) return {...data, tools: [...tools, {...phiCode}]};
-  // Migrate the image even for records already saved in KV. Preserve placement and other editor fields.
-  return {...data, tools: tools.map(t => matches(t) ? {...t, image: phiCode.image} : t)};
+  // Migrate the image and GitHub link even for records already saved in KV. Preserve placement and other editor fields.
+  return {...data, tools: tools.map(t => matches(t) ? {...t, image: phiCode.image, repoUrl: phiCode.repoUrl} : t)};
 }
