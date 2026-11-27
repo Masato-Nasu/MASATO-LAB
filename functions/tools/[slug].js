@@ -75,7 +75,7 @@ function renderPage(site, item) {
 ％は星の配置をもとに計算した運勢のスコアです。同じ条件で占えば、同じ結果になります。入力内容はブラウザに保存され、次からは開くだけで今日の占いが読めます。`;
   }
   const description = escapeHtml(descriptionText);
-  const image = resolveImage(item.image || '');
+  const image = String(item.title || '').normalize('NFKC').trim().toUpperCase() === 'PHI CODE' ? "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20512%20512%22%3E%3Crect%20width%3D%22512%22%20height%3D%22512%22%20rx%3D%2264%22%20fill%3D%22%23141619%22%2F%3E%3Ccircle%20cx%3D%22256%22%20cy%3D%22256%22%20r%3D%22174%22%20fill%3D%22none%22%20stroke%3D%22%23b9e1d6%22%20stroke-width%3D%226%22%2F%3E%3Cellipse%20cx%3D%22256%22%20cy%3D%22256%22%20rx%3D%2291%22%20ry%3D%2277%22%20fill%3D%22none%22%20stroke%3D%22%23b9e1d6%22%20stroke-width%3D%2222%22%2F%3E%3Cpath%20d%3D%22M205%20372%20L307%20140%22%20stroke%3D%22%23b9e1d6%22%20stroke-width%3D%2222%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E" : resolveImage(item.image || '');
   const fit = item.imageFit === 'cover' ? 'cover' : 'contain';
   const tags = normalizeTags(item.tags).filter(tag => !/^\s*(category|genre|platform)\s*:/i.test(tag));
   const appUrl = String(item.appUrl || '').trim();
