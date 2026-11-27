@@ -1,3 +1,4 @@
+import {ensurePhiCode} from '../_phi-code.js';
 import {ensureAdmiralIndustries} from '../_admiral-industries.js';
 import {ensureSanaRadio} from '../_sana-radio.js';
 import {ensureTotoNippo} from '../_toto-nippo.js';
@@ -133,7 +134,7 @@ export async function onRequestGet(context) {
     }
   }
 
-  data = ensureAdmiralIndustries(ensureSanaRadio(ensureTotoNippo(data)));
+  data = ensurePhiCode(ensureAdmiralIndustries(ensureSanaRadio(ensureTotoNippo(data))));
   const items = Array.isArray(data?.tools) ? data.tools : [];
   // The public listing appends the hosted DUB RIDDIM launch item on API reads.
   // Add it here as well, since detail pages normally load KV directly.

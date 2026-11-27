@@ -1,3 +1,4 @@
+import {ensurePhiCode} from '../_phi-code.js';
 import {ensureAdmiralIndustries} from '../_admiral-industries.js';
 import {ensureSanaRadio} from '../_sana-radio.js';
 import {ensureTotoNippo} from '../_toto-nippo.js';
@@ -74,7 +75,7 @@ const DEFAULT_DATA = {
 // An always-visible launch card for the hosted DUB RIDDIM version.
 // Keep distinct from the original compact DUB SIREN.
 function applyFixedClassifications(data) {
-  data = ensureAdmiralIndustries(ensureFeaturedMemory(ensureSanaRadio(ensureTotoNippo(data))));
+  data = ensurePhiCode(ensureAdmiralIndustries(ensureFeaturedMemory(ensureSanaRadio(ensureTotoNippo(data)))));
   if (!data || !Array.isArray(data.tools)) return data;
   for (const tool of data.tools) {
     const title = String(tool?.title || '').normalize('NFKC').toLowerCase();
