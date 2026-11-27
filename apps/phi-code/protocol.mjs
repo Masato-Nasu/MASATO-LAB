@@ -1,0 +1,41 @@
+// PHI CODE v0.6 (24x24 optical framing) — experimental optical framing. Confidentiality: AES-GCM.
+const enc = new TextEncoder();
+const subtle = () => globalThis.crypto.subtle;
+export const MARKER = 0xfa5b;
+export const HEADER_BYTES=21, HEADER_WORDS=14, MAX_BYTES=20000;
+export const concat=(...arrays)=>{const x=new Uint8Array(arrays.reduce((s,a)=>s+a.length,0));let i=0;for(const a of arrays){x.set(a,i);i+=a.length;}return x;};
+const u32=x=>Uint8Array.of(x>>>24,x>>>16,x>>>8,x);
+export function words(bytes){let acc=0,bits=0,out=[];for(const b of bytes){acc=(acc<<8)|b;bits+=8;while(bits>=12){bits-=12;out.push((acc>>>bits)&4095);}acc&=(1<<bits)-1;}if(bits)out.push((acc<<(12-bits))&4095);return out;}
+export function bytes(ws,n){let acc=0,bits=0,out=[];for(const w of ws){acc=(acc<<12)|w;bits+=12;while(bits>=8){bits-=8;out.push((acc>>>bits)&255);}acc&=(1<<bits)-1;}return Uint8Array.from(out.slice(0,n));}
+async function keys(pass,salt){const s=subtle();const base=await s.importKey('raw',enc.encode(pass),'PBKDF2',false,['deriveBits']);const master=await s.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:concat(enc.encode('PHI/4/'),salt),iterations:600000},base,256);const hk=await s.importKey('raw',master,'HKDF',false,['deriveKey']);const derive=(info,alg,uses)=>s.deriveKey({name:'HKDF',hash:'SHA-256',salt,info:enc.encode(info)},hk,alg,false,uses);return {aes:await derive('PHI/4/aes',{name:'AES-GCM',length:256},['encrypt','decrypt']),mac:await derive('PHI/4/optical',{name:'HMAC',hash:'SHA-256',length:256},['sign'])};}
+async function digest(k,state,i,previous){return new Uint8Array(await subtle().sign('HMAC',k,concat(state,u32(i),Uint8Array.of(previous>>8,previous))));}
+function transform(w,d,inverse=false){const p=Array.from({length:12},(_,i)=>i);for(let i=11;i>0;i--){let j=d[11-i]%(i+1);[p[i],p[j]]=[p[j],p[i]];}const mask=((d[12]<<8)|d[13])&4095;let out=0;if(!inverse){w^=mask;for(let i=0;i<12;i++)out|=((w>>i)&1)<<p[i];}else{for(let i=0;i<12;i++)out|=((w>>p[i])&1)<<i;out^=mask;}return out;}
+async function optical(ws,k,salt,inverse=false){let state=concat(enc.encode('PHI/4/state'),salt),prev=0;const out=[];for(let i=0;i<ws.length;i++){state=await digest(k,state,i,prev);const v=transform(ws[i],state,inverse);out.push(v);prev=inverse?v:ws[i];}return out;}
+export function headerInfo(ws){if(ws.length<HEADER_WORDS)throw Error('ヘッダー不足');const h=bytes(ws.slice(0,HEADER_WORDS),HEADER_BYTES);if(h[0]!==0x50||h[1]!==0x48||(h[2]!==4&&h[2]!==5))throw Error('ヘッダー不一致');const length=h[19]*256+h[20];if(length<17||length>MAX_BYTES+16)throw Error('長さが不正');return {h,compressed:h[2]===5,salt:h.slice(3,19),length,total:HEADER_WORDS+Math.ceil(length*8/12)};}
+// gzip before encryption; never expand a message just to compress it.
+async function payload(message){const raw=enc.encode(message);if(!raw.length||raw.length>MAX_BYTES)throw Error(`本文は1〜${MAX_BYTES.toLocaleString('ja-JP')} UTF-8バイト`);if(typeof CompressionStream==='function'&&raw.length>32){try{const gz=new Uint8Array(await new Response(new Blob([raw]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer());if(gz.length<raw.length)return {raw,data:gz,compressed:true};}catch{}}return {raw,data:raw,compressed:false};}
+async function inflate(data){if(typeof DecompressionStream!=='function')throw Error('このブラウザはgzip復号に対応していません');const reader=new Blob([data]).stream().pipeThrough(new DecompressionStream('gzip')).getReader();const chunks=[];let n=0;try{while(true){const {done,value}=await reader.read();if(done)break;n+=value.length;if(n>MAX_BYTES){await reader.cancel();throw Error('展開後の本文が上限を超えています');}chunks.push(value);}}finally{reader.releaseLock();}return concat(...chunks);}
+export async function estimate(message){const {raw,data,compressed}=await payload(message);return {rawBytes:raw.length,wireBytes:data.length,compressed,frames:5*Math.ceil((HEADER_WORDS+Math.ceil((data.length+16)*8/12))/160)};}
+async function logicalWords(message,pass,salt){const {data:m,compressed}=await payload(message);if(pass.length<8)throw Error('秘密鍵は8文字以上（長いランダムな鍵を推奨）');if(salt.length!==16)throw Error('session length');const length=m.length+16;const h=concat(Uint8Array.of(0x50,0x48,compressed?5:4),salt,Uint8Array.of(length>>8,length));const k=await keys(pass,salt);const c=new Uint8Array(await subtle().encrypt({name:'AES-GCM',iv:salt.slice(0,12),additionalData:h,tagLength:128},k.aes,m));return [...words(h),...await optical(words(c),k.mac,salt)];}
+export function prepareDecode(pass,salt){return keys(pass,salt).then(k=>({k,salt:salt.slice()}));}
+async function decode(ws,pass,prepared=null){const {h,salt,length,total,compressed}=headerInfo(ws);if(ws.length!==total)throw Error('データ不足');const cached=prepared?await prepared.catch(()=>null):null;const k=cached&&salt.every((b,i)=>b===cached.salt[i])?cached.k:await keys(pass,salt);const c=bytes(await optical(ws.slice(HEADER_WORDS),k.mac,salt,true),length);const m=await subtle().decrypt({name:'AES-GCM',iv:salt.slice(0,12),additionalData:h,tagLength:128},k.aes,c);const raw=compressed?await inflate(new Uint8Array(m)):new Uint8Array(m);if(!raw.length||raw.length>MAX_BYTES)throw Error('本文の長さが不正');return new TextDecoder('utf-8',{fatal:true}).decode(raw);}
+export {decode};
+// 576 bits: 8-byte header, 60-byte differential payload, 4-byte CRC32.
+// Each packet consists of a random anchor and four 60-byte delta frames.
+export const FRAME_BITS=576, GRID=24;
+const BLOCK=160, PAYLOAD=60, MAX_BLOCKS=Math.ceil((HEADER_WORDS+Math.ceil((MAX_BYTES+16)*8/12))/BLOCK);
+const crcTable=Uint32Array.from({length:256},(_,i)=>{let c=i;for(let j=0;j<8;j++)c=(c>>>1)^((c&1)?0xedb88320:0);return c>>>0;});
+function crc(b){let c=0xffffffff;for(const x of b)c=(c>>>8)^crcTable[(c^x)&255];return (c^0xffffffff)>>>0;}
+const toFrame=b=>b.reduce((a,v)=>(a<<8n)|BigInt(v),0n);
+function fromFrame(f){const b=new Uint8Array(72);for(let i=71;i>=0;i--){b[i]=Number(f&255n);f>>=8n;}return b;}
+function makeFrame(session,i,step,w){const b=new Uint8Array(72),v=new DataView(b.buffer);b[0]=0xd6;b[1]=step;v.setUint16(2,i);v.setUint32(4,session);b.set(w,8);v.setUint32(68,crc(b.subarray(0,68)));return toFrame(b);}
+export function parseFrame(f){if(typeof f!=='bigint'||f<0n||f>>576n)return null;const b=fromFrame(f),v=new DataView(b.buffer);if(b[0]!==0xd6||b[1]>4||v.getUint16(2)>=MAX_BLOCKS||v.getUint32(68)!==crc(b.subarray(0,68)))return null;return {session:v.getUint32(4),i:v.getUint16(2),step:b[1],w:b.slice(8,68)};}
+const xor=(a,b)=>a.map((x,i)=>x^b[i]);
+export async function encode(message,pass,salt=crypto.getRandomValues(new Uint8Array(16))){const logical=await logicalWords(message,pass,salt),out=[],session=new DataView(salt.buffer,salt.byteOffset,salt.byteLength).getUint32(0);for(let i=0;i<Math.ceil(logical.length/BLOCK);i++){const ws=logical.slice(i*BLOCK,(i+1)*BLOCK);while(ws.length<BLOCK)ws.push(0);let p=crypto.getRandomValues(new Uint8Array(PAYLOAD));out.push(makeFrame(session,i,0,p));for(let j=0;j<4;j++){p=xor(p,bytes(ws.slice(j*40,j*40+40),PAYLOAD));out.push(makeFrame(session,i,j+1,p));}}return out;}
+export class Receiver {
+ constructor(){this.reset();}
+ reset(){this.blocks=new Map();this.last=null;this.partials=new Map();this.total=null;this.session=null;}
+ feed(frame){if(frame===this.last)return null;this.last=frame;const r=parseFrame(frame);if(!r)return null;const {session,i,step,w}=r;if(this.session!==session){this.reset();this.session=session;this.last=frame;}if(this.blocks.has(i)||(this.total!==null&&i>=this.total))return null;let p=this.partials.get(i);if(!p){p=Array(5).fill(null);this.partials.set(i,p);}p[step]=w;if(p.some(x=>x===null))return null;const ws=[];for(let j=1;j<5;j++)ws.push(...words(xor(p[j-1],p[j])));this.partials.delete(i);this.blocks.set(i,ws);
+ if(this.blocks.has(0)){try{const info=headerInfo(this.blocks.get(0));if(new DataView(info.salt.buffer,info.salt.byteOffset,info.salt.byteLength).getUint32(0)!==session)throw Error('session mismatch');this.total=Math.ceil(info.total/BLOCK);for(const j of this.blocks.keys())if(j>=this.total)this.blocks.delete(j);if(this.blocks.size===this.total){const all=Array.from({length:this.total},(_,j)=>this.blocks.get(j)).flat().slice(0,info.total);this.reset();return {type:'complete',ws:all};}}catch{this.reset();return {type:'lost',count:0,total:null};}}
+ return {type:'progress',count:this.blocks.size,total:this.total};}
+}
