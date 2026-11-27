@@ -6,7 +6,7 @@ const phiCode = {
   "imageRatio": "4:3",
   "imageFit": "contain",
   "appUrl": "https://phi-code.pages.dev/",
-  "repoUrl": "https://github.com/Masato-Nasu/MASATO-LAB/blob/main/apps/phi-code/README.md",
+  "repoUrl": "https://github.com/Masato-Nasu/MASATO-LAB/tree/main/apps/phi-code",
   "category": "cipher-security",
   "platform": "web",
   "platforms": [
