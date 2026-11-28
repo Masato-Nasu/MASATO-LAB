@@ -91,7 +91,7 @@ function applyFixedClassifications(data) {
       image: 'https://raw.githubusercontent.com/Masato-Nasu/DUB-RIDDIM/main/icon-512.png',
       imageRatio: '4:3',
       imageFit: 'contain',
-      appUrl: 'https://dub-siren.sunny-seed-0354.chatgpt.site/',
+      appUrl: 'https://masato-lab.pages.dev/apps/dub-riddim/',
       repoUrl: 'https://github.com/Masato-Nasu/DUB-RIDDIM',
       category: 'music-sound',
       platform: 'web',

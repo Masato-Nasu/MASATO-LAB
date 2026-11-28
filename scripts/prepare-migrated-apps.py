@@ -22,6 +22,11 @@ def prepare(root):
             subprocess.run(["git", "-C", temp, "checkout", "--quiet", "--detach", revision], check=True)
             shutil.copytree(source / directory, dest, dirs_exist_ok=True,
                             ignore=shutil.ignore_patterns(".git", "README.md") if directory == "." else None)
+    flight_worker = root / "apps/fighter-jet/sw.js"
+    flight_worker.write_text(flight_worker.read_text()
+                             .replace("prefix+'14'", "prefix+'14-pages1'")
+                             .replace("'./index.html','./style.css", "'./','./style.css")
+                             .replace("cache.match(inScope('./index.html'))", "cache.match(inScope('./'))"))
     index = root / "apps/dub-riddim/index.html"
     index.write_text(index.read_text().replace("intent://dub-siren.sunny-seed-0354.chatgpt.site/",
                      "intent://masato-lab.pages.dev/apps/dub-riddim/"))

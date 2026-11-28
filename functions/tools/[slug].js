@@ -1,3 +1,4 @@
+import {migratedTool} from '../_migrated-tool.js';
 import {ensurePhiCode} from '../_phi-code.js';
 import {ensureAdmiralIndustries} from '../_admiral-industries.js';
 import {ensureSanaRadio} from '../_sana-radio.js';
@@ -78,7 +79,7 @@ function renderPage(site, item) {
   const image = String(item.title || '').normalize('NFKC').trim().toUpperCase() === 'PHI CODE' ? "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20512%20512%22%3E%3Crect%20width%3D%22512%22%20height%3D%22512%22%20rx%3D%2264%22%20fill%3D%22%23141619%22%2F%3E%3Ccircle%20cx%3D%22256%22%20cy%3D%22256%22%20r%3D%22174%22%20fill%3D%22none%22%20stroke%3D%22%23b9e1d6%22%20stroke-width%3D%226%22%2F%3E%3Cellipse%20cx%3D%22256%22%20cy%3D%22256%22%20rx%3D%2291%22%20ry%3D%2277%22%20fill%3D%22none%22%20stroke%3D%22%23b9e1d6%22%20stroke-width%3D%2222%22%2F%3E%3Cpath%20d%3D%22M205%20372%20L307%20140%22%20stroke%3D%22%23b9e1d6%22%20stroke-width%3D%2222%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E" : resolveImage(item.image || '');
   const fit = item.imageFit === 'cover' ? 'cover' : 'contain';
   const tags = normalizeTags(item.tags).filter(tag => !/^\s*(category|genre|platform)\s*:/i.test(tag));
-  const appUrl = String(item.appUrl || '').trim();
+  const appUrl = String(migratedTool(item).appUrl || '').trim();
   const repoUrl = String(item.repoUrl || '').trim();
 
   const media = image ? `<figure class="media"><img src="${escapeHtml(image)}" alt="${title}" style="object-fit:${fit}"></figure>` : '';
@@ -142,7 +143,7 @@ export async function onRequestGet(context) {
     items.push({
       title: 'DUB RIDDIM',
       description: 'DUB RIDDIMは、ドラム、ベース、スカンク、バブルなど6パートの音をステップとピアノロールで編集し、パターンを組み合わせて一曲作れるDUB専用リズムマシーン。AIR HORN、DUB SPACE、REWIND、THUNDERを演奏中に操作でき、録音やWAV書き出しにも対応。',
-      appUrl: 'https://dub-siren.sunny-seed-0354.chatgpt.site/',
+      appUrl: 'https://masato-lab.pages.dev/apps/dub-riddim/',
       repoUrl: 'https://github.com/Masato-Nasu/DUB-RIDDIM',
       image: 'https://raw.githubusercontent.com/Masato-Nasu/DUB-RIDDIM/main/icon-512.png',
       category: 'music-sound',
@@ -161,7 +162,7 @@ export async function onRequestGet(context) {
     const dubRiddim = storedDubRiddim || {
       title: 'DUB RIDDIM',
       description: 'DUB RIDDIMは、ドラム、ベース、スカンク、バブルなど6パートの音をステップとピアノロールで編集し、パターンを組み合わせて一曲作れるDUB専用リズムマシーン。AIR HORN、DUB SPACE、REWIND、THUNDERを演奏中に操作でき、録音やWAV書き出しにも対応。',
-      appUrl: 'https://dub-siren.sunny-seed-0354.chatgpt.site/',
+      appUrl: 'https://masato-lab.pages.dev/apps/dub-riddim/',
       repoUrl: 'https://github.com/Masato-Nasu/DUB-RIDDIM',
       image: 'https://raw.githubusercontent.com/Masato-Nasu/DUB-RIDDIM/main/icon-512.png',
       imageFit: 'contain',

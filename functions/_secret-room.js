@@ -1,3 +1,4 @@
+import {migratedTool} from './_migrated-tool.js';
 import {ensureSanaRadio} from './_sana-radio.js';
 import {ensureTotoNippo} from './_toto-nippo.js';
 import {ensureFeaturedMemory} from './_featured-memory.js';
@@ -39,7 +40,7 @@ const dubRiddimTool = {
   image: 'https://raw.githubusercontent.com/Masato-Nasu/DUB-RIDDIM/main/icon-512.png',
   imageRatio: '4:3',
   imageFit: 'contain',
-  appUrl: 'https://dub-siren.sunny-seed-0354.chatgpt.site/',
+  appUrl: 'https://masato-lab.pages.dev/apps/dub-riddim/',
   repoUrl: 'https://github.com/Masato-Nasu/DUB-RIDDIM',
   tags: ['DUB', 'RIDDIM', 'PIANO ROLL', 'PWA']
 };
@@ -57,7 +58,7 @@ export function projectData(data, mode = 'public') {
   const editorTools = mode === 'editor' && !tools.some(isDubRiddimTool)
     ? [{...dubRiddimTool}, ...tools]
     : tools;
-  return {...data, tools: editorTools, portfolio: items.map((item,i) => ({...item, slug: paths[i], secretRoom: isSecret(item)})).filter(item => mode === 'editor' || (mode === 'secret' ? item.secretRoom : !item.secretRoom))};
+  return {...data, tools: editorTools.map(migratedTool), portfolio: items.map((item,i) => ({...item, slug: paths[i], secretRoom: isSecret(item)})).filter(item => mode === 'editor' || (mode === 'secret' ? item.secretRoom : !item.secretRoom))};
 }
 export async function readData(env) {
   const raw = await env.SITE_DATA?.get('site-data');
