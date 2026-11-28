@@ -1,0 +1,8 @@
+/apps/double-qr/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Permissions-Policy: camera=(self), microphone=(), geolocation=()
+/apps/double-qr/sw.js
+  Cache-Control: no-cache
+/apps/double-qr/manifest.webmanifest
+  Cache-Control: no-cache
